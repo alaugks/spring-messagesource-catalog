@@ -59,7 +59,6 @@ TransUnit(Locale locale, String code, String value, String domain);
 
 
 ```java
-
 import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogHandler;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 import java.util.ArrayList;
@@ -96,10 +95,10 @@ public class MessageConfig {
 
     @Bean
     public MessageSource messageSource() {
-		return CatalogMessageSourceBuilder
-			.builder(new TransUnitsCatalog(this.transUnits), Locale.forLanguageTag("en"))
-			.build();
-    }
+        return CatalogMessageSourceBuilder
+            .builder(new TransUnitsCatalog(this.transUnits), Locale.forLanguageTag("en"))
+            .build();
+	}
 }
 ```
 
