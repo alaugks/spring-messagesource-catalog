@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
-    <description>Base package to create a custom Spring MessageSource.</description>
+    <description>Catalog to create a custom Spring MessageSource</description>
     <url>https://github.com/alaugks/spring-messagesource-catalog</url>
 
     <licenses>
