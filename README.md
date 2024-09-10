@@ -3,8 +3,7 @@
 
 # Catalog to create a custom Spring MessageSource
 
-Dieses Package erweitert die AbstractMessageSource und somit das MessageSource Interface. 
-
+This package extends the AbstractMessageSource and therefore the MessageSource interface. 
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=alaugks_spring-messagesource-base&metric=alert_status&token=3d2b79af1f0f0ab6089e565495b4db6f621e9a13)](https://sonarcloud.io/summary/overall?id=alaugks_spring-messagesource-base)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.alaugks/spring-messagesource-catalog.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.alaugks/spring-messagesource-catalog/0.1.0)
@@ -104,6 +103,8 @@ public class MessageConfig {
 ```
 
 ### Target values
+
+The behaviour of resolving the target value based on the code is equivalent to the ResourceBundleMessageSource or ReloadableResourceBundleMessageSource.
 
 <table>
   <thead>
