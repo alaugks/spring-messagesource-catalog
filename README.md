@@ -1,6 +1,3 @@
-> [!IMPORTANT]
-> Work in progress.
-
 # Catalog to create a custom Spring MessageSource
 
 This package extends the AbstractMessageSource and therefore the MessageSource interface. 
