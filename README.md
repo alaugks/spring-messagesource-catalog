@@ -54,7 +54,7 @@ TransUnit(Locale locale, String code, String value, String domain);
 
 ### Configuration example
 
-#### With List of TransUnits 
+#### MessageConfig with List of TransUnits 
 
 ```java
 import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogHandler;
@@ -100,6 +100,37 @@ public class MessageConfig {
 }
 ```
 
+#### With custom CatalogInterface
+
+##### CatalogInterface
+
+```java
+import java.util.List;
+
+import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogAbstract;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
+
+public class MyCustomCatalog extends CatalogAbstract {
+
+    List<TransUnit> transUnits;
+	
+    @Override
+    public List<TransUnit> getTransUnits() {
+        return this.transUnits;
+    }
+    
+    @Override
+    public void build() {
+        // Build a list with TransUnit from any kind of source.
+        this.transUnits = new ArrayList<>() {{
+            // ...
+        }};
+    }
+}
+```
+
+##### MessageConfig
+
 ```java
 import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogHandler;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
@@ -112,33 +143,10 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MessageConfig {
-    
-    List<TransUnit> transUnits = new ArrayList<>() {{
-        // en
-        add(new TransUnit(Locale.forLanguageTag("en"), "headline", "Headline"));
-        add(new TransUnit(Locale.forLanguageTag("en"), "postcode", "Postcode"));
-        add(new TransUnit(Locale.forLanguageTag("en"), "validation.email.exists", "Your email {0} has been registered."));
-        add(new TransUnit(Locale.forLanguageTag("en"), "default-message", "This is a default message."));
-        add(new TransUnit(Locale.forLanguageTag("en"), "headline", "Payment", "payment"));
-        add(new TransUnit(Locale.forLanguageTag("en"), "form.expiry_date", "Expiry date", "payment"));
-
-        // en-US
-        add(new TransUnit(Locale.forLanguageTag("en-US"), "postcode", "Zip code"));
-        add(new TransUnit(Locale.forLanguageTag("en-US"), "form.expiry_date", "Expiration date", "payment"));
-
-        // de
-        add(new TransUnit(Locale.forLanguageTag("de"), "headline", "Überschrift"));
-        add(new TransUnit(Locale.forLanguageTag("de"), "postcode", "Postleitzahl"));
-        add(new TransUnit(Locale.forLanguageTag("de"), "validation.email.exists", "Ihre E-Mail {0} wurde registriert."));
-        add(new TransUnit(Locale.forLanguageTag("de"), "default-message", "Das ist ein Standardtext."));
-        add(new TransUnit(Locale.forLanguageTag("de"), "headline", "Zahlung", "payment"));
-        add(new TransUnit(Locale.forLanguageTag("de"), "form.expiry_date", "Ablaufdatum", "payment"));
-    }};
-
     @Bean
     public MessageSource messageSource() {
         return CatalogMessageSourceBuilder
-            .builder(new TransUnitsCatalog(this.transUnits), Locale.forLanguageTag("en"))
+            .builder(new MyCustomCatalog(), Locale.forLanguageTag("en"))
             .build();
 	}
 }
