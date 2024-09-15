@@ -1,11 +1,12 @@
 package io.github.alaugks.spring.messagesource.catalog.record;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import java.util.Locale;
 
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
-import java.util.Locale;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class TransUnitTest {
 

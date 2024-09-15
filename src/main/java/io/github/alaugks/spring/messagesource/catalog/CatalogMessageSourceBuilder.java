@@ -1,10 +1,12 @@
 package io.github.alaugks.spring.messagesource.catalog;
 
+import java.text.MessageFormat;
+import java.util.Locale;
+
 import io.github.alaugks.spring.messagesource.catalog.catalog.Catalog;
 import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogCache;
 import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogInterface;
-import java.text.MessageFormat;
-import java.util.Locale;
+
 import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.util.Assert;
 
@@ -23,7 +25,9 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 	public static final class Builder {
 
 		private final Locale defaultLocale;
+
 		private final CatalogInterface catalogSource;
+
 		private String defaultDomain = Catalog.DEFAULT_DOMAIN;
 
 		public Builder(CatalogInterface catalogSource, Locale defaultLocale) {
@@ -45,8 +49,8 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 		public CatalogMessageSourceBuilder build() {
 			CatalogInterface catalogChain = new CatalogCache();
 			catalogChain
-				.nextHandler(new Catalog(this.defaultLocale, this.defaultDomain))
-				.nextHandler(catalogSource);
+					.nextHandler(new Catalog(this.defaultLocale, this.defaultDomain))
+					.nextHandler(catalogSource);
 			catalogChain.build();
 
 			return new CatalogMessageSourceBuilder(catalogChain);

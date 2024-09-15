@@ -1,8 +1,9 @@
 package io.github.alaugks.spring.messagesource.catalog.records;
 
-import io.github.alaugks.spring.messagesource.catalog.exception.CatalogMessageSourceRuntimeException;
 import java.util.IllformedLocaleException;
 import java.util.Locale;
+
+import io.github.alaugks.spring.messagesource.catalog.exception.CatalogMessageSourceRuntimeException;
 
 public record Filename(String domain, String language, String region) {
 
@@ -23,7 +24,8 @@ public record Filename(String domain, String language, String region) {
 				return localeBuilder.build();
 			}
 			return null;
-		} catch (IllformedLocaleException e) {
+		}
+		catch (IllformedLocaleException e) {
 			throw new CatalogMessageSourceRuntimeException(e);
 		}
 	}

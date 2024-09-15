@@ -49,7 +49,7 @@ public final class CatalogCache extends CatalogAbstract {
 	private void put(Locale locale, String code, String targetValue) {
 		if (targetValue != null) {
 			this.cacheMap.computeIfAbsent(
-				locale, l -> new ConcurrentHashMap<>()
+					locale, l -> new ConcurrentHashMap<>()
 			).put(code, targetValue);
 		}
 	}
