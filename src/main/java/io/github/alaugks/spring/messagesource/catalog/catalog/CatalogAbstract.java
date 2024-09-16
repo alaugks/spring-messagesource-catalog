@@ -1,10 +1,11 @@
 package io.github.alaugks.spring.messagesource.catalog.catalog;
 
-import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 
 public abstract class CatalogAbstract implements CatalogInterface {
 

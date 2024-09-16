@@ -4,9 +4,8 @@ on:
   push:
     branches:
       - main
-      - stage
-      - dev
       - snapshot/*
+      - release/*
   workflow_dispatch:
 jobs:
   build:

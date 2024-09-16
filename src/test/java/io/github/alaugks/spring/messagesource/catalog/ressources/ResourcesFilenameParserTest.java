@@ -1,10 +1,10 @@
 package io.github.alaugks.spring.messagesource.catalog.ressources;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
 import io.github.alaugks.spring.messagesource.catalog.records.Filename;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class ResourcesFilenameParserTest {
 
