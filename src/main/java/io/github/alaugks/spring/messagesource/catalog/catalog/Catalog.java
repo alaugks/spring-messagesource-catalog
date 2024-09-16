@@ -55,12 +55,12 @@ public final class Catalog extends CatalogAbstract {
 	}
 
 	private Optional<String> resolveFromCatalogMap(Locale locale, String code) {
-		return this.getTargetValue(locale, code)
-				.or(() -> this.getTargetValue(locale, concatCode(this.defaultDomain, code)))
-				.or(() -> this.getTargetValue(buildLocaleWithoutRegion(locale), code))
+		return this.getTargetValue(locale, concatCode(this.defaultDomain, code))
+				.or(() -> this.getTargetValue(locale, code))
 				.or(() -> this.getTargetValue(buildLocaleWithoutRegion(locale), concatCode(this.defaultDomain, code)))
-				.or(() -> this.getTargetValue(this.defaultLocale, code))
-				.or(() -> this.getTargetValue(this.defaultLocale, concatCode(this.defaultDomain, code)));
+				.or(() -> this.getTargetValue(buildLocaleWithoutRegion(locale), code))
+				.or(() -> this.getTargetValue(this.defaultLocale, concatCode(this.defaultDomain, code)))
+				.or(() -> this.getTargetValue(this.defaultLocale, code));
 	}
 
 	private Optional<String> getTargetValue(Locale locale, String code) {
