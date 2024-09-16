@@ -73,10 +73,8 @@ public class MessageConfig {
         // en
         add(new TransUnit(Locale.forLanguageTag("en"), "headline", "Headline"));
         add(new TransUnit(Locale.forLanguageTag("en"), "postcode", "Postcode"));
-        add(new TransUnit(Locale.forLanguageTag("en"), "validation.email.exists", "Your email {0} has been registered."));
-        add(new TransUnit(Locale.forLanguageTag("en"), "default-message", "This is a default message."));
         add(new TransUnit(Locale.forLanguageTag("en"), "headline", "Payment", "payment"));
-        add(new TransUnit(Locale.forLanguageTag("en"), "form.expiry_date", "Expiry date", "payment"));
+        add(new TransUnit(Locale.forLanguageTag("en"), "expiry_date", "Expiry date", "payment"));
 
         // en-US
         add(new TransUnit(Locale.forLanguageTag("en-US"), "postcode", "Zip code"));
@@ -85,10 +83,8 @@ public class MessageConfig {
         // de
         add(new TransUnit(Locale.forLanguageTag("de"), "headline", "Überschrift"));
         add(new TransUnit(Locale.forLanguageTag("de"), "postcode", "Postleitzahl"));
-        add(new TransUnit(Locale.forLanguageTag("de"), "validation.email.exists", "Ihre E-Mail {0} wurde registriert."));
-        add(new TransUnit(Locale.forLanguageTag("de"), "default-message", "Das ist ein Standardtext."));
         add(new TransUnit(Locale.forLanguageTag("de"), "headline", "Zahlung", "payment"));
-        add(new TransUnit(Locale.forLanguageTag("de"), "form.expiry_date", "Ablaufdatum", "payment"));
+        add(new TransUnit(Locale.forLanguageTag("de"), "expiry_date", "Ablaufdatum", "payment"));
     }};
 
     @Bean
@@ -180,20 +176,6 @@ The behaviour of resolving the target value based on the code is equivalent to t
     <td>Zip code</td>
     <td>Postleitzahl</td>
     <td>Postcode</td>
-  </tr>
-  <tr>
-    <td>validation.email.exists*<br>messages.validation.email.exists</td>
-    <td>Your email {0} has been registered.</td>
-    <td>Your email {0} has been registered.**</td>
-    <td>Ihre E-Mail {0} wurde registriert.</td>
-    <td>Your email {0} has been registered.</td>
-  </tr>
-  <tr>
-    <td>default-message*<br>messages.default-message</td>
-    <td>This is a default message.</td>
-    <td>This is a default message.**</td>
-    <td>Das ist ein Standardtext.</td>
-    <td>This is a default message.</td>
   </tr>
   <tr>
     <td>payment.headline</td>
