@@ -76,11 +76,11 @@ public class MessageConfig {
         add(new TransUnit(Locale.forLanguageTag("en"), "validation.email.exists", "Your email {0} has been registered."));
         add(new TransUnit(Locale.forLanguageTag("en"), "default-message", "This is a default message."));
         add(new TransUnit(Locale.forLanguageTag("en"), "headline", "Payment", "payment"));
-        add(new TransUnit(Locale.forLanguageTag("en"), "form.expiry_date", "Expiry date", "payment"));
+        add(new TransUnit(Locale.forLanguageTag("en"), "expiry_date", "Expiry date", "payment"));
 
         // en-US
         add(new TransUnit(Locale.forLanguageTag("en-US"), "postcode", "Zip code"));
-        add(new TransUnit(Locale.forLanguageTag("en-US"), "form.expiry_date", "Expiration date", "payment"));
+        add(new TransUnit(Locale.forLanguageTag("en-US"), "expiry_date", "Expiration date", "payment"));
 
         // de
         add(new TransUnit(Locale.forLanguageTag("de"), "headline", "Überschrift"));
@@ -180,20 +180,6 @@ The behaviour of resolving the target value based on the code is equivalent to t
     <td>Zip code</td>
     <td>Postleitzahl</td>
     <td>Postcode</td>
-  </tr>
-  <tr>
-    <td>validation.email.exists*<br>messages.validation.email.exists</td>
-    <td>Your email {0} has been registered.</td>
-    <td>Your email {0} has been registered.**</td>
-    <td>Ihre E-Mail {0} wurde registriert.</td>
-    <td>Your email {0} has been registered.</td>
-  </tr>
-  <tr>
-    <td>default-message*<br>messages.default-message</td>
-    <td>This is a default message.</td>
-    <td>This is a default message.**</td>
-    <td>Das ist ein Standardtext.</td>
-    <td>This is a default message.</td>
   </tr>
   <tr>
     <td>payment.headline</td>
