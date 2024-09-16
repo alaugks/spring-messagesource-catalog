@@ -1,13 +1,15 @@
 package io.github.alaugks.spring.messagesource.catalog.ressources;
 
-import io.github.alaugks.spring.messagesource.catalog.exception.CatalogMessageSourceRuntimeException;
-import io.github.alaugks.spring.messagesource.catalog.records.Filename;
-import io.github.alaugks.spring.messagesource.catalog.records.TranslationFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+
+import io.github.alaugks.spring.messagesource.catalog.exception.CatalogMessageSourceRuntimeException;
+import io.github.alaugks.spring.messagesource.catalog.records.Filename;
+import io.github.alaugks.spring.messagesource.catalog.records.TranslationFile;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.Assert;
@@ -15,7 +17,9 @@ import org.springframework.util.Assert;
 public class ResourcesLoader {
 
 	private final Locale defaultLocale;
+
 	private final Set<String> locationPatterns;
+
 	private final List<String> fileExtensions;
 
 	public ResourcesLoader(Locale defaultLocale, Set<String> locationPatterns, List<String> fileExtensions) {
@@ -45,7 +49,8 @@ public class ResourcesLoader {
 			}
 
 			return files;
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new CatalogMessageSourceRuntimeException(e);
 		}
 	}
@@ -55,11 +60,11 @@ public class ResourcesLoader {
 
 		if (filename != null) {
 			return new TranslationFile(
-				filename.domain(),
-				filename.hasLocale()
-					? filename.locale()
-					: this.defaultLocale,
-				resource.getInputStream()
+					filename.domain(),
+					filename.hasLocale()
+							? filename.locale()
+							: this.defaultLocale,
+					resource.getInputStream()
 			);
 		}
 

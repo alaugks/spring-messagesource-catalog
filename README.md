@@ -78,7 +78,7 @@ public class MessageConfig {
 
         // en-US
         add(new TransUnit(Locale.forLanguageTag("en-US"), "postcode", "Zip code"));
-        add(new TransUnit(Locale.forLanguageTag("en-US"), "form.expiry_date", "Expiration date", "payment"));
+        add(new TransUnit(Locale.forLanguageTag("en-US"), "expiry_date", "Expiration date", "payment"));
 
         // de
         add(new TransUnit(Locale.forLanguageTag("de"), "headline", "Überschrift"));

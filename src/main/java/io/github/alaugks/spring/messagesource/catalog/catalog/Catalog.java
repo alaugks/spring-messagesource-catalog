@@ -5,13 +5,17 @@ import java.util.Locale.Builder;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.springframework.util.Assert;
 
 public final class Catalog extends CatalogAbstract {
 
 	public static final String DEFAULT_DOMAIN = "messages";
+
 	private final Map<Locale, Map<String, String>> catalogMap;
+
 	private final Locale defaultLocale;
+
 	private final String defaultDomain;
 
 	public Catalog(Locale defaultLocale) {
@@ -45,23 +49,23 @@ public final class Catalog extends CatalogAbstract {
 	private void put(Locale locale, String code, String value, String domain) {
 		if (!locale.toString().isEmpty() || !code.isEmpty()) {
 			this.catalogMap.computeIfAbsent(
-				locale, l -> new ConcurrentHashMap<>()
+					locale, l -> new ConcurrentHashMap<>()
 			).putIfAbsent(concatCode(domain, code), value);
 		}
 	}
 
 	private Optional<String> resolveFromCatalogMap(Locale locale, String code) {
-		return this.getTargetValue(locale, code)
-			.or(() -> this.getTargetValue(locale, concatCode(this.defaultDomain, code)))
-			.or(() -> this.getTargetValue(buildLocaleWithoutRegion(locale), code))
-			.or(() -> this.getTargetValue(buildLocaleWithoutRegion(locale), concatCode(this.defaultDomain, code)))
-			.or(() -> this.getTargetValue(this.defaultLocale, code))
-			.or(() -> this.getTargetValue(this.defaultLocale, concatCode(this.defaultDomain, code)));
+		return this.getTargetValue(locale, concatCode(this.defaultDomain, code))
+				.or(() -> this.getTargetValue(locale, code))
+				.or(() -> this.getTargetValue(buildLocaleWithoutRegion(locale), concatCode(this.defaultDomain, code)))
+				.or(() -> this.getTargetValue(buildLocaleWithoutRegion(locale), code))
+				.or(() -> this.getTargetValue(this.defaultLocale, concatCode(this.defaultDomain, code)))
+				.or(() -> this.getTargetValue(this.defaultLocale, code));
 	}
 
 	private Optional<String> getTargetValue(Locale locale, String code) {
 		return Optional.ofNullable(this.catalogMap.get(locale)).flatMap(
-			localeCatalog -> Optional.ofNullable(localeCatalog.get(code))
+				localeCatalog -> Optional.ofNullable(localeCatalog.get(code))
 		);
 	}
 
