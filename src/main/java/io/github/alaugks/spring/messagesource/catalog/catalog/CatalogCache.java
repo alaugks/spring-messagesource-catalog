@@ -2,6 +2,7 @@ package io.github.alaugks.spring.messagesource.catalog.catalog;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -33,7 +34,12 @@ public final class CatalogCache extends CatalogAbstract {
 	@Override
 	public void build() {
 		super.build();
-		super.getTransUnits().forEach(t -> this.put(t.locale(), concatCode(t.domain(), t.code()), t.value()));
+		super.getTransUnits().forEach(t -> {
+			if (Objects.equals(t.domain(), Catalog.DEFAULT_DOMAIN)) {
+				this.put(t.locale(), t.code(), t.value());
+			}
+			this.put(t.locale(), concatCode(t.domain(), t.code()), t.value());
+		});
 	}
 
 	private Optional<String> getTargetValue(Locale locale, String code) {
