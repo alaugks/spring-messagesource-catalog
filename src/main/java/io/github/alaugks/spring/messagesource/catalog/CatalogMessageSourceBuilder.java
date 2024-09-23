@@ -58,8 +58,8 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 		public CatalogMessageSourceBuilder build() {
 			CatalogInterface catalogChain = new CatalogCache();
 			catalogChain
-					.nextHandler(new Catalog(this.defaultLocale, this.defaultDomain))
-					.nextHandler(catalogSource);
+					.nextCatalog(new Catalog(this.defaultLocale, this.defaultDomain))
+					.nextCatalog(catalogSource);
 			catalogChain.build();
 
 			return new CatalogMessageSourceBuilder(catalogChain);

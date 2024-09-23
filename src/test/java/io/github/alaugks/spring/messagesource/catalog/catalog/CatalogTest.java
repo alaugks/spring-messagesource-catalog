@@ -41,7 +41,7 @@ class CatalogTest {
 		transUnits.add(new TransUnit(Locale.forLanguageTag("en_US"), "key_2", "value_en_us_2", "messages"));
 
 		catalog = new Catalog(Locale.forLanguageTag("en"));
-		catalog.nextHandler(new TransUnitsCatalog(transUnits));
+		catalog.nextCatalog(new TransUnitsCatalog(transUnits));
 		catalog.build();
 	}
 

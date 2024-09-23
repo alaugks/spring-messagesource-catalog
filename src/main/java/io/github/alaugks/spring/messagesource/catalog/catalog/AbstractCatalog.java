@@ -1,6 +1,6 @@
 package io.github.alaugks.spring.messagesource.catalog.catalog;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -9,32 +9,32 @@ import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 
 public abstract class AbstractCatalog implements CatalogInterface {
 
-	protected CatalogInterface nextHandler;
+	protected CatalogInterface nextCatalog;
 
-	public CatalogInterface nextHandler(CatalogInterface handler) {
-		this.nextHandler = handler;
-		return handler;
+	public CatalogInterface nextCatalog(CatalogInterface catalog) {
+		this.nextCatalog = catalog;
+		return catalog;
 	}
 
 	public List<TransUnit> getTransUnits() {
-		if (this.nextHandler == null) {
-			return Collections.emptyList();
+		if (this.nextCatalog == null) {
+			return new ArrayList<>();
 		}
 
-		return this.nextHandler.getTransUnits();
+		return this.nextCatalog.getTransUnits();
 	}
 
 	public String resolveCode(Locale locale, String code) {
-		if (this.nextHandler == null) {
+		if (this.nextCatalog == null) {
 			return null;
 		}
 
-		return this.nextHandler.resolveCode(locale, code);
+		return this.nextCatalog.resolveCode(locale, code);
 	}
 
 	public void build() {
-		if (this.nextHandler != null) {
-			this.nextHandler.build();
+		if (this.nextCatalog != null) {
+			this.nextCatalog.build();
 		}
 	}
 
