@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class CatalogCache extends CatalogAbstract {
+public final class CatalogCache extends AbstractCatalog {
 
 	private final Map<Locale, Map<String, String>> cacheMap = new ConcurrentHashMap<>();
 

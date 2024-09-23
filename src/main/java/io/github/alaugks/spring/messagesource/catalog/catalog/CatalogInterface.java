@@ -7,7 +7,7 @@ import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 
 public interface CatalogInterface {
 
-	CatalogInterface nextHandler(CatalogInterface handler);
+	CatalogInterface nextCatalog(CatalogInterface handler);
 
 	List<TransUnit> getTransUnits();
 

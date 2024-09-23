@@ -2,10 +2,10 @@ package io.github.alaugks.spring.messagesource.catalog;
 
 import java.util.List;
 
-import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogAbstract;
+import io.github.alaugks.spring.messagesource.catalog.catalog.AbstractCatalog;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 
-public class TransUnitsCatalog extends CatalogAbstract {
+public class TransUnitsCatalog extends AbstractCatalog {
 
 	List<TransUnit> transUnits;
 
