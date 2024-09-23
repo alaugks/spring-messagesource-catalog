@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.util.Assert;
 
-public final class Catalog extends CatalogAbstract {
+public final class Catalog extends AbstractCatalog {
 
 	public static final String DEFAULT_DOMAIN = "messages";
 

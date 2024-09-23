@@ -90,7 +90,7 @@ public class MessageConfig {
     @Bean
     public MessageSource messageSource() {
         return CatalogMessageSourceBuilder
-            .builder(new TransUnitsCatalog(this.transUnits), Locale.forLanguageTag("en"))
+            .builder(this.transUnits, Locale.forLanguageTag("en"))
             .build();
 	}
 }
@@ -103,25 +103,26 @@ public class MessageConfig {
 ```java
 import java.util.List;
 
-import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogAbstract;
+import io.github.alaugks.spring.messagesource.catalog.catalog.AbstractCatalog;
+import io.github.alaugks.spring.messagesource.catalog.catalog.Abstractcatalog;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 
-public class MyCustomCatalog extends CatalogAbstract {
+public class MyCustomCatalog extends AbstractCatalog {
 
-    List<TransUnit> transUnits;
-	
-    @Override
-    public List<TransUnit> getTransUnits() {
-        return this.transUnits;
-    }
-    
-    @Override
-    public void build() {
-        // Build a list with TransUnit from any kind of source.
-        this.transUnits = new ArrayList<>() {{
-            // ...
-        }};
-    }
+	List<TransUnit> transUnits;
+
+	@Override
+	public List<TransUnit> getTransUnits() {
+		return this.transUnits;
+	}
+
+	@Override
+	public void build() {
+		// Build a list with TransUnit from any kind of source.
+		this.transUnits = new ArrayList<>() {{
+			// ...
+		}};
+	}
 }
 ```
 

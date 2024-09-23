@@ -7,7 +7,7 @@ import java.util.Optional;
 
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 
-public abstract class CatalogAbstract implements CatalogInterface {
+public abstract class AbstractCatalog implements CatalogInterface {
 
 	protected CatalogInterface nextHandler;
 

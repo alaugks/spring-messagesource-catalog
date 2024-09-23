@@ -1,6 +1,5 @@
 package io.github.alaugks.spring.messagesource.catalog;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -18,21 +17,37 @@ class CatalogMessageSourceBuilderTest {
 	public final Locale locale = Locale.forLanguageTag("en");
 
 	@Test
-	void test_withoutSetDefaultDomain() {
-		List<TransUnit> transUnits = Arrays.asList(
-				new TransUnit(this.locale, "key", "messages_value"),
-				new TransUnit(this.locale, "key", "foo_value", "foo")
+	void test_builder_withList() {
+		List<TransUnit> transUnits = List.of(
+				new TransUnit(this.locale, "key", "messages_value")
 		);
 
 		assertEquals(
 				"messages_value",
-				CatalogMessageSourceBuilder.builder(new TransUnitsCatalog(transUnits), this.locale).build().getMessage("key", null, this.locale)
+				CatalogMessageSourceBuilder
+						.builder(transUnits, this.locale)
+						.build().getMessage("key", null, this.locale)
+		);
+	}
+
+	@Test
+	void test_builder_withCatalogInterface() {
+		List<TransUnit> transUnits = List.of(
+				new TransUnit(this.locale, "key", "messages_value")
+		);
+
+		assertEquals(
+				"messages_value",
+				CatalogMessageSourceBuilder
+						.builder(new TransUnitsCatalog(transUnits), this.locale)
+						.build()
+						.getMessage("key", null, this.locale)
 		);
 	}
 
 	@Test
 	void test_withSetDefaultDomain() {
-		List<TransUnit> transUnits = Arrays.asList(
+		List<TransUnit> transUnits = List.of(
 				new TransUnit(this.locale, "key", "messages_value"),
 				new TransUnit(this.locale, "key", "foo_value", "foo")
 		);
