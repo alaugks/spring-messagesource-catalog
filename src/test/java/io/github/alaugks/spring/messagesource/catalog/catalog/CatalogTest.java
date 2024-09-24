@@ -6,6 +6,7 @@ import java.util.Locale;
 
 import io.github.alaugks.spring.messagesource.catalog.TransUnitsCatalog;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +20,7 @@ class CatalogTest {
 	@BeforeEach
 	void BeforeEach() {
 
-		List<TransUnit> transUnits = new ArrayList<>();
+		List<TransUnitInterface> transUnits = new ArrayList<>();
 
 		// Domain messages
 		transUnits.add(new TransUnit(Locale.forLanguageTag("en"), "key_1", "value_en_1"));
