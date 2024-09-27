@@ -11,7 +11,7 @@ public interface CatalogInterface {
 
 	List<TransUnitInterface> getTransUnits();
 
-	String resolveCode(Locale locale, String code);
+	String resolveCode(String code, Locale locale);
 
 	void build();
 }

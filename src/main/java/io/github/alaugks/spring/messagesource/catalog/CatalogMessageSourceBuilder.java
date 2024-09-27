@@ -68,7 +68,7 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 
 	@Override
 	protected MessageFormat resolveCode(String code, Locale locale) {
-		String value = this.catalog.resolveCode(locale, code);
+		String value = this.catalog.resolveCode(code, locale);
 
 		if (value != null) {
 			return new MessageFormat(value, locale);

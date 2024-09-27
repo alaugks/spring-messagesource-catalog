@@ -24,12 +24,12 @@ public abstract class AbstractCatalog implements CatalogInterface {
 		return this.nextCatalog.getTransUnits();
 	}
 
-	public String resolveCode(Locale locale, String code) {
+	public String resolveCode(String code, Locale locale) {
 		if (this.nextCatalog == null) {
 			return null;
 		}
 
-		return this.nextCatalog.resolveCode(locale, code);
+		return this.nextCatalog.resolveCode(code, locale);
 	}
 
 	public void build() {

@@ -23,7 +23,7 @@ class AbstractCatalogTest {
 
 	@Test
 	void test_resolveCode() {
-		assertNull(new MyCatalog().resolveCode(Locale.forLanguageTag("en"), "foo"));
+		assertNull(new MyCatalog().resolveCode("foo", Locale.forLanguageTag("en")));
 	}
 }
 

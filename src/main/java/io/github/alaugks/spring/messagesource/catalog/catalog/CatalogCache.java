@@ -11,7 +11,7 @@ public final class CatalogCache extends AbstractCatalog {
 	private final Map<Locale, Map<String, String>> cacheMap = new ConcurrentHashMap<>();
 
 	@Override
-	public String resolveCode(Locale locale, String code) {
+	public String resolveCode(String code, Locale locale) {
 		if (locale.toString().isEmpty() || code.isEmpty()) {
 			return null;
 		}
@@ -23,7 +23,7 @@ public final class CatalogCache extends AbstractCatalog {
 		}
 
 		// Resolve in Catalog
-		String resolvedValue = super.resolveCode(locale, code);
+		String resolvedValue = super.resolveCode(code, locale);
 
 		// Put in cache
 		this.put(locale, code, resolvedValue);
