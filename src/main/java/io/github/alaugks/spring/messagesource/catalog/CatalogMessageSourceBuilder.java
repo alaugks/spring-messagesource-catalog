@@ -7,7 +7,7 @@ import java.util.Locale;
 import io.github.alaugks.spring.messagesource.catalog.catalog.Catalog;
 import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogCache;
 import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogInterface;
-import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 
 import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.util.Assert;
@@ -20,7 +20,7 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 		this.catalog = catalog;
 	}
 
-	public static Builder builder(List<TransUnit> transUnits, Locale defaultLocale) {
+	public static Builder builder(List<TransUnitInterface> transUnits, Locale defaultLocale) {
 		Assert.notNull(transUnits, "Argument transUnits must not be null");
 
 		return builder(new TransUnitsCatalog(transUnits), defaultLocale);
@@ -68,7 +68,7 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 
 	@Override
 	protected MessageFormat resolveCode(String code, Locale locale) {
-		String value = this.catalog.resolveCode(locale, code);
+		String value = this.catalog.resolveCode(code, locale);
 
 		if (value != null) {
 			return new MessageFormat(value, locale);

@@ -12,8 +12,8 @@ class CatalogCacheTest {
 	void test_get_paramValuesEmpty() {
 		var catalog = new CatalogCache();
 
-		assertNull(catalog.resolveCode(Locale.forLanguageTag("en"), ""));
-		assertNull(catalog.resolveCode(Locale.forLanguageTag(""), "messages.m_en_1"));
+		assertNull(catalog.resolveCode("", Locale.forLanguageTag("en")));
+		assertNull(catalog.resolveCode("messages.m_en_1", Locale.forLanguageTag("")));
 	}
 
 }

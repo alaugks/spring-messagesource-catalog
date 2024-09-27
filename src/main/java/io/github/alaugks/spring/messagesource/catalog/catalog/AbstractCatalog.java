@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 
 public abstract class AbstractCatalog implements CatalogInterface {
 
@@ -16,7 +16,7 @@ public abstract class AbstractCatalog implements CatalogInterface {
 		return catalog;
 	}
 
-	public List<TransUnit> getTransUnits() {
+	public List<TransUnitInterface> getTransUnits() {
 		if (this.nextCatalog == null) {
 			return new ArrayList<>();
 		}
@@ -24,12 +24,12 @@ public abstract class AbstractCatalog implements CatalogInterface {
 		return this.nextCatalog.getTransUnits();
 	}
 
-	public String resolveCode(Locale locale, String code) {
+	public String resolveCode(String code, Locale locale) {
 		if (this.nextCatalog == null) {
 			return null;
 		}
 
-		return this.nextCatalog.resolveCode(locale, code);
+		return this.nextCatalog.resolveCode(code, locale);
 	}
 
 	public void build() {

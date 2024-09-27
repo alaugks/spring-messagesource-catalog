@@ -32,12 +32,12 @@ public final class Catalog extends AbstractCatalog {
 	}
 
 	@Override
-	public String resolveCode(Locale locale, String code) {
+	public String resolveCode(String code, Locale locale) {
 		if (locale.toString().isEmpty() || code.isEmpty()) {
 			return null;
 		}
 
-		return this.resolveFromCatalogMap(locale, code).orElse(super.resolveCode(locale, code));
+		return this.resolveFromCatalogMap(locale, code).orElse(super.resolveCode(code, locale));
 	}
 
 	@Override

@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogInterface;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 import io.github.alaugks.spring.messagesource.catalog.records.TranslationFile;
 import io.github.alaugks.spring.messagesource.catalog.ressources.ResourcesLoader;
 import org.junit.jupiter.api.BeforeAll;
@@ -166,7 +167,7 @@ class BenchmarkMessageSourceTest {
 	}
 
 	private static CatalogInterface createTransUnitListFromMessagesPropertiesFiles() throws IOException {
-		List<TransUnit> transUnits = new ArrayList<>();
+		List<TransUnitInterface> transUnits = new ArrayList<>();
 
 		var resourcesLoader = new ResourcesLoader(
 				Locale.forLanguageTag("en"),
