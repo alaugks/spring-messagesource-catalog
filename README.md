@@ -29,6 +29,7 @@ implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog',
 
 * [spring-messagesource-xliff](https://github.com/alaugks/spring-messagesource-xliff): MessageSource for translations from XLIFF files.
 * [spring-messagesource-db-example](https://github.com/alaugks/spring-messagesource-db-example): Example custom Spring MessageSource from database
+* [spring-messagesource-json-example](https://github.com/alaugks/spring-messagesource-json-example): Example custom Spring MessageSource from JSON
 
 ## CatalogMessageSource Configuration
 
