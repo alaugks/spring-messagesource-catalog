@@ -1,4 +1,4 @@
-package io.github.alaugks.spring.messagesource.catalog.ressources;
+package io.github.alaugks.spring.messagesource.catalog.resources;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

@@ -1,4 +1,4 @@
-package io.github.alaugks.spring.messagesource.catalog.ressources;
+package io.github.alaugks.spring.messagesource.catalog.resources;
 
 import io.github.alaugks.spring.messagesource.catalog.records.Filename;
 import org.junit.jupiter.api.Test;

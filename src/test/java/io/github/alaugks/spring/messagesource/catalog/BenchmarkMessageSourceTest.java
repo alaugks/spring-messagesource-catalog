@@ -13,7 +13,7 @@ import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogInterface;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 import io.github.alaugks.spring.messagesource.catalog.records.TranslationFile;
-import io.github.alaugks.spring.messagesource.catalog.ressources.ResourcesLoader;
+import io.github.alaugks.spring.messagesource.catalog.resources.ResourcesLoader;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
