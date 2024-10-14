@@ -12,7 +12,7 @@ class TransUnitTest {
 
 	@Test
 	void test_withoutDomain() {
-		var transUnit = new TransUnit(Locale.forLanguageTag("en"), "the-code", "the-value");
+		TransUnit transUnit = new TransUnit(Locale.forLanguageTag("en"), "the-code", "the-value");
 
 		assertEquals(Locale.forLanguageTag("en"), transUnit.locale());
 		assertEquals("the-code", transUnit.code());
@@ -22,7 +22,7 @@ class TransUnitTest {
 
 	@Test
 	void test_witDomain() {
-		var transUnit = new TransUnit(Locale.forLanguageTag("en"), "the-code", "the-value", "my-domain");
+		TransUnit transUnit = new TransUnit(Locale.forLanguageTag("en"), "the-code", "the-value", "my-domain");
 
 		assertEquals(Locale.forLanguageTag("en"), transUnit.locale());
 		assertEquals("the-code", transUnit.code());

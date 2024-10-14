@@ -13,7 +13,7 @@ class TranslationFileTest {
 
 	@Test
 	void test_record() {
-		var translationFile = new TranslationFile(
+		TranslationFile translationFile = new TranslationFile(
 				"my-domain",
 				Locale.forLanguageTag("en-US"),
 				getClass().getClassLoader().getResourceAsStream("translations_en_US/messages_en_US.txt")

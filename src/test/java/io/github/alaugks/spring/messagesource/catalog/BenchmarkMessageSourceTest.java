@@ -149,7 +149,7 @@ class BenchmarkMessageSourceTest {
 	private static CatalogInterface createTransUnitListFromMessagesPropertiesFiles() throws IOException {
 		List<TransUnitInterface> transUnits = new ArrayList<>();
 
-		var resourcesLoader = new ResourcesLoader(
+		ResourcesLoader resourcesLoader = new ResourcesLoader(
 				Locale.forLanguageTag("en"),
 				new HashSet<>(List.of("messages/messages*")),
 				List.of("properties")
@@ -160,8 +160,8 @@ class BenchmarkMessageSourceTest {
 			properties.load(translationFile.inputStream());
 			for (Entry<Object, Object> property : properties.entrySet()) {
 
-				var key = property.getKey();
-				var posDomainDelimiter = key.toString().lastIndexOf(".");
+				Object key = property.getKey();
+				int posDomainDelimiter = key.toString().lastIndexOf(".");
 
 				transUnits.add(new TransUnit(
 						translationFile.locale(),

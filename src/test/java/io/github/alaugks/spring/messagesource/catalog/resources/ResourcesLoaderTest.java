@@ -16,7 +16,7 @@ class ResourcesLoaderTest {
 
 	@Test
 	void test_setLocationPatterns() {
-		var resourcesLoader = new ResourcesLoader(
+		ResourcesLoader resourcesLoader = new ResourcesLoader(
 				Locale.forLanguageTag("en"),
 				new HashSet<>(List.of("translations/*")),
 				List.of("txt")
@@ -27,7 +27,7 @@ class ResourcesLoaderTest {
 
 	@Test
 	void test_setLocationPatterns_domainMessages() {
-		var resourcesLoader = new ResourcesLoader(
+		ResourcesLoader resourcesLoader = new ResourcesLoader(
 				Locale.forLanguageTag("en"),
 				new HashSet<>(List.of("translations/messages*")),
 				List.of("txt")
@@ -39,7 +39,7 @@ class ResourcesLoaderTest {
 
 	@Test
 	void test_setLocationPatterns_languageDe() {
-		var resourcesLoader = new ResourcesLoader(
+		ResourcesLoader resourcesLoader = new ResourcesLoader(
 				Locale.forLanguageTag("en"),
 				new HashSet<>(List.of("translations/*_de*")),
 				List.of("txt")
@@ -50,7 +50,7 @@ class ResourcesLoaderTest {
 
 	@Test
 	void test_setLocationPatternsPattern() {
-		var resourcesLoader = new ResourcesLoader(
+		ResourcesLoader resourcesLoader = new ResourcesLoader(
 				Locale.forLanguageTag("en"),
 				new HashSet<>(List.of("translations_en/*", "translations_de/*")),
 				List.of("txt")
@@ -61,7 +61,7 @@ class ResourcesLoaderTest {
 
 	@Test
 	void test_Record() {
-		var resourcesLoader = new ResourcesLoader(
+		ResourcesLoader resourcesLoader = new ResourcesLoader(
 				Locale.forLanguageTag("en"),
 				new HashSet<>(List.of("translations_en_US/*")),
 				List.of("txt")
@@ -76,7 +76,7 @@ class ResourcesLoaderTest {
 
 	@Test
 	void test_parseFileName_null() {
-		var resourcesLoader = new ResourcesLoader(
+		ResourcesLoader resourcesLoader = new ResourcesLoader(
 				Locale.forLanguageTag("en"),
 				new HashSet<>(List.of("translations/.txt")),
 				List.of("txt")
