@@ -60,7 +60,7 @@ TransUnit(Locale locale, String code, String value, String domain);
 
 ```java
 import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogHandler;
-import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -71,7 +71,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MessageConfig {
     
-    List<TransUnit> transUnits = new ArrayList<>() {{
+    List<TransUnitInterface> transUnits = new ArrayList<>() {{
         // en
         add(new TransUnit(Locale.forLanguageTag("en"), "headline", "Headline"));
         add(new TransUnit(Locale.forLanguageTag("en"), "postcode", "Postcode"));
@@ -107,14 +107,14 @@ import java.util.List;
 
 import io.github.alaugks.spring.messagesource.catalog.catalog.AbstractCatalog;
 import io.github.alaugks.spring.messagesource.catalog.catalog.Abstractcatalog;
-import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 
 public class MyCustomCatalog extends AbstractCatalog {
 
-	List<TransUnit> transUnits;
+	List<TransUnitInterface> transUnits;
 
 	@Override
-	public List<TransUnit> getTransUnits() {
+	public List<TransUnitInterface> getTransUnits() {
 		return this.transUnits;
 	}
 
