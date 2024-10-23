@@ -7,6 +7,9 @@ This package extends the AbstractMessageSource and therefore the MessageSource i
 
 ## Dependency
 
+> [!IMPORTANT]  
+> There may still be a breaking change in the [CatalogInterface.build()](src/main/java/io/github/alaugks/spring/messagesource/catalog/catalog/CatalogInterface.java) up to version 1.0.0.
+
 ### Maven
 
 ```xml
