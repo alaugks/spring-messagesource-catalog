@@ -3,7 +3,7 @@
 This package extends the AbstractMessageSource and therefore the MessageSource interface. 
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=alaugks_spring-messagesource-base&metric=alert_status&token=3d2b79af1f0f0ab6089e565495b4db6f621e9a13)](https://sonarcloud.io/summary/overall?id=alaugks_spring-messagesource-base)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.alaugks/spring-messagesource-catalog.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.alaugks/spring-messagesource-catalog/0.4.0)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.alaugks/spring-messagesource-catalog.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.alaugks/spring-messagesource-catalog/0.5.0)
 
 ## Dependency
 
@@ -17,7 +17,7 @@ This package extends the AbstractMessageSource and therefore the MessageSource i
     <dependency>
         <groupId>io.github.alaugks</groupId>
         <artifactId>spring-messagesource-catalog</artifactId>
-        <version>0.4.0</version>
+        <version>0.5.0</version>
     </dependency>
 </dependencies>
 ```
@@ -25,7 +25,7 @@ This package extends the AbstractMessageSource and therefore the MessageSource i
 ### Gradle
 
 ```
-implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog', version: '0.4.0'
+implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog', version: '0.5.0'
 ```
 
 ## Packages that use the catalog as a base package
