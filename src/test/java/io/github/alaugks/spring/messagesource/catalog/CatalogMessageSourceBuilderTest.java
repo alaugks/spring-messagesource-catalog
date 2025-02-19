@@ -1,13 +1,15 @@
 package io.github.alaugks.spring.messagesource.catalog;
 
-import java.util.List;
-import java.util.Locale;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.springframework.context.support.AbstractMessageSource;
 
 @SuppressWarnings({"java:S4144"})
 class CatalogMessageSourceBuilderTest {
@@ -58,5 +60,51 @@ class CatalogMessageSourceBuilderTest {
 						.build()
 						.getMessage("key", null, this.locale)
 		);
+	}
+
+	@Test
+	void test_CatalogMessageSource_asParentMessageSource() {
+		List <TransUnitInterface> transUnits = new ArrayList<>();
+		transUnits.add(new TransUnit(this.locale, "key", "key_value"));
+
+		CatalogMessageSourceBuilder catalogMessageSourceBuilder = CatalogMessageSourceBuilder
+				.builder(transUnits, locale)
+				.build();
+
+		MockMessageSource mockMessageSource = new MockMessageSource();
+		mockMessageSource.setParentMessageSource(catalogMessageSourceBuilder);
+
+		assertEquals("key_value", mockMessageSource.getMessage(
+				"key",
+				new Object[] {},
+				Locale.forLanguageTag("en")
+		));
+	}
+
+	@Test
+	void test_CatalogMessageSource_setParentMessageSource() {
+		CatalogMessageSourceBuilder messageSource = CatalogMessageSourceBuilder
+				.builder(new ArrayList<>(), locale)
+				.build();
+
+		messageSource.setParentMessageSource(new MockMessageSource());
+
+		assertEquals("code_value", messageSource.getMessage(
+				"code",
+				new Object[] {},
+				Locale.forLanguageTag("en")
+		));
+	}
+
+	static class MockMessageSource extends AbstractMessageSource {
+
+		@Override
+		protected MessageFormat resolveCode(String code, Locale locale) {
+			if (code.equals("code")) {
+				return new MessageFormat("code_value");
+			}
+			return null;
+		}
+
 	}
 }

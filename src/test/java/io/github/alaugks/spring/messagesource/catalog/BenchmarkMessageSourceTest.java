@@ -1,32 +1,26 @@
 package io.github.alaugks.spring.messagesource.catalog;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.stream.Stream;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogInterface;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 import io.github.alaugks.spring.messagesource.catalog.records.TranslationFile;
-import io.github.alaugks.spring.messagesource.catalog.ressources.ResourcesLoader;
+import io.github.alaugks.spring.messagesource.catalog.resources.LocationPattern;
+import io.github.alaugks.spring.messagesource.catalog.resources.ResourcesLoader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import org.springframework.context.MessageSource;
-import org.springframework.context.MessageSourceResolvable;
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * This test compares the logic when resolving the code of CatalogMessageSourceBuilder vs. ResourceBundleMessageSource
@@ -67,22 +61,6 @@ class BenchmarkMessageSourceTest {
 				code,
 				args,
 				Locale.forLanguageTag(locale)
-		));
-	}
-
-	@Test
-	void test_CatalogMessageSource_abstractMethodSetter() {
-		var messageSource = CatalogMessageSourceBuilder
-				.builder(new TransUnitsCatalog(new ArrayList<>()), defaultLocale)
-				.build();
-
-		messageSource.setParentMessageSource(new ParentMessageSource());
-		messageSource.setAlwaysUseMessageFormat(true);
-
-		assertEquals("Parent MessageSource", messageSource.getMessage(
-				"code",
-				new Object[] {},
-				Locale.forLanguageTag("en")
 		));
 	}
 
@@ -169,9 +147,9 @@ class BenchmarkMessageSourceTest {
 	private static CatalogInterface createTransUnitListFromMessagesPropertiesFiles() throws IOException {
 		List<TransUnitInterface> transUnits = new ArrayList<>();
 
-		var resourcesLoader = new ResourcesLoader(
+		ResourcesLoader resourcesLoader = new ResourcesLoader(
 				Locale.forLanguageTag("en"),
-				new HashSet<>(List.of("messages/messages*")),
+				new LocationPattern(List.of("messages/messages*")),
 				List.of("properties")
 		);
 
@@ -180,8 +158,8 @@ class BenchmarkMessageSourceTest {
 			properties.load(translationFile.inputStream());
 			for (Entry<Object, Object> property : properties.entrySet()) {
 
-				var key = property.getKey();
-				var posDomainDelimiter = key.toString().lastIndexOf(".");
+				Object key = property.getKey();
+				int posDomainDelimiter = key.toString().lastIndexOf(".");
 
 				transUnits.add(new TransUnit(
 						translationFile.locale(),
@@ -206,23 +184,5 @@ class BenchmarkMessageSourceTest {
 		}
 
 		return code;
-	}
-
-	static class ParentMessageSource implements MessageSource {
-
-		@Override
-		public String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
-			return "Parent MessageSource";
-		}
-
-		@Override
-		public String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
-			return "Parent MessageSource";
-		}
-
-		@Override
-		public String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
-			return "Parent MessageSource";
-		}
 	}
 }
