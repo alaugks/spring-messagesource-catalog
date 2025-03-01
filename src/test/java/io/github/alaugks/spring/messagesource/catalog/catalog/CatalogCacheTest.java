@@ -1,10 +1,9 @@
 package io.github.alaugks.spring.messagesource.catalog.catalog;
 
-import java.util.Locale;
-
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.util.Locale;
+import org.junit.jupiter.api.Test;
 
 class CatalogCacheTest {
 

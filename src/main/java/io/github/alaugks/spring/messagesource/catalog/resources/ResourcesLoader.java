@@ -1,15 +1,13 @@
 package io.github.alaugks.spring.messagesource.catalog.resources;
 
+import io.github.alaugks.spring.messagesource.catalog.exception.CatalogMessageSourceRuntimeException;
+import io.github.alaugks.spring.messagesource.catalog.records.Filename;
+import io.github.alaugks.spring.messagesource.catalog.records.TranslationFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-
-import io.github.alaugks.spring.messagesource.catalog.exception.CatalogMessageSourceRuntimeException;
-import io.github.alaugks.spring.messagesource.catalog.records.Filename;
-import io.github.alaugks.spring.messagesource.catalog.records.TranslationFile;
-
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.Assert;
@@ -22,6 +20,14 @@ public class ResourcesLoader {
 
 	private final List<String> fileExtensions;
 
+	public ResourcesLoader(Locale defaultLocale, LocationPattern locationPattern, List<String> fileExtensions) {
+		this(defaultLocale, locationPattern.getLocationPatterns(), fileExtensions);
+	}
+
+	/**
+	 *	Will replace with: ResourcesLoader(Locale defaultLocale, LocationPattern locationPattern, List<String> fileExtensions)
+	 */
+	@Deprecated(since = "0.6.0")
 	public ResourcesLoader(Locale defaultLocale, Set<String> locationPatterns, List<String> fileExtensions) {
 		Assert.notNull(defaultLocale, "Argument defaultLocale must not be null");
 		Assert.notNull(locationPatterns, "Argument locationPatterns must not be null");

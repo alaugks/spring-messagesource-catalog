@@ -1,10 +1,8 @@
 package io.github.alaugks.spring.messagesource.catalog.resources;
 
+import io.github.alaugks.spring.messagesource.catalog.records.Filename;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import io.github.alaugks.spring.messagesource.catalog.records.Filename;
-
 import org.springframework.util.Assert;
 
 public class ResourcesFileNameParser {

@@ -17,7 +17,7 @@ public final class CatalogCache extends AbstractCatalog {
 		}
 
 		// Resolve in Cache
-		Optional<String> value = this.getTargetValue(locale, code);
+		Optional<String> value = this.resolveFromCacheMap(code, locale);
 		if (value.isPresent()) {
 			return value.get();
 		}
@@ -42,7 +42,7 @@ public final class CatalogCache extends AbstractCatalog {
 		});
 	}
 
-	private Optional<String> getTargetValue(Locale locale, String code) {
+	private Optional<String> resolveFromCacheMap(String code, Locale locale) {
 		Map<String, String> map = this.cacheMap.get(locale);
 
 		if (map != null) {

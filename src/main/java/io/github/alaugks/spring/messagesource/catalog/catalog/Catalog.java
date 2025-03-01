@@ -5,7 +5,6 @@ import java.util.Locale.Builder;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.springframework.util.Assert;
 
 public final class Catalog extends AbstractCatalog {
@@ -37,7 +36,7 @@ public final class Catalog extends AbstractCatalog {
 			return null;
 		}
 
-		return this.resolveFromCatalogMap(locale, code).orElse(super.resolveCode(code, locale));
+		return this.resolveFromCatalogMap(code, locale).orElse(super.resolveCode(code, locale));
 	}
 
 	@Override
@@ -47,29 +46,29 @@ public final class Catalog extends AbstractCatalog {
 	}
 
 	private void put(Locale locale, String code, String value, String domain) {
-		if (!locale.toString().isEmpty() || !code.isEmpty()) {
+		if (!locale.toString().isEmpty()) {
 			this.catalogMap.computeIfAbsent(
 					locale, l -> new ConcurrentHashMap<>()
 			).putIfAbsent(concatCode(domain, code), value);
 		}
 	}
 
-	private Optional<String> resolveFromCatalogMap(Locale locale, String code) {
-		return this.getTargetValue(locale, concatCode(this.defaultDomain, code))
-				.or(() -> this.getTargetValue(locale, code))
-				.or(() -> this.getTargetValue(buildLocaleWithoutRegion(locale), concatCode(this.defaultDomain, code)))
-				.or(() -> this.getTargetValue(buildLocaleWithoutRegion(locale), code))
-				.or(() -> this.getTargetValue(this.defaultLocale, concatCode(this.defaultDomain, code)))
-				.or(() -> this.getTargetValue(this.defaultLocale, code));
+	private Optional<String> resolveFromCatalogMap(String code, Locale locale) {
+		return this.getTargetValue(concatCode(this.defaultDomain, code), locale)
+				.or(() -> this.getTargetValue(code, locale))
+				.or(() -> this.getTargetValue(concatCode(this.defaultDomain, code), this.buildLocaleWithoutRegion(locale)))
+				.or(() -> this.getTargetValue(code, this.buildLocaleWithoutRegion(locale)))
+				.or(() -> this.getTargetValue(concatCode(this.defaultDomain, code), this.defaultLocale))
+				.or(() -> this.getTargetValue(code, this.defaultLocale));
 	}
 
-	private Optional<String> getTargetValue(Locale locale, String code) {
+	private Optional<String> getTargetValue(String code, Locale locale) {
 		return Optional.ofNullable(this.catalogMap.get(locale)).flatMap(
 				localeCatalog -> Optional.ofNullable(localeCatalog.get(code))
 		);
 	}
 
-	private static Locale buildLocaleWithoutRegion(Locale locale) {
+	private Locale buildLocaleWithoutRegion(Locale locale) {
 		return new Builder().setLanguage(locale.getLanguage()).build();
 	}
 }

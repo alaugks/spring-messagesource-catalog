@@ -1,17 +1,15 @@
 package io.github.alaugks.spring.messagesource.catalog;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
-import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.context.support.AbstractMessageSource;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"java:S4144"})
 class CatalogMessageSourceBuilderTest {
