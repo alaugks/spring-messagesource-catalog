@@ -13,13 +13,11 @@ This package extends the AbstractMessageSource and therefore the MessageSource i
 ### Maven
 
 ```xml
-<dependencies>
-    <dependency>
-        <groupId>io.github.alaugks</groupId>
-        <artifactId>spring-messagesource-catalog</artifactId>
-        <version>0.5.0</version>
-    </dependency>
-</dependencies>
+<dependency>
+    <groupId>io.github.alaugks</groupId>
+    <artifactId>spring-messagesource-catalog</artifactId>
+    <version>0.5.0</version>
+</dependency>
 ```
 
 ### Gradle
