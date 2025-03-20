@@ -28,13 +28,13 @@ class LocationPatternTest {
 	void test_string() {
 		LocationPattern locationPattern = new LocationPattern("path/");
 
-		assertEquals(Set.of("path/"), locationPattern.getLocationPatterns());
+		assertEquals(Set.of("path/"), locationPattern.getLocationPattern());
 	}
 
 	@Test
 	void test_string_list() {
 		LocationPattern locationPattern = new LocationPattern(List.of("path/", "path/", "other_path/"));
 
-		assertEquals(Set.of("path/", "other_path/"), locationPattern.getLocationPatterns());
+		assertEquals(Set.of("path/", "other_path/"), locationPattern.getLocationPattern());
 	}
 }

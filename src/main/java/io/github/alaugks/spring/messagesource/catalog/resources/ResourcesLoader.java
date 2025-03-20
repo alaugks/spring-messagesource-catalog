@@ -32,7 +32,7 @@ public class ResourcesLoader {
 
 	private final Locale defaultLocale;
 
-	private final Set<String> locationPatterns;
+	private final Set<String> locationPattern;
 
 	private final List<String> fileExtensions;
 
@@ -42,7 +42,7 @@ public class ResourcesLoader {
 		Assert.notNull(fileExtensions, "Argument fileExtensions must not be null");
 
 		this.defaultLocale = defaultLocale;
-		this.locationPatterns = locationPattern.getLocationPatterns();
+		this.locationPattern = locationPattern.getLocationPattern();
 		this.fileExtensions = fileExtensions;
 	}
 
@@ -50,8 +50,8 @@ public class ResourcesLoader {
 		try {
 			List<TranslationFile> files = new ArrayList<>();
 			PathMatchingResourcePatternResolver resourceLoader = new PathMatchingResourcePatternResolver();
-			for (String locationPattern : this.locationPatterns) {
-				Resource[] resources = resourceLoader.getResources(locationPattern);
+			for (String locationPatternItem : this.locationPattern) {
+				Resource[] resources = resourceLoader.getResources(locationPatternItem);
 				for (Resource resource : resources) {
 					if (this.isFileExtensionSupported(resource)) {
 						TranslationFile translationFile = this.parseFileName(resource);
