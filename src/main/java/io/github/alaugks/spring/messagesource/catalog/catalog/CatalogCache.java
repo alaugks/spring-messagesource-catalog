@@ -25,7 +25,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class CatalogCache extends AbstractCatalog {
 
 	private final Map<Locale, Map<String, String>> cacheMap = new ConcurrentHashMap<>();
+	private final String defaultDomain;
 
+	public CatalogCache() {
+		this(Catalog.DEFAULT_DOMAIN);
+	}
+
+	public CatalogCache(String defaultDomain) {
+		this.defaultDomain = defaultDomain;
+	}
+	
 	@Override
 	public String resolveCode(String code, Locale locale) {
 		if (locale.toString().isEmpty() || code.isEmpty()) {
@@ -51,7 +60,7 @@ public final class CatalogCache extends AbstractCatalog {
 	public void build() {
 		super.build();
 		super.getTransUnits().forEach(t -> {
-			if (Objects.equals(t.domain(), Catalog.DEFAULT_DOMAIN)) {
+			if (Objects.equals(t.domain(), this.defaultDomain)) {
 				this.put(t.locale(), t.code(), t.value());
 			}
 			this.put(t.locale(), concatCode(t.domain(), t.code()), t.value());

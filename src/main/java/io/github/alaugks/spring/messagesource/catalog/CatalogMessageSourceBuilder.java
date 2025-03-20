@@ -70,7 +70,7 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 		}
 
 		public CatalogMessageSourceBuilder build() {
-			CatalogInterface catalogChain = new CatalogCache();
+			CatalogInterface catalogChain = new CatalogCache(this.defaultDomain);
 			catalogChain
 					.nextCatalog(new Catalog(this.defaultLocale, this.defaultDomain))
 					.nextCatalog(catalogSource);
