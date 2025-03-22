@@ -40,7 +40,7 @@ jobs:
       - name: Build and analyze (dev)
         run: |
           mvn test -P test-coverage
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:5.0.0.4389:sonar \
             -Dsonar.projectName=${{ vars.SONAR_PROJECT_NAME }} \
             -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }} \
             -Dsonar.branch.name=${{ steps.branch-name.outputs.ref_branch }} \
