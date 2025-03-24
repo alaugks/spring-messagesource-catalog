@@ -32,17 +32,26 @@ public class ResourcesLoader {
 
 	private final Locale defaultLocale;
 
-	private final Set<String> locationPattern;
+	private final Set<String> locationPatterns;
 
 	private final List<String> fileExtensions;
 
 	public ResourcesLoader(Locale defaultLocale, LocationPattern locationPattern, List<String> fileExtensions) {
+		this(defaultLocale, locationPattern.getLocationPattern(), fileExtensions);
+	}
+
+	/**
+	 * @deprecated
+	 * Will replace with {@link ResourcesLoader#ResourcesLoader(Locale defaultLocale, LocationPattern locationPattern, List<String> fileExtensions)}
+	 */
+	@Deprecated(since = "1.0.0")
+	public ResourcesLoader(Locale defaultLocale, Set<String> locationPatterns, List<String> fileExtensions) {
 		Assert.notNull(defaultLocale, "Argument defaultLocale must not be null");
-		Assert.notNull(locationPattern, "Argument locationPatterns must not be null");
+		Assert.notNull(locationPatterns, "Argument locationPatterns must not be null");
 		Assert.notNull(fileExtensions, "Argument fileExtensions must not be null");
 
 		this.defaultLocale = defaultLocale;
-		this.locationPattern = locationPattern.getLocationPattern();
+		this.locationPatterns = locationPatterns;
 		this.fileExtensions = fileExtensions;
 	}
 
@@ -50,8 +59,8 @@ public class ResourcesLoader {
 		try {
 			List<TranslationFile> files = new ArrayList<>();
 			PathMatchingResourcePatternResolver resourceLoader = new PathMatchingResourcePatternResolver();
-			for (String locationPatternItem : this.locationPattern) {
-				Resource[] resources = resourceLoader.getResources(locationPatternItem);
+			for (String locationPattern : this.locationPatterns) {
+				Resource[] resources = resourceLoader.getResources(locationPattern);
 				for (Resource resource : resources) {
 					if (this.isFileExtensionSupported(resource)) {
 						TranslationFile translationFile = this.parseFileName(resource);
