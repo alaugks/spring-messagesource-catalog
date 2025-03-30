@@ -24,7 +24,7 @@ import java.util.Optional;
 
 public abstract class AbstractCatalog implements CatalogInterface {
 
-	protected CatalogInterface nextCatalog;
+	private CatalogInterface nextCatalog;
 
 	public CatalogInterface nextCatalog(CatalogInterface catalog) {
 		this.nextCatalog = catalog;
