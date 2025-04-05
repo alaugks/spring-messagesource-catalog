@@ -69,6 +69,7 @@ public final class Catalog extends AbstractCatalog {
 	}
 
 	public void build() {
+		super.build();
 		super.getTransUnits().forEach(t -> this.put(t.locale(), t.code(), t.value(), t.domain()));
 	}
 
