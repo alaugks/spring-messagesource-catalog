@@ -28,5 +28,9 @@ public interface CatalogInterface {
 
 	String resolveCode(String code, Locale locale);
 
+	/**
+	 * @deprecated
+	 */
+	@Deprecated(since = "1.0.0")
 	void build();
 }

@@ -37,4 +37,27 @@
         <developerConnection>scm:git:https://github.com/alaugks/spring-messagesource-catalog</developerConnection>
         <url>https://github.com/alaugks/spring-messagesource-catalog</url>
     </scm>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/CatalogCache.*</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>jacoco-report</id>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

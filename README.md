@@ -108,21 +108,13 @@ import io.github.alaugks.spring.messagesource.catalog.catalog.Abstractcatalog;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 
 public class MyCustomCatalog extends AbstractCatalog {
-
-	List<TransUnitInterface> transUnits;
-
-	@Override
-	public List<TransUnitInterface> getTransUnits() {
-		return this.transUnits;
-	}
-
-	@Override
-	public void build() {
-		// Build a list with TransUnit from any kind of source.
-		this.transUnits = new ArrayList<>() {{
-			// ...
-		}};
-	}
+    @Override
+    public List<TransUnitInterface> getTransUnits() {
+        // Build a list with TransUnit from any kind of source.
+        return new ArrayList<>() {{
+            // ...
+        }};
+    }
 }
 ```
 

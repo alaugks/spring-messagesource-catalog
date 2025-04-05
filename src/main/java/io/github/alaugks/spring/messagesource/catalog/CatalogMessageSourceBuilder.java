@@ -17,7 +17,6 @@
 package io.github.alaugks.spring.messagesource.catalog;
 
 import io.github.alaugks.spring.messagesource.catalog.catalog.Catalog;
-import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogCache;
 import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogInterface;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 import java.text.MessageFormat;
@@ -70,10 +69,8 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 		}
 
 		public CatalogMessageSourceBuilder build() {
-			CatalogInterface catalogChain = new CatalogCache(this.defaultDomain);
-			catalogChain
-					.nextCatalog(new Catalog(this.defaultLocale, this.defaultDomain))
-					.nextCatalog(catalogSource);
+			Catalog catalogChain = new Catalog(this.defaultLocale, this.defaultDomain);
+			catalogChain.nextCatalog(catalogSource);
 			catalogChain.build();
 
 			return new CatalogMessageSourceBuilder(catalogChain);

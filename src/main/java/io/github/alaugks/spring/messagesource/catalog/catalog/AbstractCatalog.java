@@ -47,6 +47,10 @@ public abstract class AbstractCatalog implements CatalogInterface {
 		return this.nextCatalog.resolveCode(code, locale);
 	}
 
+	/**
+	 * @deprecated
+	 */
+	@Deprecated(since = "1.0.0")
 	public void build() {
 		if (this.nextCatalog != null) {
 			this.nextCatalog.build();
