@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Use {@link Catalog()}
  * @deprecated
  */
-@Deprecated(since = "0.7.0", forRemoval = true)
+@Deprecated(since = "0.6.0", forRemoval = true)
 public final class CatalogCache extends AbstractCatalog {
 
 	private final Map<Locale, Map<String, String>> cacheMap = new ConcurrentHashMap<>();
