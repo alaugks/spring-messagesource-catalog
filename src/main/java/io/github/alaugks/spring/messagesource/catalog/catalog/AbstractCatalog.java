@@ -50,7 +50,7 @@ public abstract class AbstractCatalog implements CatalogInterface {
 	/**
 	 * @deprecated
 	 */
-	@Deprecated(since = "0.7.0", forRemoval = true)
+	@Deprecated(since = "0.6.0", forRemoval = true)
 	public void build() {
 		if (this.nextCatalog != null) {
 			this.nextCatalog.build();
