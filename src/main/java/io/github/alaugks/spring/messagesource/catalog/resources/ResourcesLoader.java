@@ -44,7 +44,7 @@ public class ResourcesLoader {
 	 * @deprecated
 	 * Will replace with {@link ResourcesLoader#ResourcesLoader(Locale defaultLocale, LocationPattern locationPattern, List<String> fileExtensions)}
 	 */
-	@Deprecated(since = "1.0.0")
+	@Deprecated(since = "0.7.0", forRemoval = true)
 	public ResourcesLoader(Locale defaultLocale, Set<String> locationPatterns, List<String> fileExtensions) {
 		Assert.notNull(defaultLocale, "Argument defaultLocale must not be null");
 		Assert.notNull(locationPatterns, "Argument locationPatterns must not be null");

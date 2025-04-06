@@ -31,6 +31,6 @@ public interface CatalogInterface {
 	/**
 	 * @deprecated
 	 */
-	@Deprecated(since = "1.0.0")
+	@Deprecated(since = "0.7.0", forRemoval = true)
 	void build();
 }

@@ -42,7 +42,7 @@ public class LocationPattern {
 	 * @deprecated
 	 * Will replace with {@link #getLocationPattern()}
 	 */
-	@Deprecated(since = "1.0.0")
+	@Deprecated(since = "0.7.0", forRemoval = true)
 	public Set<String> getLocationPatterns() {
 		return this.getLocationPattern();
 	}
