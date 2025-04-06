@@ -16,37 +16,75 @@
 
 package io.github.alaugks.spring.messagesource.catalog.catalog;
 
-import java.util.ArrayList;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
+import java.util.List;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 class AbstractCatalogTest {
 
 	@Test
-	void test_set() {
-		assertInstanceOf(NextCatalog.class, new MyCatalog().nextCatalog(new NextCatalog()));
-	}
+	void test_functional() {
+		Catalog catalog = new Catalog(Locale.forLanguageTag("en"));
+		catalog.nextCatalog(new FirstCatalog()).nextCatalog(new SecondCatalog());
+		catalog.build();
 
-	@Test
-	void test_getTransUnits() {
-		assertEquals(new ArrayList<>(), new MyCatalog().getTransUnits());
-	}
-
-	@Test
-	void test_resolveCode() {
-		assertNull(new MyCatalog().resolveCode("foo", Locale.forLanguageTag("en")));
+		assertEquals("first_value_a", catalog.resolveCode("first_key_a", Locale.forLanguageTag("en")));
+		assertEquals("first_value_b", catalog.resolveCode("first_key_b", Locale.forLanguageTag("en")));
+		assertEquals("second_value_a", catalog.resolveCode("second_key_a", Locale.forLanguageTag("en")));
+		assertEquals("second_value_b", catalog.resolveCode("second_key_b", Locale.forLanguageTag("en")));
 	}
 }
 
+class FirstCatalog extends AbstractCatalog {
 
-class MyCatalog extends AbstractCatalog {
+	private List<TransUnitInterface> transUnits;
 
+	@Override
+	public List<TransUnitInterface> getTransUnits() {
+		return this.transUnits;
+	}
+
+	@Override
+	public String resolveCode(String code, Locale locale) {
+		if (code.equals("first_key_b")) {
+			return "first_value_b";
+		}
+
+		return this.transUnits
+			.stream()
+			.filter(t -> code.equals(t.code()))
+			.findFirst()
+			.map(TransUnitInterface::value)
+			.orElse(super.resolveCode(code, locale));
+	}
+
+	@Override
+	public void build() {
+		super.build();
+		this.transUnits = super.getTransUnits();
+		this.transUnits.add(new TransUnit(Locale.forLanguageTag("en"), "first_key_a", "first_value_a"));
+	}
 }
 
-class NextCatalog extends AbstractCatalog {
+class SecondCatalog extends AbstractCatalog {
 
+	@Override
+	public String resolveCode(String code, Locale locale) {
+		if (code.equals("second_key_b")) {
+			return "second_value_b";
+		}
+
+		return super.resolveCode(code, locale);
+	}
+
+	@Override
+	public List<TransUnitInterface> getTransUnits() {
+		List<TransUnitInterface> transUnits = super.getTransUnits();
+		transUnits.add(new TransUnit(Locale.forLanguageTag("en"), "second_key_a", "second_value_a"));
+		return transUnits;
+	}
 }
