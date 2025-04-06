@@ -34,7 +34,16 @@ public class LocationPattern {
 		this.locationPatterns = new HashSet<>(locationPatterns);
 	}
 
-	public Set<String> getLocationPatterns() {
+	public Set<String> getLocationPattern() {
 		return locationPatterns;
+	}
+
+	/**
+	 * @deprecated
+	 * Will replace with {@link #getLocationPattern()}
+	 */
+	@Deprecated(since = "0.6.0", forRemoval = true)
+	public Set<String> getLocationPatterns() {
+		return this.getLocationPattern();
 	}
 }

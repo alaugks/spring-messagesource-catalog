@@ -19,6 +19,7 @@ package io.github.alaugks.spring.messagesource.catalog.catalog;
 import java.util.Locale;
 import java.util.Locale.Builder;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.util.Assert;
@@ -52,10 +53,21 @@ public final class Catalog extends AbstractCatalog {
 			return null;
 		}
 
-		return this.resolveFromCatalogMap(code, locale).orElse(super.resolveCode(code, locale));
+		// Resolve in CatalogMap
+		Optional<String> value = this.resolveFromCatalogMap(code, locale);
+		if (value.isPresent()) {
+			return value.get();
+		}
+
+		String nextValue = super.resolveCode(code, locale);
+		if (nextValue != null) {
+			this.put(locale, code, nextValue, null);
+			return nextValue;
+		}
+
+		return null;
 	}
 
-	@Override
 	public void build() {
 		super.build();
 		super.getTransUnits().forEach(t -> this.put(t.locale(), t.code(), t.value(), t.domain()));
@@ -63,6 +75,12 @@ public final class Catalog extends AbstractCatalog {
 
 	private void put(Locale locale, String code, String value, String domain) {
 		if (!locale.toString().isEmpty()) {
+			if (Objects.equals(domain, this.defaultDomain)) {
+				this.catalogMap.computeIfAbsent(
+					locale, l -> new ConcurrentHashMap<>()
+				).putIfAbsent(code, value);
+			}
+
 			this.catalogMap.computeIfAbsent(
 					locale, l -> new ConcurrentHashMap<>()
 			).putIfAbsent(concatCode(domain, code), value);
@@ -70,12 +88,12 @@ public final class Catalog extends AbstractCatalog {
 	}
 
 	private Optional<String> resolveFromCatalogMap(String code, Locale locale) {
-		return this.getTargetValue(concatCode(this.defaultDomain, code), locale)
-				.or(() -> this.getTargetValue(code, locale))
-				.or(() -> this.getTargetValue(concatCode(this.defaultDomain, code), this.buildLocaleWithoutRegion(locale)))
+		return this.getTargetValue(code, locale)
+				.or(() -> this.getTargetValue(concatCode(this.defaultDomain, code), locale))
 				.or(() -> this.getTargetValue(code, this.buildLocaleWithoutRegion(locale)))
-				.or(() -> this.getTargetValue(concatCode(this.defaultDomain, code), this.defaultLocale))
-				.or(() -> this.getTargetValue(code, this.defaultLocale));
+				.or(() -> this.getTargetValue(concatCode(this.defaultDomain, code), this.buildLocaleWithoutRegion(locale)))
+				.or(() -> this.getTargetValue(code, this.defaultLocale))
+				.or(() -> this.getTargetValue(concatCode(this.defaultDomain, code), this.defaultLocale));
 	}
 
 	private Optional<String> getTargetValue(String code, Locale locale) {
