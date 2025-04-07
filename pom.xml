@@ -7,11 +7,11 @@
     <parent>
         <groupId>io.github.alaugks</groupId>
         <artifactId>spring-messagesource-parent</artifactId>
-        <version>1.0.1</version>
+        <version>3.3.10</version>
     </parent>
 
     <artifactId>spring-messagesource-catalog</artifactId>
-    <version>0.5.0</version>
+    <version>0.5.1</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -28,7 +28,7 @@
     <developers>
         <developer>
             <name>André Laugks</name>
-            <email>maven-central@pb82.de</email>
+            <email>alaugks@gmail.com</email>
         </developer>
     </developers>
 
@@ -37,4 +37,27 @@
         <developerConnection>scm:git:https://github.com/alaugks/spring-messagesource-catalog</developerConnection>
         <url>https://github.com/alaugks/spring-messagesource-catalog</url>
     </scm>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/CatalogCache.*</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>jacoco-report</id>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

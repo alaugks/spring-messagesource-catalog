@@ -24,7 +24,7 @@ import java.util.Optional;
 
 public abstract class AbstractCatalog implements CatalogInterface {
 
-	protected CatalogInterface nextCatalog;
+	private CatalogInterface nextCatalog;
 
 	public CatalogInterface nextCatalog(CatalogInterface catalog) {
 		this.nextCatalog = catalog;
@@ -47,6 +47,10 @@ public abstract class AbstractCatalog implements CatalogInterface {
 		return this.nextCatalog.resolveCode(code, locale);
 	}
 
+	/**
+	 * @deprecated
+	 */
+	@Deprecated(since = "0.6.0", forRemoval = true)
 	public void build() {
 		if (this.nextCatalog != null) {
 			this.nextCatalog.build();

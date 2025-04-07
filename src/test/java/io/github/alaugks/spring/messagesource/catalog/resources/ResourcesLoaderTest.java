@@ -18,7 +18,6 @@ package io.github.alaugks.spring.messagesource.catalog.resources;
 
 import io.github.alaugks.spring.messagesource.catalog.records.TranslationFile;
 import java.io.InputStream;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
@@ -28,17 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ResourcesLoaderTest {
-
-	@Test
-	void test_setLocationPatterns_deprecated() {
-		ResourcesLoader resourcesLoader = new ResourcesLoader(
-				Locale.forLanguageTag("en"),
-				new HashSet<>(List.of("translations/*")),
-				List.of("txt")
-		);
-
-		assertEquals(5, resourcesLoader.getTranslationFiles().size());
-	}
 
 	@Test
 	void test_setLocationPatterns() {

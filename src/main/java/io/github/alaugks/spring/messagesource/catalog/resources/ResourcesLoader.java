@@ -37,13 +37,14 @@ public class ResourcesLoader {
 	private final List<String> fileExtensions;
 
 	public ResourcesLoader(Locale defaultLocale, LocationPattern locationPattern, List<String> fileExtensions) {
-		this(defaultLocale, locationPattern.getLocationPatterns(), fileExtensions);
+		this(defaultLocale, locationPattern.getLocationPattern(), fileExtensions);
 	}
 
 	/**
-	 *	Will replace with: ResourcesLoader(Locale defaultLocale, LocationPattern locationPattern, List<String> fileExtensions)
+	 * @deprecated
+	 * Will replace with {@link ResourcesLoader#ResourcesLoader(Locale defaultLocale, LocationPattern locationPattern, List<String> fileExtensions)}
 	 */
-	@Deprecated(since = "0.6.0")
+	@Deprecated(since = "0.6.0", forRemoval = true)
 	public ResourcesLoader(Locale defaultLocale, Set<String> locationPatterns, List<String> fileExtensions) {
 		Assert.notNull(defaultLocale, "Argument defaultLocale must not be null");
 		Assert.notNull(locationPatterns, "Argument locationPatterns must not be null");

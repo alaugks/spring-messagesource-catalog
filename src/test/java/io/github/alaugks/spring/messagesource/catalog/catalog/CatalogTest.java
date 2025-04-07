@@ -22,6 +22,7 @@ import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -57,7 +58,7 @@ class CatalogTest {
 		transUnits.add(new TransUnit(Locale.forLanguageTag("en_US"), "key_2", "value_en_us_2", "messages"));
 
 		catalog = new Catalog(Locale.forLanguageTag("en"));
-		catalog.nextCatalog(new TransUnitsCatalog(transUnits));
+		catalog.nextCatalog(new TransUnitsCatalog(transUnits)).nextCatalog(new FooBarCatalog());
 		catalog.build();
 	}
 
@@ -108,4 +109,30 @@ class CatalogTest {
 		assertNull(catalog.resolveCode("messages.m_en_1", Locale.forLanguageTag("")));
 	}
 
+	@Test
+	void test_resolve_nextCatalog() {
+		Locale locale = Locale.forLanguageTag("en");
+		assertEquals("foobar_value", catalog.resolveCode("dummy", locale));
+		assertEquals("foobar_value", catalog.resolveCode("messages.dummy", locale));
+	}
+
+	@Test
+	void test_not_resolved() {
+		Locale locale = Locale.forLanguageTag("en");
+		assertNull(catalog.resolveCode("not_exists", locale));
+		assertNull(catalog.resolveCode("messages.not_exists", locale));
+	}
+}
+
+class FooBarCatalog extends AbstractCatalog {
+
+	@Override
+	public String resolveCode(String code, Locale locale) {
+
+		if (Objects.equals(code, "dummy") || Objects.equals(code, "messages.dummy")) {
+			return "foobar_value";
+		}
+
+		return null;
+	}
 }
