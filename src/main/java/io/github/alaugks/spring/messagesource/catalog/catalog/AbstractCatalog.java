@@ -47,16 +47,6 @@ public abstract class AbstractCatalog implements CatalogInterface {
 		return this.nextCatalog.resolveCode(code, locale);
 	}
 
-	/**
-	 * @deprecated
-	 */
-	@Deprecated(since = "0.6.0", forRemoval = true)
-	public void build() {
-		if (this.nextCatalog != null) {
-			this.nextCatalog.build();
-		}
-	}
-
 	protected static String concatCode(String domain, String code) {
 		return Optional.ofNullable(domain).orElse(Catalog.DEFAULT_DOMAIN) + "." + code;
 	}

@@ -45,6 +45,8 @@ class FirstCatalog extends AbstractCatalog {
 
 	@Override
 	public List<TransUnitInterface> getTransUnits() {
+		this.transUnits = super.getTransUnits();
+		this.transUnits.add(new TransUnit(Locale.forLanguageTag("en"), "first_key_a", "first_value_a"));
 		return this.transUnits;
 	}
 
@@ -60,13 +62,6 @@ class FirstCatalog extends AbstractCatalog {
 			.findFirst()
 			.map(TransUnitInterface::value)
 			.orElse(super.resolveCode(code, locale));
-	}
-
-	@Override
-	public void build() {
-		super.build();
-		this.transUnits = super.getTransUnits();
-		this.transUnits.add(new TransUnit(Locale.forLanguageTag("en"), "first_key_a", "first_value_a"));
 	}
 }
 

@@ -29,7 +29,6 @@ class LocationPatternTest {
 		LocationPattern locationPattern = new LocationPattern("path/");
 
 		assertEquals(Set.of("path/"), locationPattern.getLocationPattern());
-		assertEquals(Set.of("path/"), locationPattern.getLocationPatterns());
 	}
 
 	@Test
@@ -37,6 +36,5 @@ class LocationPatternTest {
 		LocationPattern locationPattern = new LocationPattern(List.of("path/", "path/", "other_path/"));
 
 		assertEquals(Set.of("path/", "other_path/"), locationPattern.getLocationPattern());
-		assertEquals(Set.of("path/", "other_path/"), locationPattern.getLocationPatterns());
 	}
 }

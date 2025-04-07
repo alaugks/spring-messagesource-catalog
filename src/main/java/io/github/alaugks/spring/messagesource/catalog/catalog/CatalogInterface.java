@@ -27,10 +27,4 @@ public interface CatalogInterface {
 	List<TransUnitInterface> getTransUnits();
 
 	String resolveCode(String code, Locale locale);
-
-	/**
-	 * @deprecated
-	 */
-	@Deprecated(since = "0.6.0", forRemoval = true)
-	void build();
 }
