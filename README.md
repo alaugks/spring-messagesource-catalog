@@ -5,7 +5,7 @@ This package extends the [AbstractMessageSource](https://docs.spring.io/spring-f
 ## Dependency
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=alaugks_spring-messagesource-base&metric=alert_status&token=3d2b79af1f0f0ab6089e565495b4db6f621e9a13)](https://sonarcloud.io/summary/overall?id=alaugks_spring-messagesource-base)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.alaugks/spring-messagesource-catalog.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.alaugks/spring-messagesource-catalog/0.5.1)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.alaugks/spring-messagesource-catalog.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.alaugks/spring-messagesource-catalog/0.6.0-SNAPSHOT)
 
 ### Maven
 
@@ -13,14 +13,14 @@ This package extends the [AbstractMessageSource](https://docs.spring.io/spring-f
 <dependency>
     <groupId>io.github.alaugks</groupId>
     <artifactId>spring-messagesource-catalog</artifactId>
-    <version>0.5.1</version>
+    <version>0.6.0-SNAPSHOT</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```
-implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog', version: '0.5.1'
+implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog', version: '0.6.0-SNAPSHOT'
 ```
 
 ## Packages that use the catalog as a base package
@@ -108,12 +108,33 @@ import io.github.alaugks.spring.messagesource.catalog.catalog.Abstractcatalog;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 
 public class MyCustomCatalog extends AbstractCatalog {
+    
+    private final MyService myService;
+    
+    public MyCustomCatalog(MyService myService) {
+        this.myService = myService;
+    }
+	
     @Override
     public List<TransUnitInterface> getTransUnits() {
         // Build a list with TransUnit from any kind of source.
+        // For example create list with from MyService.
         return new ArrayList<>() {{
             // ...
         }};
+    }  
+	
+    // or / and
+        
+    @Override
+    public String resolveCode(String code, Locale locale) {
+        String value = this.myService.findByCodeAndLocale(code, locale);
+		
+        if (value != null) {
+            return value;
+        }
+    
+        return null;
     }
 }
 ```
@@ -132,10 +153,20 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MessageConfig {
+	
+    private final MyService myService;
+    
+    public MyCustomCatalog(MyService myService) {
+        this.myService = myService;
+    }
+	
     @Bean
     public MessageSource messageSource() {
         return CatalogMessageSourceBuilder
-            .builder(new MyCustomCatalog(), Locale.forLanguageTag("en"))
+            .builder(
+                new MyCustomCatalog(this.myService),
+                Locale.forLanguageTag("en")
+            )
             .build();
 	}
 }
