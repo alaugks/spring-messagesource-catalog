@@ -25,15 +25,15 @@ public record Filename(String domain, String language, String region) {
 	public boolean hasLocale() {
 		Locale locale = locale();
 
-		return locale != null && !locale.toString().isEmpty();
+		return locale != null;
 	}
 
 	public Locale locale() {
 		try {
-			if (language != null && !language.isEmpty()) {
+			if (language != null) {
 				Locale.Builder localeBuilder = new Locale.Builder();
 				localeBuilder.setLanguage(language);
-				if (region != null && !region.isEmpty()) {
+				if (region != null) {
 					localeBuilder.setRegion(region);
 				}
 				return localeBuilder.build();

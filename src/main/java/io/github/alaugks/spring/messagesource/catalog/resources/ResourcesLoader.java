@@ -86,11 +86,6 @@ public class ResourcesLoader {
 
 	private boolean isFileExtensionSupported(Resource resource) {
 		String fileName = resource.getFilename();
-
-		if (fileName == null) {
-			return false;
-		}
-
-		return fileExtensions.contains(fileName.substring(fileName.lastIndexOf(".") + 1));
+		return fileName != null && this.fileExtensions.contains(fileName.substring(fileName.lastIndexOf(".") + 1));
 	}
 }
