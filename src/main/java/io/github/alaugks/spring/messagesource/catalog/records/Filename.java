@@ -23,9 +23,7 @@ import java.util.Locale;
 public record Filename(String domain, String language, String region) {
 
 	public boolean hasLocale() {
-		Locale locale = locale();
-
-		return locale != null;
+		return this.locale() != null;
 	}
 
 	public Locale locale() {
