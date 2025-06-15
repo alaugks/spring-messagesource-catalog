@@ -20,7 +20,7 @@ This package extends the [AbstractMessageSource](https://docs.spring.io/spring-f
 ### Gradle
 
 ```
-implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog', version: '0.6.0-SNAPSHOT'
+implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog', version: '0.5.1'
 ```
 
 ## Packages that use the catalog as a base package
