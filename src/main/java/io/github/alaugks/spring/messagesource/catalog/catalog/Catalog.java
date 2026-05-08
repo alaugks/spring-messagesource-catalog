@@ -49,7 +49,7 @@ public final class Catalog extends AbstractCatalog {
 
 	@Override
 	public String resolveCode(String code, Locale locale) {
-		if (locale.toString().isEmpty() || code.isEmpty()) {
+		if (locale.getLanguage().isEmpty() || code.isEmpty()) {
 			return null;
 		}
 
