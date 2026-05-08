@@ -23,6 +23,8 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
 import org.springframework.context.support.AbstractMessageSource;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -81,7 +83,8 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 	}
 
 	@Override
-	protected MessageFormat resolveCode(String code, Locale locale) {
+	@Nullable
+	protected MessageFormat resolveCode(@NonNull String code, @NonNull Locale locale) {
 		String value = this.catalog.resolveCode(code, locale);
 
 		if (value != null) {
