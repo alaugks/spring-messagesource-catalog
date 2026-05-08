@@ -23,6 +23,11 @@ import org.springframework.util.Assert;
 
 public class ResourcesFileNameParser {
 
+	private static final Pattern PATTERN = Pattern.compile(
+			"^(?<domain>[a-z0-9]+)(?:([_-](?<language>[a-z]+))(?:[_-](?<region>[a-z]+))?)?",
+			Pattern.CASE_INSENSITIVE
+	);
+
 	private final String filename;
 
 	public ResourcesFileNameParser(String filename) {
@@ -32,9 +37,7 @@ public class ResourcesFileNameParser {
 	}
 
 	public Filename parse() {
-		String regexp = "^(?<domain>[a-z0-9]+)(?:([_-](?<language>[a-z]+))(?:[_-](?<region>[a-z]+))?)?";
-		Pattern pattern = Pattern.compile(regexp, Pattern.CASE_INSENSITIVE);
-		Matcher matcher = pattern.matcher(this.filename);
+		Matcher matcher = PATTERN.matcher(this.filename);
 
 		if (matcher.find()) {
 			return new Filename(
