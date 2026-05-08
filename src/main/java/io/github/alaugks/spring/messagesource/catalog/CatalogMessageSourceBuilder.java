@@ -25,6 +25,9 @@ import java.util.Locale;
 import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.util.Assert;
 
+/**
+ * Thread-safe. Custom {@link CatalogInterface} implementations must also be thread-safe.
+ */
 public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 
 	private final CatalogInterface catalog;
