@@ -45,4 +45,47 @@ class TranslationFileTest {
 		assertEquals(Locale.forLanguageTag("en-US"), translationFile.locale());
 		assertEquals(content, translationFile.content());
 	}
+
+	@Test
+	void test_equals() {
+		TranslationFile a = new TranslationFile(
+				"my-domain",
+				Locale.forLanguageTag("en-US"),
+				new byte[] {1, 2, 3}
+		);
+		TranslationFile b = new TranslationFile(
+				"my-domain",
+				Locale.forLanguageTag("en-US"),
+				new byte[] {1, 2, 3}
+		);
+
+		assertEquals(a, b);
+	}
+
+	@Test
+	void test_hashCode() {
+		TranslationFile a = new TranslationFile(
+				"my-domain",
+				Locale.forLanguageTag("en-US"),
+				new byte[] {1, 2, 3}
+		);
+		TranslationFile b = new TranslationFile(
+				"my-domain",
+				Locale.forLanguageTag("en-US"),
+				new byte[] {1, 2, 3}
+		);
+
+		assertEquals(a.hashCode(), b.hashCode());
+	}
+
+	@Test
+	void test_toString() {
+		TranslationFile translationFile = new TranslationFile(
+				"my-domain",
+				Locale.forLanguageTag("en-US"),
+				new byte[] {1, 2, 3}
+		);
+
+        assertEquals("TranslationFile[domain=my-domain, locale=en_US, content=3 bytes]", translationFile.toString());
+	}
 }
