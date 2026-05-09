@@ -22,7 +22,7 @@ import java.util.List;
 
 public class TransUnitsCatalog extends AbstractCatalog {
 
-	private final List<TransUnitInterface> transUnits;
+	List<TransUnitInterface> transUnits;
 
 	public TransUnitsCatalog(List<TransUnitInterface> transUnits) {
 		this.transUnits = transUnits;
