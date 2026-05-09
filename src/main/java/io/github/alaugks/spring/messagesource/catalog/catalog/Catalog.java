@@ -73,17 +73,18 @@ public final class Catalog extends AbstractCatalog {
 	}
 
 	private void put(Locale locale, String code, String value, String domain) {
-		if (!locale.toString().isEmpty()) {
-			if (Objects.equals(domain, this.defaultDomain)) {
-				this.catalogMap.computeIfAbsent(
-					locale, l -> new ConcurrentHashMap<>()
-				).putIfAbsent(code, value);
-			}
-
-			this.catalogMap.computeIfAbsent(
-					locale, l -> new ConcurrentHashMap<>()
-			).putIfAbsent(concatCode(domain, code), value);
+		if (locale.getLanguage().isEmpty()) {
+			return;
 		}
+
+		Map<String, String> bucket = this.catalogMap.computeIfAbsent(
+				locale, l -> new ConcurrentHashMap<>()
+		);
+
+		if (Objects.equals(domain, this.defaultDomain)) {
+			bucket.putIfAbsent(code, value);
+		}
+		bucket.putIfAbsent(concatCode(domain, code), value);
 	}
 
 	private Optional<String> resolveFromCatalogMap(String code, Locale locale) {
