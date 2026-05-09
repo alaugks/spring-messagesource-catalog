@@ -20,6 +20,7 @@ import io.github.alaugks.spring.messagesource.catalog.exception.CatalogMessageSo
 import io.github.alaugks.spring.messagesource.catalog.records.Filename;
 import io.github.alaugks.spring.messagesource.catalog.records.TranslationFile;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -72,13 +73,15 @@ public class ResourcesLoader {
 		Filename filename = new ResourcesFileNameParser(resource.getFilename()).parse();
 
 		if (filename != null) {
-			return new TranslationFile(
-					filename.domain(),
-					filename.hasLocale()
-							? filename.locale()
-							: this.defaultLocale,
-					resource.getInputStream()
-			);
+			try (InputStream inputStream = resource.getInputStream()) {
+				return new TranslationFile(
+						filename.domain(),
+						filename.hasLocale()
+								? filename.locale()
+								: this.defaultLocale,
+						inputStream.readAllBytes()
+				);
+			}
 		}
 
 		return null;

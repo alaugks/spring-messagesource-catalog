@@ -16,12 +16,15 @@
 
 package io.github.alaugks.spring.messagesource.catalog;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogInterface;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 import io.github.alaugks.spring.messagesource.catalog.records.TranslationFile;
 import io.github.alaugks.spring.messagesource.catalog.resources.LocationPattern;
 import io.github.alaugks.spring.messagesource.catalog.resources.ResourcesLoader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +38,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * This test compares the logic when resolving the code of CatalogMessageSourceBuilder vs. ResourceBundleMessageSource
@@ -171,7 +172,7 @@ class BenchmarkMessageSourceTest {
 
 		for (TranslationFile translationFile : resourcesLoader.getTranslationFiles()) {
 			Properties properties = new Properties();
-			properties.load(translationFile.inputStream());
+			properties.load(new ByteArrayInputStream(translationFile.content()));
 			for (Entry<Object, Object> property : properties.entrySet()) {
 
 				Object key = property.getKey();

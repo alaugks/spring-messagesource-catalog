@@ -16,25 +16,33 @@
 
 package io.github.alaugks.spring.messagesource.catalog.record;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import io.github.alaugks.spring.messagesource.catalog.records.TranslationFile;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-
 class TranslationFileTest {
 
 	@Test
-	void test_record() {
+	void test_record() throws IOException {
+		byte[] content;
+		try (InputStream inputStream = getClass().getClassLoader()
+				.getResourceAsStream("translations_en_US/messages_en_US.txt")) {
+			assertNotNull(inputStream);
+			content = inputStream.readAllBytes();
+		}
+
 		TranslationFile translationFile = new TranslationFile(
 				"my-domain",
 				Locale.forLanguageTag("en-US"),
-				getClass().getClassLoader().getResourceAsStream("translations_en_US/messages_en_US.txt")
+				content
 		);
 		assertEquals("my-domain", translationFile.domain());
 		assertEquals(Locale.forLanguageTag("en-US"), translationFile.locale());
-		assertInstanceOf(InputStream.class, translationFile.inputStream());
+		assertEquals(content, translationFile.content());
 	}
 }
