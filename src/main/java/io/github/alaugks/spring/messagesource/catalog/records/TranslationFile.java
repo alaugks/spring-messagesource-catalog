@@ -16,8 +16,36 @@
 
 package io.github.alaugks.spring.messagesource.catalog.records;
 
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;import org.springframework.lang.NonNull;
 
 public record TranslationFile(String domain, Locale locale, byte[] content) {
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof TranslationFile other)) {
+			return false;
+		}
+		return Objects.equals(domain, other.domain)
+				&& Objects.equals(locale, other.locale)
+				&& Arrays.equals(content, other.content);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(domain, locale, Arrays.hashCode(content));
+	}
+
+	@Override
+	@NonNull
+	public String toString() {
+		return "TranslationFile[domain=" + domain
+				+ ", locale=" + locale
+				+ ", content=" + (content == null ? "null" : content.length + " bytes")
+				+ "]";
+	}
 }
