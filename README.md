@@ -35,11 +35,22 @@ implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog',
 
 `builder(CatalogInterface catalogSource, Locale defaultLocale)` (required)
 
-* Argument `CatalogInterface catalogSource`: CatalogInterface<br>
-* Argument `Locale defaultLocale`: Default Locale
+* Argument `CatalogInterface catalogSource`: Initial source.
+* Argument `Locale defaultLocale`: Locale used as a fallback when a code cannot be resolved for the requested locale.
+
+`builder(List<TransUnitInterface> transUnits, Locale defaultLocale)` (required, alternative)
+
+* Argument `List<TransUnitInterface> transUnits`: Trans units used as the initial source (wrapped in a `TransUnitsCatalog`).
+* Argument `Locale defaultLocale`: Locale used as a fallback when a code cannot be resolved for the requested locale.
+
+`addSource(CatalogInterface source)`
+* Appends another source. Sources are aggregated additively at `build()`; their lazy `resolveTransUnit` lookups are also chained in the order they were added.
+
+`addSource(List<TransUnitInterface> transUnits)`
+* Convenience overload that wraps the trans units in a `TransUnitsCatalog`.
 
 `defaultDomain(String defaultDomain)`
-* If the default domain not set, the default is **messages**.
+* If the default domain is not set, the default is **messages**.
 
 ### TransUnit Record
 
@@ -57,7 +68,8 @@ TransUnit(Locale locale, String code, String value, String domain);
 #### MessageConfig with List of TransUnits 
 
 ```java
-import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogHandler;
+import io.github.alaugks.spring.messagesource.catalog.CatalogMessageSourceBuilder;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,83 +108,7 @@ public class MessageConfig {
 }
 ```
 
-#### With custom CatalogInterface
-
-##### CatalogInterface
-
-```java
-import java.util.List;
-
-import io.github.alaugks.spring.messagesource.catalog.catalog.AbstractCatalog;
-import io.github.alaugks.spring.messagesource.catalog.catalog.Abstractcatalog;
-import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
-
-public class MyCustomCatalog extends AbstractCatalog {
-    
-    private final MyService myService;
-    
-    public MyCustomCatalog(MyService myService) {
-        this.myService = myService;
-    }
-	
-    @Override
-    public List<TransUnitInterface> getTransUnits() {
-        // Build a list with TransUnit from any kind of source.
-        // For example create list with from MyService.
-        return new ArrayList<>() {{
-            // ...
-        }};
-    }  
-	
-    // or / and
-        
-    @Override
-    public String resolveCode(String code, Locale locale) {
-        String value = this.myService.findByCodeAndLocale(code, locale);
-		
-        if (value != null) {
-            return value;
-        }
-    
-        return null;
-    }
-}
-```
-
-##### MessageConfig
-
-```java
-import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogHandler;
-import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-public class MessageConfig {
-	
-    private final MyService myService;
-    
-    public MyCustomCatalog(MyService myService) {
-        this.myService = myService;
-    }
-	
-    @Bean
-    public MessageSource messageSource() {
-        return CatalogMessageSourceBuilder
-            .builder(
-                new MyCustomCatalog(this.myService),
-                Locale.forLanguageTag("en")
-            )
-            .build();
-	}
-}
-```
-
-### Target values
+#### Target values
 
 The behaviour of resolving the target value based on the code is equivalent to the ResourceBundleMessageSource or ReloadableResourceBundleMessageSource.
 
@@ -209,7 +145,7 @@ The behaviour of resolving the target value based on the code is equivalent to t
     <td>Payment</td>
   </tr>
   <tr>
-    <td>payment.form.expiry_date</td>
+    <td>payment.expiry_date</td>
     <td>Expiry date</td>
     <td>Expiration date</td>
     <td>Ablaufdatum</td>
@@ -221,15 +157,149 @@ The behaviour of resolving the target value based on the code is equivalent to t
 > *Default domain is `messages`.
 >
 > **Example of a fallback from Language_Region (`en-US`) to Language (`en`). The `id` does not exist in `en-US`, so it tries to select the translation with locale `en`.
-> 
+>
 > ***There is no translation for Japanese (`jp`). The default locale transUnits (`en`) are selected.
 
+### With custom CatalogInterface
 
-## Support
+A custom source typically extends `AbstractCatalog`, which provides the chain plumbing (`nextCatalog`) and no-op defaults for the two data methods. A source then chooses one of two patterns:
 
-If you have questions, comments or feature requests please use the [Discussions](https://github.com/alaugks/spring-messagesource-catalog/discussions) section.
+- **Eager** — override `getTransUnits()`. The list is read once at construction time and merged into the catalog map.
+- **Lazy** — override `resolveTransUnit(code, locale)` to return a `TransUnitInterface`. Called only when the catalog map has no entry for the requested key. The returned trans unit is cached in the map (using its `domain`), so subsequent lookups for the same key hit the in-memory map.
 
-<a name="a8"></a>
+The three examples below illustrate the patterns. They are then combined in [Combining multiple sources](#combining-multiple-sources).
 
+#### Custom catalog with a list of TransUnits
 
+The trans units are passed in via the constructor.
+
+```java
+import io.github.alaugks.spring.messagesource.catalog.catalog.AbstractCatalog;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
+import java.util.List;
+
+public class MyStaticCatalog extends AbstractCatalog {
+
+    private final List<TransUnitInterface> transUnits;
+
+    public MyStaticCatalog(List<TransUnitInterface> transUnits) {
+        this.transUnits = transUnits;
+    }
+
+    @Override
+    public List<TransUnitInterface> getTransUnits() {
+        return this.transUnits;
+    }
+}
+```
+
+#### Custom catalog from a database table
+
+The trans units are loaded from a database table at construction time and exposed via `getTransUnits()`.
+
+```java
+import io.github.alaugks.spring.messagesource.catalog.catalog.AbstractCatalog;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
+import java.util.ArrayList;
+import java.util.List;
+
+public class GlossaryDbCatalog extends AbstractCatalog {
+
+    private final GlossaryRepository glossaryRepository;
+
+    public GlossaryDbCatalog(GlossaryRepository glossaryRepository) {
+        this.glossaryRepository = glossaryRepository;
+    }
+
+    @Override
+    public List<TransUnitInterface> getTransUnits() {
+        List<TransUnitInterface> transUnits = new ArrayList<>();
+        this.glossaryRepository.findAll().forEach(row -> transUnits.add(
+            new TransUnit(row.getLocale(), row.getCode(), row.getValue(), "glossary")
+        ));
+        return transUnits;
+    }
+}
+```
+
+#### Custom catalog with lazy resolution
+
+The trans units are not loaded up front. `resolveCode(...)` is called only on a map miss; the resolved value is then cached in the catalog so that subsequent lookups for the same key hit the in-memory map.
+
+Useful when the underlying source is large enough that eager loading is impractical (e.g. a glossary table with hundreds of thousands of rows, or an external API).
+
+The returned `TransUnit` carries its own domain, so the source decides where the cached entry lives.
+
+```java
+import io.github.alaugks.spring.messagesource.catalog.catalog.AbstractCatalog;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
+import java.util.Locale;
+
+public class LazyCatalog extends AbstractCatalog {
+
+    private final LazyCatalogRepository lazyCatalogRepository;
+
+    public LazyCatalog(LazyCatalogRepository lazyCatalogRepository) {
+        this.lazyCatalogRepository = lazyCatalogRepository;
+    }
+
+    @Override
+    public TransUnitInterface resolveTransUnit(String code, Locale locale) {
+        String value = this.lazyCatalogRepository.findByCodeAndLocale(code, locale);
+        if (value == null) {
+            return null;
+        }
+        return new TransUnit(locale, code, value, "lazyglossary");
+    }
+}
+```
+
+#### Combining multiple sources
+
+Several sources can be combined directly on the `CatalogMessageSourceBuilder`. The example below chains the three custom catalogs above.
+
+Sources are added in order with `addSource(...)`. For eager sources the first source wins on key conflicts (`putIfAbsent` semantics). For lazy sources the first non-`null` result wins.
+
+```java
+import io.github.alaugks.spring.messagesource.catalog.CatalogMessageSourceBuilder;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class MessageConfig {
+
+    private final GlossaryRepository glossaryRepository;
+    private final LazyCatalogRepository lazyCatalogRepository;
+
+    public MessageConfig(
+        GlossaryRepository glossaryRepository,
+        LazyCatalogRepository lazyCatalogRepository
+    ) {
+        this.glossaryRepository = glossaryRepository;
+        this.lazyCatalogRepository = lazyCatalogRepository;
+    }
+
+    @Bean
+    public MessageSource messageSource() {
+        List<TransUnitInterface> staticTransUnits = new ArrayList<>() {{
+            add(new TransUnit(Locale.forLanguageTag("en"), "headline", "Headline"));
+            add(new TransUnit(Locale.forLanguageTag("de"), "headline", "Überschrift"));
+        }};
+
+        return CatalogMessageSourceBuilder
+            .builder(new MyStaticCatalog(staticTransUnits), Locale.forLanguageTag("en"))
+            .addSource(new GlossaryDbCatalog(this.glossaryRepository))
+            .addSource(new LazyCatalog(this.lazyCatalogRepository))
+            .build();
+    }
+}
+```
 
