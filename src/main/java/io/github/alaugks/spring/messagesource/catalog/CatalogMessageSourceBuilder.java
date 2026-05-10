@@ -22,10 +22,10 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -48,7 +48,7 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 
 	public static final String DEFAULT_DOMAIN = "messages";
 
-	private final Map<Locale, Map<String, String>> catalogMap;
+	private final ConcurrentMap<Locale, ConcurrentMap<String, String>> catalogMap;
 
 	private final Locale defaultLocale;
 
@@ -154,7 +154,7 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 			return;
 		}
 
-		Map<String, String> bucket = this.catalogMap.computeIfAbsent(
+		ConcurrentMap<String, String> bucket = this.catalogMap.computeIfAbsent(
 				locale, l -> new ConcurrentHashMap<>()
 		);
 
@@ -193,7 +193,7 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 
 	/** Reads the bucket for {@code locale} once and probes both the bare and the domain-qualified code. */
 	private String lookup(Locale locale, String code, String domainCode) {
-		Map<String, String> bucket = this.catalogMap.get(locale);
+		ConcurrentMap<String, String> bucket = this.catalogMap.get(locale);
 		if (bucket == null) {
 			return null;
 		}
