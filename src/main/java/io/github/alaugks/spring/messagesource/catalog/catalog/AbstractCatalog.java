@@ -20,7 +20,6 @@ import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 
 public abstract class AbstractCatalog implements CatalogInterface {
 
@@ -39,15 +38,11 @@ public abstract class AbstractCatalog implements CatalogInterface {
 		return this.nextCatalog.getTransUnits();
 	}
 
-	public String resolveCode(String code, Locale locale) {
+	public TransUnitInterface resolveTransUnit(String code, Locale locale) {
 		if (this.nextCatalog == null) {
 			return null;
 		}
 
-		return this.nextCatalog.resolveCode(code, locale);
-	}
-
-	protected static String concatCode(String domain, String code) {
-		return Optional.ofNullable(domain).orElse(Catalog.DEFAULT_DOMAIN) + "." + code;
+		return this.nextCatalog.resolveTransUnit(code, locale);
 	}
 }
