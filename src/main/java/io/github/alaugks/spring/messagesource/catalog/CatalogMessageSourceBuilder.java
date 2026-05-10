@@ -20,6 +20,7 @@ import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogInterface;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -70,10 +71,14 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 			source.getTransUnits().forEach(t -> this.put(t.locale(), t.code(), t.value(), t.domain()));
 		}
 
-		for (int i = 0; i < sources.size() - 1; i++) {
-			sources.get(i).nextCatalog(sources.get(i + 1));
+		Iterator<CatalogInterface> it = sources.iterator();
+		this.chainHead = it.next();
+		CatalogInterface current = this.chainHead;
+		while (it.hasNext()) {
+			CatalogInterface next = it.next();
+			current.nextCatalog(next);
+			current = next;
 		}
-		this.chainHead = sources.get(0);
 	}
 
 	/**
@@ -226,12 +231,12 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 		/**
 		 * Creates a new builder seeded with an initial source.
 		 *
-		 * @param catalogSource the initial source; may not be {@code null} in normal use
-		 *                      (the static {@code builder(...)} factories enforce this)
+		 * @param catalogSource the initial source; must not be {@code null}
 		 * @param defaultLocale the locale used as a fallback when a code cannot be resolved
 		 *                      for the requested locale; must not be {@code null}
 		 */
 		public Builder(CatalogInterface catalogSource, Locale defaultLocale) {
+			Assert.notNull(catalogSource, "Argument catalogSource must not be null");
 			Assert.notNull(defaultLocale, "Argument defaultLocale must not be null");
 
 			this.defaultLocale = defaultLocale;
