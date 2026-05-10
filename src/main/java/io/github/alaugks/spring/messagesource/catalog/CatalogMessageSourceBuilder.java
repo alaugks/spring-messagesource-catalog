@@ -161,24 +161,44 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 		if (Objects.equals(domain, this.defaultDomain)) {
 			bucket.putIfAbsent(code, value);
 		}
-		bucket.putIfAbsent(concatCode(domain, code), value);
+		bucket.putIfAbsent(this.concatCode(domain, code), value);
 	}
 
 	/** Walks the locale and code-key fallbacks (region → language → default locale, bare code → domain-qualified). */
 	private Optional<String> resolveFromCatalogMap(String code, Locale locale) {
-		return this.getTargetValue(code, locale)
-				.or(() -> this.getTargetValue(concatCode(this.defaultDomain, code), locale))
-				.or(() -> this.getTargetValue(code, this.buildLocaleWithoutRegion(locale)))
-				.or(() -> this.getTargetValue(concatCode(this.defaultDomain, code), this.buildLocaleWithoutRegion(locale)))
-				.or(() -> this.getTargetValue(code, this.defaultLocale))
-				.or(() -> this.getTargetValue(concatCode(this.defaultDomain, code), this.defaultLocale));
+		String qualifiedCode = this.concatCode(this.defaultDomain, code);
+
+		String value = this.lookup(locale, code, qualifiedCode);
+		if (value != null) {
+			return Optional.of(value);
+		}
+
+		Locale languageOnly = this.buildLocaleWithoutRegion(locale);
+		if (!languageOnly.equals(locale)) {
+			value = this.lookup(languageOnly, code, qualifiedCode);
+			if (value != null) {
+				return Optional.of(value);
+			}
+		}
+
+		if (!this.defaultLocale.equals(locale) && !this.defaultLocale.equals(languageOnly)) {
+			value = this.lookup(this.defaultLocale, code, qualifiedCode);
+			if (value != null) {
+				return Optional.of(value);
+			}
+		}
+
+		return Optional.empty();
 	}
 
-	/** Reads a single value from the catalog map for the given code and locale. */
-	private Optional<String> getTargetValue(String code, Locale locale) {
-		return Optional.ofNullable(this.catalogMap.get(locale)).flatMap(
-				localeCatalog -> Optional.ofNullable(localeCatalog.get(code))
-		);
+	/** Reads the bucket for {@code locale} once and probes both the bare and the domain-qualified code. */
+	private String lookup(Locale locale, String code, String qualifiedCode) {
+		Map<String, String> bucket = this.catalogMap.get(locale);
+		if (bucket == null) {
+			return null;
+		}
+		String value = bucket.get(code);
+		return value != null ? value : bucket.get(qualifiedCode);
 	}
 
 	/** Returns a language-only {@link Locale} (region and variant stripped). */
