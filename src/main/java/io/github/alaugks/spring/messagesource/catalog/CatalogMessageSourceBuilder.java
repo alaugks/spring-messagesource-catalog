@@ -166,23 +166,23 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 
 	/** Walks the locale and code-key fallbacks (region → language → default locale, bare code → domain-qualified). */
 	private Optional<String> resolveFromCatalogMap(String code, Locale locale) {
-		String qualifiedCode = this.concatCode(this.defaultDomain, code);
+		String domainCode = this.concatCode(this.defaultDomain, code);
 
-		String value = this.lookup(locale, code, qualifiedCode);
+		String value = this.lookup(locale, code, domainCode);
 		if (value != null) {
 			return Optional.of(value);
 		}
 
 		Locale languageOnly = this.buildLocaleWithoutRegion(locale);
 		if (!languageOnly.equals(locale)) {
-			value = this.lookup(languageOnly, code, qualifiedCode);
+			value = this.lookup(languageOnly, code, domainCode);
 			if (value != null) {
 				return Optional.of(value);
 			}
 		}
 
 		if (!this.defaultLocale.equals(locale) && !this.defaultLocale.equals(languageOnly)) {
-			value = this.lookup(this.defaultLocale, code, qualifiedCode);
+			value = this.lookup(this.defaultLocale, code, domainCode);
 			if (value != null) {
 				return Optional.of(value);
 			}
@@ -192,13 +192,13 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 	}
 
 	/** Reads the bucket for {@code locale} once and probes both the bare and the domain-qualified code. */
-	private String lookup(Locale locale, String code, String qualifiedCode) {
+	private String lookup(Locale locale, String code, String domainCode) {
 		Map<String, String> bucket = this.catalogMap.get(locale);
 		if (bucket == null) {
 			return null;
 		}
 		String value = bucket.get(code);
-		return value != null ? value : bucket.get(qualifiedCode);
+		return value != null ? value : bucket.get(domainCode);
 	}
 
 	/** Returns a language-only {@link Locale} (region and variant stripped). */
