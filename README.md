@@ -167,6 +167,17 @@ A custom source typically extends `AbstractCatalog`, which provides the chain pl
 - **Eager** — override `getTransUnits()`. The list is read once at construction time and merged into the catalog map.
 - **Lazy** — override `resolveTransUnit(code, locale)` to return a `TransUnitInterface`. Called only when the catalog map has no entry for the requested key. The returned trans unit is cached in the map (using its `domain`), so subsequent lookups for the same key hit the in-memory map.
 
+#### Chain of Responsibility for lazy lookups
+
+When the catalog map cannot resolve a key, the lazy path walks the configured sources as a **Chain of Responsibility**. Each `CatalogInterface` plays the role of a handler:
+
+1. The current source inspects the incoming `code` (and `locale`).
+2. If it can answer, it returns a `TransUnit`, the chain stops, and the result is cached in the in-memory catalog map.
+3. If it cannot answer, it returns `null` and `AbstractCatalog` forwards the call to the next source set by `nextCatalog(...)`.
+4. If no source claims the request, the message ends up unresolved.
+
+A common opt-out strategy is to gate on the requested domain — a source that owns `"glossary"` declines anything that doesn't start with `"glossary."`. The `LazyCatalog` example below shows that pattern.
+
 The three examples below illustrate the patterns. They are then combined in [Combining multiple sources](#combining-multiple-sources).
 
 #### Custom catalog with a list of TransUnits
@@ -206,6 +217,8 @@ import java.util.List;
 
 public class GlossaryDbCatalog extends AbstractCatalog {
 
+    private static final String DOMAIN = "glossary";
+
     private final GlossaryRepository glossaryRepository;
 
     public GlossaryDbCatalog(GlossaryRepository glossaryRepository) {
@@ -216,7 +229,7 @@ public class GlossaryDbCatalog extends AbstractCatalog {
     public List<TransUnitInterface> getTransUnits() {
         List<TransUnitInterface> transUnits = new ArrayList<>();
         this.glossaryRepository.findAll().forEach(row -> transUnits.add(
-            new TransUnit(row.getLocale(), row.getCode(), row.getValue(), "glossary")
+            new TransUnit(row.getLocale(), row.getCode(), row.getValue(), DOMAIN)
         ));
         return transUnits;
     }
@@ -225,11 +238,11 @@ public class GlossaryDbCatalog extends AbstractCatalog {
 
 #### Custom catalog with lazy resolution
 
-The trans units are not loaded up front. `resolveCode(...)` is called only on a map miss; the resolved value is then cached in the catalog so that subsequent lookups for the same key hit the in-memory map.
+The trans units are not loaded up front. `resolveTransUnit(...)` is called only on a map miss; the resolved value is then cached in the catalog so that subsequent lookups for the same key hit the in-memory map.
 
 Useful when the underlying source is large enough that eager loading is impractical (e.g. a glossary table with hundreds of thousands of rows, or an external API).
 
-The returned `TransUnit` carries its own domain, so the source decides where the cached entry lives.
+The `code` argument is passed through as-is from the caller, so it may be a bare key (e.g. `"headline"`) or domain-qualified (e.g. `"lazyglossary.headline"`). A source that owns a specific domain checks the prefix and strips it before looking up its backend; the returned `TransUnit` then carries the bare code and the source's own domain, so the cache entry lives at `"<domain>.<code>"`.
 
 ```java
 import io.github.alaugks.spring.messagesource.catalog.catalog.AbstractCatalog;
@@ -239,6 +252,9 @@ import java.util.Locale;
 
 public class LazyCatalog extends AbstractCatalog {
 
+    private static final String DOMAIN = "lazyglossary";
+    private static final String PREFIX = DOMAIN + ".";
+
     private final LazyCatalogRepository lazyCatalogRepository;
 
     public LazyCatalog(LazyCatalogRepository lazyCatalogRepository) {
@@ -247,11 +263,17 @@ public class LazyCatalog extends AbstractCatalog {
 
     @Override
     public TransUnitInterface resolveTransUnit(String code, Locale locale) {
-        String value = this.lazyCatalogRepository.findByCodeAndLocale(code, locale);
+        // code may be "<code>" (default domain) or "<domain>.<code>".
+        // This source owns only DOMAIN, so anything else is declined.
+        if (!code.startsWith(PREFIX)) {
+            return null;
+        }
+        String bareCode = code.substring(PREFIX.length());
+        String value = this.lazyCatalogRepository.findByCodeAndLocale(bareCode, locale);
         if (value == null) {
             return null;
         }
-        return new TransUnit(locale, code, value, "lazyglossary");
+        return new TransUnit(locale, bareCode, value, DOMAIN);
     }
 }
 ```
@@ -260,7 +282,7 @@ public class LazyCatalog extends AbstractCatalog {
 
 Several sources can be combined directly on the `CatalogMessageSourceBuilder`. The example below chains the three custom catalogs above.
 
-Sources are added in order with `addSource(...)`. For eager sources the first source wins on key conflicts (`putIfAbsent` semantics). For lazy sources the first non-`null` result wins.
+Sources are added in order with `addSource(...)`. Lazy lookups walk this order as a **Chain of Responsibility** — each source decides whether it can resolve the request, otherwise it delegates to the next link, and the first non-`null` result wins. Eager sources, by contrast, are aggregated up front into the catalog map, where the first source wins on key conflicts (`putIfAbsent` semantics).
 
 ```java
 import io.github.alaugks.spring.messagesource.catalog.CatalogMessageSourceBuilder;
