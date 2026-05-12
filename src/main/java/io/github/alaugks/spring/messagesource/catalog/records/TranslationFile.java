@@ -20,6 +20,12 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;import org.springframework.lang.NonNull;
 
+/**
+ * Raw, loaded translation resource: domain, locale and file bytes.
+ *
+ * <p>{@code equals}/{@code hashCode}/{@code toString} are overridden so the {@code byte[]}
+ * content is compared by value rather than by identity.
+ */
 public record TranslationFile(String domain, Locale locale, byte[] content) {
 
 	@Override

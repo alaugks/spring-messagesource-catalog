@@ -20,6 +20,9 @@ import io.github.alaugks.spring.messagesource.catalog.catalog.AbstractCatalog;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 import java.util.List;
 
+/**
+ * Eager catalog source backed by a pre-built list of trans units.
+ */
 public class TransUnitsCatalog extends AbstractCatalog {
 
 	List<TransUnitInterface> transUnits;
