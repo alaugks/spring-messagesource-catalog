@@ -21,20 +21,41 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.util.Assert;
 
+/**
+ * Parses translation resource file names into a {@link Filename} record.
+ *
+ * <p>Supported shapes (case-insensitive; {@code _} and {@code -} both work as separators):
+ * <ul>
+ *   <li>{@code domain}</li>
+ *   <li>{@code domain_language}</li>
+ *   <li>{@code domain_language_region}</li>
+ * </ul>
+ * The file extension is ignored — only the leading segments are inspected.
+ */
 public class ResourcesFileNameParser {
+
+	private static final Pattern PATTERN = Pattern.compile(
+			"^(?<domain>[a-z0-9]+)(?:([_-](?<language>[a-z]+))(?:[_-](?<region>[a-z]+))?)?",
+			Pattern.CASE_INSENSITIVE
+	);
 
 	private final String filename;
 
+	/**
+	 * @param filename the file name to parse; must not be {@code null}
+	 */
 	public ResourcesFileNameParser(String filename) {
 		Assert.notNull(filename, "Argument filename must not be null");
 
 		this.filename = filename;
 	}
 
+	/**
+	 * @return the parsed {@link Filename}, or {@code null} if the file name does not match
+	 *         the expected pattern
+	 */
 	public Filename parse() {
-		String regexp = "^(?<domain>[a-z0-9]+)(?:([_-](?<language>[a-z]+))(?:[_-](?<region>[a-z]+))?)?";
-		Pattern pattern = Pattern.compile(regexp, Pattern.CASE_INSENSITIVE);
-		Matcher matcher = pattern.matcher(this.filename);
+		Matcher matcher = PATTERN.matcher(this.filename);
 
 		if (matcher.find()) {
 			return new Filename(

@@ -21,6 +21,11 @@ import java.util.List;
 import java.util.Set;
 import org.springframework.util.Assert;
 
+/**
+ * Holds one or more Spring resource location patterns (e.g. {@code classpath:/translations/*})
+ * used by {@link ResourcesLoader} to discover translation files. Duplicates are eliminated by
+ * storing the patterns in a {@link Set}.
+ */
 public class LocationPattern {
 
 	private final Set<String> locationPatterns;
@@ -29,21 +34,18 @@ public class LocationPattern {
 		this(List.of(locationPattern));
 	}
 
+	/**
+	 * @param locationPatterns the location patterns; must not be {@code null}
+	 */
 	public LocationPattern(List<String> locationPatterns) {
 		Assert.notNull(locationPatterns, "Argument locationPatterns must not be null");
 		this.locationPatterns = new HashSet<>(locationPatterns);
 	}
 
+	/**
+	 * @return the configured location patterns (deduplicated)
+	 */
 	public Set<String> getLocationPattern() {
 		return locationPatterns;
-	}
-
-	/**
-	 * @deprecated
-	 * Will replace with {@link #getLocationPattern()}
-	 */
-	@Deprecated(since = "0.6.0", forRemoval = true)
-	public Set<String> getLocationPatterns() {
-		return this.getLocationPattern();
 	}
 }

@@ -18,12 +18,28 @@ package io.github.alaugks.spring.messagesource.catalog.records;
 
 import java.util.Locale;
 
+/**
+ * A single translation entry: a {@code (locale, domain, code) -> value} tuple.
+ */
 public interface TransUnitInterface {
+
+	/**
+	 * @return the locale this translation belongs to
+	 */
 	Locale locale();
 
+	/**
+	 * @return the message code (bare, without domain prefix)
+	 */
 	String code();
 
+	/**
+	 * @return the translated text
+	 */
 	String value();
 
+	/**
+	 * @return the domain this trans unit belongs to, or {@code null} for the default domain
+	 */
 	String domain();
 }

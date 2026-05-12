@@ -16,15 +16,18 @@
 
 package io.github.alaugks.spring.messagesource.catalog.resources;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import io.github.alaugks.spring.messagesource.catalog.exception.CatalogMessageSourceRuntimeException;
 import io.github.alaugks.spring.messagesource.catalog.records.TranslationFile;
-import java.io.InputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ResourcesLoaderTest {
 
@@ -85,7 +88,7 @@ class ResourcesLoaderTest {
 
 		assertEquals("messages", translationFile.domain());
 		assertEquals("en_US", translationFile.locale().toString());
-		assertInstanceOf(InputStream.class, translationFile.inputStream());
+		assertNotNull(translationFile.content());
 	}
 
 	@Test
@@ -97,5 +100,17 @@ class ResourcesLoaderTest {
 		);
 
 		assertTrue(resourcesLoader.getTranslationFiles().isEmpty());
+	}
+
+	@Test
+	void test_Exception() {
+		ResourcesLoader resourcesLoader = new ResourcesLoader(
+			Locale.forLanguageTag("en"),
+			new LocationPattern("translations/not-exists.txt"),
+			List.of("txt")
+		);
+
+		Exception e = assertThrows(CatalogMessageSourceRuntimeException.class, resourcesLoader::getTranslationFiles);
+		assertInstanceOf(IOException.class, e.getCause());
 	}
 }
