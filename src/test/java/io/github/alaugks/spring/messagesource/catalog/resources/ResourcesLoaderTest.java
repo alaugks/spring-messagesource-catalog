@@ -1,28 +1,35 @@
+/*
+ * Copyright 2024-2025 André Laugks <alaugks@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.github.alaugks.spring.messagesource.catalog.resources;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.alaugks.spring.messagesource.catalog.exception.CatalogMessageSourceRuntimeException;
 import io.github.alaugks.spring.messagesource.catalog.records.TranslationFile;
-import java.io.InputStream;
-import java.util.HashSet;
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
 
 class ResourcesLoaderTest {
-
-	@Test
-	void test_setLocationPatterns_deprecated() {
-		ResourcesLoader resourcesLoader = new ResourcesLoader(
-				Locale.forLanguageTag("en"),
-				new HashSet<>(List.of("translations/*")),
-				List.of("txt")
-		);
-
-		assertEquals(5, resourcesLoader.getTranslationFiles().size());
-	}
 
 	@Test
 	void test_setLocationPatterns() {
@@ -81,7 +88,7 @@ class ResourcesLoaderTest {
 
 		assertEquals("messages", translationFile.domain());
 		assertEquals("en_US", translationFile.locale().toString());
-		assertInstanceOf(InputStream.class, translationFile.inputStream());
+		assertNotNull(translationFile.content());
 	}
 
 	@Test
@@ -93,5 +100,17 @@ class ResourcesLoaderTest {
 		);
 
 		assertTrue(resourcesLoader.getTranslationFiles().isEmpty());
+	}
+
+	@Test
+	void test_Exception() {
+		ResourcesLoader resourcesLoader = new ResourcesLoader(
+			Locale.forLanguageTag("en"),
+			new LocationPattern("translations/not-exists.txt"),
+			List.of("txt")
+		);
+
+		Exception e = assertThrows(CatalogMessageSourceRuntimeException.class, resourcesLoader::getTranslationFiles);
+		assertInstanceOf(IOException.class, e.getCause());
 	}
 }
