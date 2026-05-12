@@ -4,12 +4,19 @@ This package extends the [AbstractMessageSource](https://docs.spring.io/spring-f
 
 ## Dependency
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=alaugks_spring-messagesource-base&metric=alert_status&token=3d2b79af1f0f0ab6089e565495b4db6f621e9a13)](https://sonarcloud.io/summary/overall?id=alaugks_spring-messagesource-base)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=alaugks_spring-messagesource-catalog&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=alaugks_spring-messagesource-catalog)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.alaugks/spring-messagesource-catalog.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.alaugks/spring-messagesource-catalog/0.6.0-SNAPSHOT)
 
 ### Maven
 
 ```xml
+<dependency>
+    <groupId>io.github.alaugks</groupId>
+    <artifactId>spring-messagesource-catalog</artifactId>
+    <version>0.5.1</version>
+</dependency>
+
+<!-- Snapshot -->
 <dependency>
     <groupId>io.github.alaugks</groupId>
     <artifactId>spring-messagesource-catalog</artifactId>
@@ -21,6 +28,9 @@ This package extends the [AbstractMessageSource](https://docs.spring.io/spring-f
 
 ```
 implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog', version: '0.5.1'
+
+// Snapshot
+implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog', version: '0.6.0-SNAPSHOT'
 ```
 
 ## Packages that use the catalog as a base package
