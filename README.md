@@ -345,3 +345,7 @@ Build the Javadoc locally:
 
 The generated HTML is written to `target/reports/apidocs/index.html`.
 
+## License
+
+Licensed under the [Apache License, Version 2.0](LICENSE).
+
