@@ -24,13 +24,18 @@ import org.springframework.util.Assert;
 /**
  * Parses translation resource file names into a {@link Filename} record.
  *
- * <p>Supported shapes (case-insensitive; {@code _} and {@code -} both work as separators):
- * <ul>
- *   <li>{@code domain}</li>
- *   <li>{@code domain_language}</li>
- *   <li>{@code domain_language_region}</li>
- * </ul>
+ * <p>Matches case-insensitively; {@code _} and {@code -} both work as separators.
  * The file extension is ignored — only the leading segments are inspected.
+ *
+ * <p>Examples (the extension is shown for context but ignored by the parser):
+ * <ul>
+ *   <li>{@code messages.ext} &rarr; domain={@code messages}</li>
+ *   <li>{@code messages_de.ext} &rarr; domain={@code messages}, language={@code de}</li>
+ *   <li>{@code messages_en-US.ext} &rarr; domain={@code messages}, language={@code en}, region={@code US}</li>
+ *   <li>{@code payment.ext} &rarr; domain={@code payment}</li>
+ *   <li>{@code payment_de.ext} &rarr; domain={@code payment}, language={@code de}</li>
+ *   <li>{@code payment_en-US.ext} &rarr; domain={@code payment}, language={@code en}, region={@code US}</li>
+ * </ul>
  */
 public class ResourcesFileNameParser {
 
@@ -42,6 +47,8 @@ public class ResourcesFileNameParser {
 	private final String filename;
 
 	/**
+	 * Creates a parser bound to the given file name.
+	 *
 	 * @param filename the file name to parse; must not be {@code null}
 	 */
 	public ResourcesFileNameParser(String filename) {
@@ -51,6 +58,8 @@ public class ResourcesFileNameParser {
 	}
 
 	/**
+	 * Parses the bound file name into a {@link Filename}.
+	 *
 	 * @return the parsed {@link Filename}, or {@code null} if the file name does not match
 	 *         the expected pattern
 	 */

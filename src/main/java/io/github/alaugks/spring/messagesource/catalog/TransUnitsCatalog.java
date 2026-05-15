@@ -27,6 +27,11 @@ public class TransUnitsCatalog extends AbstractCatalog {
 
 	List<TransUnitInterface> transUnits;
 
+	/**
+	 * Creates a catalog backed by the given trans units.
+	 *
+	 * @param transUnits the trans units to serve; used directly without copying
+	 */
 	public TransUnitsCatalog(List<TransUnitInterface> transUnits) {
 		this.transUnits = transUnits;
 	}

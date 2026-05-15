@@ -30,11 +30,18 @@ public class LocationPattern {
 
 	private final Set<String> locationPatterns;
 
+	/**
+	 * Convenience constructor for a single location pattern.
+	 *
+	 * @param locationPattern the location pattern; must not be {@code null}
+	 */
 	public LocationPattern(String locationPattern) {
 		this(List.of(locationPattern));
 	}
 
 	/**
+	 * Creates a {@link LocationPattern} from the given list; duplicate entries are eliminated.
+	 *
 	 * @param locationPatterns the location patterns; must not be {@code null}
 	 */
 	public LocationPattern(List<String> locationPatterns) {
@@ -43,6 +50,8 @@ public class LocationPattern {
 	}
 
 	/**
+	 * Returns the configured location patterns.
+	 *
 	 * @return the configured location patterns (deduplicated)
 	 */
 	public Set<String> getLocationPattern() {

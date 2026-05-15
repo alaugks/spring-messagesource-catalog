@@ -42,6 +42,12 @@ public abstract class AbstractCatalog implements CatalogInterface {
 	private CatalogInterface nextCatalog;
 
 	/**
+	 * Default constructor for use by subclasses.
+	 */
+	protected AbstractCatalog() {
+	}
+
+	/**
 	 * Stores the next catalog in the chain and returns it, so calls can be chained fluently.
 	 *
 	 * @param catalog the next catalog

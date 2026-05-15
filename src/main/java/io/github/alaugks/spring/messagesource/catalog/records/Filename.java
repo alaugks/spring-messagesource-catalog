@@ -31,6 +31,8 @@ import java.util.Locale;
 public record Filename(String domain, String language, String region) {
 
 	/**
+	 * Reports whether the file name carried a language part.
+	 *
 	 * @return {@code true} when the file name contains a language part
 	 */
 	public boolean hasLocale() {

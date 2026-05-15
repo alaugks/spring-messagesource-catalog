@@ -45,6 +45,8 @@ public class ResourcesLoader {
 	private final List<String> fileExtensions;
 
 	/**
+	 * Creates a loader for the configured locations and file extensions.
+	 *
 	 * @param defaultLocale   the locale used when a file name carries no locale part;
 	 *                        must not be {@code null}
 	 * @param locationPattern the resource location patterns to scan

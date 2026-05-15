@@ -335,3 +335,13 @@ public class MessageConfig {
 }
 ```
 
+## Javadoc
+
+Build the Javadoc locally:
+
+```
+./mvnw javadoc:javadoc
+```
+
+The generated HTML is written to `target/reports/apidocs/index.html`.
+

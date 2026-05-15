@@ -25,6 +25,10 @@ import java.util.Objects;import org.springframework.lang.NonNull;
  *
  * <p>{@code equals}/{@code hashCode}/{@code toString} are overridden so the {@code byte[]}
  * content is compared by value rather than by identity.
+ *
+ * @param domain  the domain the file belongs to
+ * @param locale  the locale parsed from the file name, or the default locale when none was given
+ * @param content the raw file bytes
  */
 public record TranslationFile(String domain, Locale locale, byte[] content) {
 

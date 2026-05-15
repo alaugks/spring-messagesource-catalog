@@ -24,6 +24,8 @@ package io.github.alaugks.spring.messagesource.catalog.exception;
 public class CatalogMessageSourceRuntimeException extends RuntimeException {
 
 	/**
+	 * Wraps the given throwable as an unchecked catalog exception.
+	 *
 	 * @param cause the underlying checked exception being wrapped
 	 */
 	public CatalogMessageSourceRuntimeException(Throwable cause) {

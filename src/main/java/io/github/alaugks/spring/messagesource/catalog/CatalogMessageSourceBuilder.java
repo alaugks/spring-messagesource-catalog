@@ -47,6 +47,7 @@ import org.springframework.util.Assert;
  */
 public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 
+	/** Default domain used when none is configured: {@value}. */
 	public static final String DEFAULT_DOMAIN = "messages";
 
 	private final ConcurrentMap<Locale, ConcurrentMap<String, String>> catalogMap;
