@@ -105,7 +105,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MessageConfig {
     
-    List<TransUnitInterface> transUnits = new ArrayList<>() {{
+    private List<TransUnitInterface> transUnits = new ArrayList<>() {{
         // en
         add(new TransUnit(Locale.forLanguageTag("en"), "headline", "Headline"));
         add(new TransUnit(Locale.forLanguageTag("en"), "postcode", "Postcode"));
