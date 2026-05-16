@@ -5,20 +5,6 @@ This package extends the [AbstractMessageSource](https://docs.spring.io/spring-f
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=alaugks_spring-messagesource-catalog&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=alaugks_spring-messagesource-catalog)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.alaugks/spring-messagesource-catalog.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.alaugks/spring-messagesource-catalog/0.6.0-SNAPSHOT)
 
-## Table of Contents
-
-- [Dependency](#dependency)
-  - [Maven](#maven)
-  - [Gradle](#gradle)
-- [Packages that use the catalog as a base package](#packages-that-use-the-catalog-as-a-base-package)
-- [CatalogMessageSource Configuration](#catalogmessagesource-configuration)
-  - [Options](#options)
-  - [TransUnit Record](#transunit-record)
-  - [Configuration example](#configuration-example)
-  - [With custom CatalogInterface](#with-custom-cataloginterface)
-- [Javadoc](#javadoc)
-- [License](#license)
-
 ## Dependency
 
 ### Maven
@@ -105,7 +91,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MessageConfig {
     
-    private List<TransUnitInterface> transUnits = new ArrayList<>() {{
+    private final List<TransUnitInterface> transUnits = new ArrayList<>() {{
         // en
         add(new TransUnit(Locale.forLanguageTag("en"), "headline", "Headline"));
         add(new TransUnit(Locale.forLanguageTag("en"), "postcode", "Postcode"));
