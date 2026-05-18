@@ -21,10 +21,10 @@ import java.util.Locale;
  *
  * <p>Sources are wired into a <em>Chain of Responsibility</em> via
  * {@link #nextCatalog(CatalogInterface)}: each link decides whether it can answer the request
- * and delegates to the next otherwise (a {@code null} return from
- * {@link #resolveTransUnit(String, Locale)} is the opt-out). {@link AbstractCatalog} provides
- * the chain plumbing and no-op defaults; most implementations extend it rather than
- * implementing this interface directly.
+ * and delegates to the next otherwise. {@link AbstractCatalog} provides the chain plumbing
+ * and no-op defaults; subclasses that override {@link #resolveTransUnit(String, Locale)}
+ * must forward by returning {@code super.resolveTransUnit(code, locale)} when they cannot
+ * answer — a direct {@code return null} ends the chain at that link.
  */
 public interface CatalogInterface {
 

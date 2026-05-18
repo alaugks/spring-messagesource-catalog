@@ -63,6 +63,10 @@ public abstract class AbstractCatalog implements CatalogInterface {
 	 * Default lazy lookup: returns {@code null}, or — once a next catalog has been wired —
 	 * delegates to it. Subclasses override to resolve on demand.
 	 *
+	 * <p><strong>Chain semantics:</strong> when an override cannot answer the request, it
+	 * must return {@code super.resolveTransUnit(code, locale)} so this default forwards to
+	 * the next link; a direct {@code return null} ends the chain at this source.
+	 *
 	 * <p>See {@link CatalogInterface#resolveTransUnit(String, Locale)} for the {@code code}
 	 * format (with or without a domain prefix).
 	 *

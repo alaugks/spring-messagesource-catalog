@@ -183,7 +183,7 @@ When the catalog map cannot resolve a key, the lazy path walks the configured so
 
 1. The current source inspects the incoming `code` (and `locale`).
 2. If it can answer, it returns a `TransUnit`, the chain stops, and the result is cached in the in-memory catalog map.
-3. If it cannot answer, it returns `null` and `AbstractCatalog` forwards the call to the next source set by `nextCatalog(...)`.
+3. If it cannot answer, it forwards by calling `super.resolveTransUnit(code, locale)` — the `AbstractCatalog` default delegates to the next source set by `nextCatalog(...)`. Returning `null` directly (without calling `super`) ends the chain at this source.
 4. If no source claims the request, the message ends up unresolved.
 
 A common opt-out strategy is to gate on the requested domain — a source that owns `"glossary"` declines anything that doesn't start with `"glossary."`. The `LazyCatalog` example below shows that pattern.
@@ -252,7 +252,7 @@ The trans units are not loaded up front. `resolveTransUnit(...)` is called only 
 
 Useful when the underlying source is large enough that eager loading is impractical (e.g. a glossary table with hundreds of thousands of rows, or an external API).
 
-The `code` argument is passed through as-is from the caller, so it may be a bare key (e.g. `"headline"`) or domain-qualified (e.g. `"lazyglossary.headline"`). A source that owns a specific domain checks the prefix and strips it before looking up its backend; the returned `TransUnit` then carries the bare code and the source's own domain, so the cache entry lives at `"<domain>.<code>"`.
+The `code` argument is passed through as-is from the caller, so it may be given without a domain prefix (e.g. `"headline"`) or with one (e.g. `"lazyglossary.headline"`). A source that owns a specific domain checks the prefix and strips it before looking up its backend; the returned `TransUnit` then carries the code without the prefix and the source's own domain, so the cache entry lives at `"<domain>.<code>"`.
 
 ```java
 import io.github.alaugks.spring.messagesource.catalog.catalog.AbstractCatalog;
@@ -274,16 +274,16 @@ public class LazyCatalog extends AbstractCatalog {
     @Override
     public TransUnitInterface resolveTransUnit(String code, Locale locale) {
         // code may be "<code>" (default domain) or "<domain>.<code>".
-        // This source owns only DOMAIN, so anything else is declined.
-        if (!code.startsWith(PREFIX)) {
-            return null;
+        // This source owns only DOMAIN; anything it cannot answer is forwarded
+        // to the next source via super.resolveTransUnit(...).
+        if (code.startsWith(PREFIX)) {
+            String localCode = code.substring(PREFIX.length());
+            String value = this.lazyCatalogRepository.findByCodeAndLocale(localCode, locale);
+            if (value != null) {
+                return new TransUnit(locale, localCode, value, DOMAIN);
+            }
         }
-        String bareCode = code.substring(PREFIX.length());
-        String value = this.lazyCatalogRepository.findByCodeAndLocale(bareCode, locale);
-        if (value == null) {
-            return null;
-        }
-        return new TransUnit(locale, bareCode, value, DOMAIN);
+        return super.resolveTransUnit(code, locale);
     }
 }
 ```
