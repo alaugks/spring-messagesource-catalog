@@ -80,7 +80,10 @@ public class ResourcesLoader {
 		}
 	}
 
-	/** Builds a {@link TranslationFile} by parsing the resource file name and reading its bytes; returns {@code null} when the name does not match. */
+	/**
+	 * Builds a {@link TranslationFile} by parsing the resource file name and reading its
+	 * bytes; returns {@code null} when the name does not match.
+	 */
 	private TranslationFile parseFileName(Resource resource) throws IOException {
 		Filename filename = new ResourcesFileNameParser(resource.getFilename()).parse();
 

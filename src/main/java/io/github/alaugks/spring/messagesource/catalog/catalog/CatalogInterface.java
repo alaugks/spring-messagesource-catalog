@@ -48,12 +48,12 @@ public interface CatalogInterface {
 	 * Resolves a single trans unit on demand. Called only when the catalog map has no
 	 * entry for {@code code} under {@code locale}; the returned value is cached in the map.
 	 *
-	 * <p>The {@code code} parameter is passed through as-is from the caller. It may be a
-	 * bare key (e.g. {@code "headline"}, implying the default domain) or domain-qualified
-	 * (e.g. {@code "payment.headline"}). Implementations that route by domain must split
-	 * on the {@code .} separator themselves.
+	 * <p>The {@code code} parameter is passed through as-is from the caller. It may be
+	 * given without a domain prefix (e.g. {@code "headline"}, implying the default domain)
+	 * or with one (e.g. {@code "payment.headline"}). Implementations that route by domain
+	 * must split on the {@code .} separator themselves.
 	 *
-	 * @param code the message code; bare or domain-qualified ({@code "<domain>.<code>"})
+	 * @param code the message code, with or without a domain prefix ({@code "<domain>.<code>"})
 	 * @param locale the locale to resolve for
 	 * @return the resolved trans unit, or {@code null} if this source cannot resolve it
 	 */

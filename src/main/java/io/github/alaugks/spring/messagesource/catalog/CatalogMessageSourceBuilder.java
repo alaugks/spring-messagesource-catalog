@@ -46,9 +46,8 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 	private final CatalogInterface chainHead;
 
 	/**
-	 * Aggregates trans units from each source into the catalog map and wires the sources
-	 * into a chain (via {@link CatalogInterface#nextCatalog(CatalogInterface)}) for late-
-	 * binding {@code resolveTransUnit} fallback.
+	 * Aggregates trans units into the catalog map and wires the source chain
+	 * for late-binding fallback.
 	 */
 	private CatalogMessageSourceBuilder(List<CatalogInterface> sources, Locale defaultLocale, String defaultDomain) {
 		this.defaultLocale = defaultLocale;
@@ -121,7 +120,10 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 		return null;
 	}
 
-	/** Looks up the code in the catalog map, falling back to the source chain and caching the result. */
+	/**
+	 * Looks up the code in the catalog map, falling back to the source chain
+	 * and caching the result.
+	 */
 	private String resolveFromCatalog(String code, Locale locale) {
 		if (locale.getLanguage().isEmpty() || code.isEmpty()) {
 			return null;
@@ -141,7 +143,10 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 		return null;
 	}
 
-	/** Stores a translation under its domain-qualified key, plus an unqualified alias when the domain matches the default. */
+	/**
+	 * Stores a translation under its key with the domain prefix, plus an alias
+	 * without the prefix when the domain matches the default.
+	 */
 	private void put(Locale locale, String code, String value, String domain) {
 		if (locale.getLanguage().isEmpty()) {
 			return;
@@ -157,7 +162,10 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 		bucket.putIfAbsent(this.concatCode(domain, code), value);
 	}
 
-	/** Walks the locale and code-key fallbacks (region → language → default locale, bare code → domain-qualified). */
+	/**
+	 * Walks the locale and code-key fallbacks (region → language → default
+	 * locale, code without domain prefix → code with domain prefix).
+	 */
 	private Optional<String> resolveFromCatalogMap(String code, Locale locale) {
 		String domainCode = this.concatCode(this.defaultDomain, code);
 
@@ -184,7 +192,10 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 		return Optional.empty();
 	}
 
-	/** Reads the bucket for {@code locale} once and probes both the bare and the domain-qualified code. */
+	/**
+	 * Reads the bucket for {@code locale} once and probes the code both
+	 * without and with the domain prefix.
+	 */
 	private String lookup(Locale locale, String code, String domainCode) {
 		ConcurrentMap<String, String> bucket = this.catalogMap.get(locale);
 		if (bucket == null) {
@@ -199,7 +210,10 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 		return new Locale.Builder().setLanguage(locale.getLanguage()).build();
 	}
 
-	/** Joins {@code domain} and {@code code} with a dot, defaulting to {@link #DEFAULT_DOMAIN} when {@code domain} is {@code null}. */
+	/**
+	 * Joins {@code domain} and {@code code} with a dot, defaulting to
+	 * {@link #DEFAULT_DOMAIN} when {@code domain} is {@code null}.
+	 */
 	private String concatCode(String domain, String code) {
 		return Optional.ofNullable(domain).orElse(DEFAULT_DOMAIN) + "." + code;
 	}
@@ -233,7 +247,7 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 
 		/**
 		 * Sets the default domain. Codes stored under this domain are also accessible via
-		 * their bare (domain-less) name; codes stored under any other domain require the
+		 * their name without the domain prefix; codes stored under any other domain require the
 		 * {@code <domain>.<code>} prefix.
 		 *
 		 * @param defaultDomain the default domain; must not be {@code null}

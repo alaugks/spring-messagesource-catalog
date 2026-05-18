@@ -20,7 +20,7 @@ public interface TransUnitInterface {
 	/**
 	 * Returns the message code.
 	 *
-	 * @return the message code (bare, without domain prefix)
+	 * @return the message code (without domain prefix)
 	 */
 	String code();
 

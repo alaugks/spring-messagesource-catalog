@@ -64,9 +64,9 @@ public abstract class AbstractCatalog implements CatalogInterface {
 	 * delegates to it. Subclasses override to resolve on demand.
 	 *
 	 * <p>See {@link CatalogInterface#resolveTransUnit(String, Locale)} for the {@code code}
-	 * format (bare or domain-qualified).
+	 * format (with or without a domain prefix).
 	 *
-	 * @param code the message code; bare or domain-qualified ({@code "<domain>.<code>"})
+	 * @param code the message code, with or without a domain prefix ({@code "<domain>.<code>"})
 	 * @param locale the locale to resolve for
 	 * @return the resolved trans unit from the next catalog, or {@code null} when this is
 	 *         the last link or the next catalog cannot resolve it
