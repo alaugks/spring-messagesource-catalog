@@ -23,6 +23,26 @@ class CatalogMessageSourceBuilderTest {
 
 	public final Locale locale = Locale.forLanguageTag("en");
 
+
+	@Test
+	void test_resolution_messageFormat() {
+		Locale en = Locale.forLanguageTag("en");
+		Locale de = Locale.forLanguageTag("de");
+		Locale enUs = Locale.forLanguageTag("en-US");
+
+		List<TransUnitInterface> transUnits = List.of(
+			new TransUnit(en, "list_files", "Es gibt {0,choice,0#keine Datei|1#eine Datei|1<{0,number,integer} Dateien}"),
+			new TransUnit(de, "list_files", "Es gibt {0,choice,0#keine Datei|1#eine Datei|1<{0,number,integer} Dateien}")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+			.builder(transUnits, en)
+			.build();
+
+		assertEquals("Es gibt 10,000 Dateien", ms.getMessage("list_files", new Object[] {10000}, "", en));
+		assertEquals("Es gibt 10.000 Dateien", ms.getMessage("list_files", new Object[] {10000}, "", de));
+	}
+
 	@Test
 	void test_builder_withList() {
 		List<TransUnitInterface> transUnits = List.of(
@@ -207,20 +227,20 @@ class CatalogMessageSourceBuilderTest {
 		));
 	}
 
-	@Test
-	void test_CatalogMessageSource_setParentMessageSource() {
-		CatalogMessageSourceBuilder messageSource = CatalogMessageSourceBuilder
-				.builder(new ArrayList<>(), locale)
-				.build();
-
-		messageSource.setParentMessageSource(new MockMessageSource());
-
-		assertEquals("code_value", messageSource.getMessage(
-				"code",
-				new Object[] {},
-				Locale.forLanguageTag("en")
-		));
-	}
+//	@Test
+//	void test_CatalogMessageSource_setParentMessageSource() {
+//		CatalogMessageSourceBuilder messageSource = CatalogMessageSourceBuilder
+//				.builder(new ArrayList<>(), locale)
+//				.build();
+//
+//		messageSource.setParentMessageSource(new MockMessageSource());
+//
+//		assertEquals("code_value", messageSource.getMessage(
+//				"code",
+//				new Object[] {},
+//				Locale.forLanguageTag("en")
+//		));
+//	}
 
 	static class MockMessageSource extends AbstractMessageSource {
 
