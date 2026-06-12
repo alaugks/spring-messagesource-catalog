@@ -13,9 +13,12 @@ import io.github.alaugks.spring.messagesource.catalog.resources.LocationPattern;
 import io.github.alaugks.spring.messagesource.catalog.resources.ResourcesLoader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -35,6 +38,8 @@ class BenchmarkMessageSourceTest {
 
 	static CatalogMessageSourceBuilder catalogMessageSourceBuilder;
 
+	static CatalogMessageSourceBuilder catalogMessageSourceBuilderICU4j;
+
 	static ResourceBundleMessageSource resourceBundleMessageSource;
 
 	static ReloadableResourceBundleMessageSource reloadableResourceBundleMessageSource;
@@ -45,6 +50,11 @@ class BenchmarkMessageSourceTest {
 	static void beforeAll() throws IOException {
 		catalogMessageSourceBuilder = CatalogMessageSourceBuilder
 				.builder(createTransUnitListFromMessagesPropertiesFiles(), defaultLocale)
+				.build();
+
+		catalogMessageSourceBuilderICU4j = CatalogMessageSourceBuilder
+				.builder(createTransUnitListFromMessagesPropertiesFiles(), defaultLocale)
+				.enableICU4j()
 				.build();
 
 		resourceBundleMessageSource = new ResourceBundleMessageSource();
@@ -69,6 +79,16 @@ class BenchmarkMessageSourceTest {
 	}
 
 	@ParameterizedTest()
+	@MethodSource("dataProvider_examples_icu4j")
+	void test_CatalogMessageSource_icu4j(String locale, String code, Object[] args, Object expected) {
+		assertEquals(expected, catalogMessageSourceBuilderICU4j.getMessage(
+			code,
+			args,
+			Locale.forLanguageTag(locale)
+		));
+	}
+
+	@ParameterizedTest()
 	@MethodSource("dataProvider_examples")
 	void test_ResourceBundleMessageSource(String locale, String code, Object[] args, Object expected) {
 		assertEquals(expected, resourceBundleMessageSource.getMessage(
@@ -86,6 +106,12 @@ class BenchmarkMessageSourceTest {
 				args,
 				Locale.forLanguageTag(locale)
 		));
+	}
+
+	private static Stream<Arguments> dataProvider_examples_icu4j() {
+		return Stream.of(
+				Arguments.of("de", "messages.list_files_icu4j", new Object[] {Map.of("file_count", 10000L)}, "Sie haben 10.000 Dateien gelöscht.")
+		);
 	}
 
 	private static Stream<Arguments> dataProvider_examples() {
@@ -159,7 +185,10 @@ class BenchmarkMessageSourceTest {
 
 		for (TranslationFile translationFile : resourcesLoader.getTranslationFiles()) {
 			Properties properties = new Properties();
-			properties.load(new ByteArrayInputStream(translationFile.content()));
+			properties.load(new InputStreamReader(
+					new ByteArrayInputStream(translationFile.content()),
+					StandardCharsets.UTF_8
+			));
 			for (Entry<Object, Object> property : properties.entrySet()) {
 
 				Object key = property.getKey();

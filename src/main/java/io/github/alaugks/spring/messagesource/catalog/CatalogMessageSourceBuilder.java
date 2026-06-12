@@ -48,7 +48,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 
 	private final CatalogInterface chainHead;
 
-	private final boolean useCodeAsDefaultMessage;
+	private final boolean useICU4j;
 
 	/**
 	 * Aggregates trans units into the catalog map and wires the source chain
@@ -58,11 +58,11 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 			List<CatalogInterface> sources,
 			Locale defaultLocale,
 			String defaultDomain,
-			boolean useCodeAsDefaultMessage
+        	boolean useICU4j
 	) {
 		this.defaultLocale = defaultLocale;
 		this.defaultDomain = defaultDomain;
-		this.useCodeAsDefaultMessage = useCodeAsDefaultMessage;
+		this.useICU4j = useICU4j;
 		this.catalogMap = new ConcurrentHashMap<>();
 
 		for (CatalogInterface source : sources) {
@@ -116,23 +116,16 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 			return msg;
 		}
 
-		if (defaultMessage == null) {
-			return getDefaultMessage(code);
-		}
-
-		return null;
+		return defaultMessage;
 	}
 
 	@Override
 	public final String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
-		String msg = getMessageInternal(code, args, locale);
+		String msg = this.getMessageInternal(code, args, locale);
 		if (msg != null) {
 			return msg;
 		}
-		String fallback = getDefaultMessage(code);
-		if (fallback != null) {
-			return fallback;
-		}
+
         throw new NoSuchMessageException(code, locale);
     }
 
@@ -141,16 +134,13 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		String[] codes = resolvable.getCodes();
 		if (codes != null) {
 			for (String code : codes) {
-				String message = getMessageInternal(code, resolvable.getArguments(), locale);
+				String message = this.getMessageInternal(code, resolvable.getArguments(), locale);
 				if (message != null) {
 					return message;
 				}
 			}
 		}
-//		String defaultMessage = getDefaultMessage(resolvable, locale);
-//		if (defaultMessage != null) {
-//			return defaultMessage;
-//		}
+
 		String code = !ObjectUtils.isEmpty(codes) ? codes[codes.length - 1] : "";
 		if (locale == null ) {
 			throw new NoSuchMessageException(code);
@@ -159,28 +149,6 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 			throw new NoSuchMessageException(code, locale);
 		}
 	}
-
-	/**
-	 * Whether a message code is returned as the default message when it cannot be resolved.
-	 *
-	 * @return {@code true} if the code is used as the default message
-	 */
-	public boolean isUseCodeAsDefaultMessage() {
-		return this.useCodeAsDefaultMessage;
-	}
-
-	/**
-	 * Returns the default message to use when a code cannot be resolved: the code itself when
-	 * {@link #isUseCodeAsDefaultMessage()} is enabled, otherwise {@code null}.
-	 */
-	@Nullable
-	protected String getDefaultMessage(String code) {
-		if (this.isUseCodeAsDefaultMessage()) {
-			return code;
-		}
-		return null;
-	}
-
 
 	/**
 	 * Resolves the given code to a {@link MessageFormat} for the requested locale.
@@ -197,37 +165,27 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	protected String getMessageInternal(@NonNull String code, Object[] args, @NonNull Locale locale) {
 		String value = this.resolveFromCatalog(code, locale);
 
-		if(args == null) {
+		if (args == null || value == null) {
 			return value;
 		}
 
-		return new com.ibm.icu.text.MessageFormat(value, locale).format(args);
-			//return new MessageFormat(value, locale).format(args);
+		// When ICU4J is enabled the value is formatted with ICU4J's MessageFormat; otherwise
+		// java.text.MessageFormat is used to keep Spring Core compatibility.
+		if (this.useICU4j) {
+			com.ibm.icu.text.MessageFormat messageFormat = new com.ibm.icu.text.MessageFormat(value, locale);
 
+			// Named/alphanumeric arguments are passed as a single Map (format(Map)); positional
+			// arguments use the array path (format(Object[])).
+			if (args.length == 1 && args[0] instanceof java.util.Map<?, ?> map) {
+				@SuppressWarnings("unchecked")
+				java.util.Map<String, Object> namedArgs = (java.util.Map<String, Object>) map;
+				return messageFormat.format(namedArgs);
+			}
 
+			return messageFormat.format(args);
+		}
 
-//		if (args[0] instanceof java.util.Map) {
-//			return new com.ibm.icu.text.MessageFormat(value, locale).format(args);
-//		}
-//
-//		return null;
-
-
-//		if (args == null || args.length == 0) {
-			//return value;
-//		}
-
-//		//if (args.length == 1 && !args[0] instanceof java.util.Map) {
-//			MessageFormat fmt = new java.text.MessageFormat(code, locale);
-//			return fmt.format(args);
-//		//}
-
-//		if (args.length == 1 && args[0] instanceof java.util.Map) {
-//			MessageFormat fmt = new MessageFormat(code, locale);
-//			return fmt.format(args[0]);
-//		}
-
-		//return null;
+		return new MessageFormat(value, locale).format(args);
 	}
 
 	/**
@@ -340,7 +298,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 
 		private String defaultDomain = DEFAULT_DOMAIN;
 
-		private boolean useCodeAsDefaultMessage = false;
+		private boolean useICU4j = false;
 
 		/**
 		 * Creates a new builder seeded with an initial source.
@@ -374,14 +332,14 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		}
 
 		/**
-		 * Sets whether a message code is returned as the default message when it cannot be
-		 * resolved. Defaults to {@code false}.
+		 * Enables ICU4J message formatting. When enabled, resolved messages are formatted with
+		 * {@link com.ibm.icu.text.MessageFormat} (supporting ICU syntax such as named arguments
+		 * and {@code plural}/{@code select}); otherwise {@link java.text.MessageFormat} is used.
 		 *
-		 * @param useCodeAsDefaultMessage {@code true} to use the code as the default message
 		 * @return this builder
 		 */
-		public Builder setUseCodeAsDefaultMessage(boolean useCodeAsDefaultMessage) {
-			this.useCodeAsDefaultMessage = useCodeAsDefaultMessage;
+		public Builder enableICU4j() {
+			this.useICU4j = true;
 
 			return this;
 		}
@@ -425,7 +383,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		 */
 		public CatalogMessageSourceBuilder build() {
 			return new CatalogMessageSourceBuilder(
-					this.sources, this.defaultLocale, this.defaultDomain, this.useCodeAsDefaultMessage
+					this.sources, this.defaultLocale, this.defaultDomain, this.useICU4j
 			);
 		}
 	}
