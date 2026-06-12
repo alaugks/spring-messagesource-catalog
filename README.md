@@ -52,6 +52,16 @@ implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog',
 `defaultDomain(String defaultDomain)`
 * If the default domain is not set, the default is **messages**.
 
+`enableICU4j()`
+* Formats messages with ICU4J's `com.ibm.icu.text.MessageFormat` instead of the default `java.text.MessageFormat`. The default only understands numeric argument indices (`{0}`, `{1}`); ICU4J additionally supports named arguments and ICU `plural`/`select`/`gender` patterns (e.g. `{count, plural, …}`). Such patterns cannot be resolved by the default formatter and fail at `getMessage()` time.
+
+> [!IMPORTANT]
+> ICU4J is the [`com.ibm.icu:icu4j`](https://mvnrepository.com/artifact/com.ibm.icu/icu4j) dependency, which is shipped transitively with this package — no extra dependency is required. Its `com.ibm.icu.text.MessageFormat` is a syntax superset of `java.text.MessageFormat`, so existing numeric-index patterns keep working.
+>
+> With ICU4J enabled, named arguments are passed by calling `getMessage(...)` with a single-element `Object[]` holding a `Map<String, Object>`; positional arguments keep using the array as before.
+>
+> Note that the two are not fully output-compatible: ICU4J uses Unicode CLDR locale data, so the formatted result for a given locale can differ from the JDK's — for example the decimal and grouping separators in numbers (`.` vs `,`). Verify locale-sensitive output after enabling ICU4J.
+
 ### TransUnit Record
 
 If the `String domain` argument is not set, the default is the **messages** domain.
