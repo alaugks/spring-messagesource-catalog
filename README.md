@@ -15,8 +15,12 @@ This package extends the [AbstractMessageSource](https://docs.spring.io/spring-f
   - [Options](#options)
   - [TransUnit Record](#transunit-record)
   - [Configuration example](#configuration-example)
-  - [Message formatting](#message-formatting)
   - [With custom CatalogInterface](#with-custom-cataloginterface)
+- [Message formatting](#message-formatting)
+  - [Default: `java.text.MessageFormat`](#default-javatextmessageformat)
+  - [ICU4J: `com.ibm.icu.text.MessageFormat`](#icu4j-comibmicutextmessageformat)
+    - [Plural](#plural)
+    - [Select (and gender)](#select-and-gender)
 - [Javadoc](#javadoc)
 - [License](#license)
 
@@ -68,14 +72,7 @@ implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog',
 * If the default domain is not set, the default is **messages**.
 
 `enableICU4j()`
-* Formats messages with ICU4J's `com.ibm.icu.text.MessageFormat` instead of the default `java.text.MessageFormat`. The default only understands numeric argument indices (`{0}`, `{1}`); ICU4J additionally supports named arguments and ICU `plural`/`select`/`gender` patterns (e.g. `{count, plural, …}`). Such patterns cannot be resolved by the default formatter and fail at `getMessage()` time.
-
-> [!IMPORTANT]
-> ICU4J is the [`com.ibm.icu:icu4j`](https://mvnrepository.com/artifact/com.ibm.icu/icu4j) dependency, which is shipped transitively with this package — no extra dependency is required. Its `com.ibm.icu.text.MessageFormat` is a syntax superset of `java.text.MessageFormat`, so existing numeric-index patterns keep working.
->
-> With ICU4J enabled, named arguments are passed by calling `getMessage(...)` with a single-element `Object[]` holding a `Map<String, Object>`; positional arguments keep using the array as before.
->
-> Note that the two are not fully output-compatible: ICU4J uses Unicode CLDR locale data, so the formatted result for a given locale can differ from the JDK's — for example the decimal and grouping separators in numbers (`.` vs `,`). Verify locale-sensitive output after enabling ICU4J.
+* Formats messages with ICU4J's `com.ibm.icu.text.MessageFormat` instead of the default `java.text.MessageFormat`, adding named arguments and ICU `plural`/`select` patterns. See [Message formatting](#message-formatting) for details and examples.
 
 ### TransUnit Record
 
@@ -184,134 +181,6 @@ The behaviour of resolving the target value based on the code is equivalent to t
 > **Example of a fallback from Language_Region (`en-US`) to Language (`en`). The `id` does not exist in `en-US`, so it tries to select the translation with locale `en`.
 >
 > ***There is no translation for Japanese (`jp`). The default locale transUnits (`en`) are selected.
-
-### Message formatting
-
-A resolved value is formatted before it is returned, applying the arguments passed to `getMessage(...)` to
-the message pattern. Two formatters are available: the default `java.text.MessageFormat` and, once
-`enableICU4j()` is set, `com.ibm.icu.text.MessageFormat`.
-
-#### Default: `java.text.MessageFormat`
-
-Without `enableICU4j()`, values are formatted with [`java.text.MessageFormat`](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/text/MessageFormat.html) —
-the same formatter Spring's `ResourceBundleMessageSource` uses. It only understands **numeric argument
-indices** (`{0}`, `{1}`, …), passed positionally as an `Object[]`. Numbers are formatted locale-aware
-(grouping separators differ per locale).
-
-```java
-new TransUnit(Locale.forLanguageTag("en"), "files", "There are {0,number,integer} files.");
-new TransUnit(Locale.forLanguageTag("de"), "files", "Es gibt {0,number,integer} Dateien.");
-```
-
-**getMessage()**
-
-```java
-messageSource.getMessage(
-    "files",
-    new Object[] { 10000 },
-    Locale.forLanguageTag("de")
-);
-```
-
-**Result:** `Es gibt 10.000 Dateien.`
-
-#### ICU4J: `com.ibm.icu.text.MessageFormat`
-
-Enable ICU4J on the builder to format with [ICU4J's `MessageFormat`](https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/text/MessageFormat.html):
-
-```java
-@Bean
-public MessageSource messageSource() {
-    return CatalogMessageSourceBuilder
-        .builder(this.transUnits, Locale.forLanguageTag("en"))
-        .enableICU4j() // required for named arguments and plural/select
-        .build();
-}
-```
-
-Its syntax is a superset of `java.text.MessageFormat`, so existing numeric-index patterns keep working
-while gaining **named arguments** and the ICU `plural`/`select` constructs.
-
-> [!IMPORTANT]
-> Named arguments (e.g. `count`, `recipient_gender`) cannot be resolved by the default `java.text.MessageFormat` —
-> it only understands numeric indices (`{0}`, `{1}`). When a pattern uses named arguments you **must** enable
-> ICU4J via `enableICU4j()`, otherwise `getMessage()` fails. ICU4J ships transitively with this library; no extra
-> dependency is required.
-
-Named arguments are passed as a single `Map` (not as positional `{0}` / `{1}` arguments). The catalog detects
-a lone `Map` argument and formats the pattern with it.
-
-##### Plural
-
-A `plural` switch selects a variant based on a number. Each case is either an **exact number** — matched as
-`=N` — or a **CLDR plural keyword** (`zero`, `one`, `two`, `few`, `many`, `other`) that the locale's plural
-rules select from the number. The number itself is inserted into a case by referencing the argument name,
-`{count}`.
-
-Which keywords a language uses, and how each number maps to one, is defined per language in the
-[Unicode CLDR Language Plural Rules](https://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html).
-
-```java
-new TransUnit(
-    Locale.forLanguageTag("en"),
-    "file_deleted",
-    "{count, plural, =0 {You deleted no files.} =1 {You deleted one file.} other {You deleted {count} files.}}"
-);
-new TransUnit(
-    Locale.forLanguageTag("de"),
-    "file_deleted",
-    "{count, plural, =0 {Sie haben keine Dateien gelöscht.} =1 {Sie haben eine Datei gelöscht.} other {Sie haben {count} Dateien gelöscht.}}"
-);
-```
-
-**getMessage()**
-
-```java
-messageSource.getMessage(
-    "file_deleted",
-    new Object[] { Map.of("count", 1000) },
-    Locale.forLanguageTag("de")
-);
-```
-
-**Result:** `Sie haben 1.000 Dateien gelöscht.`
-
-##### Select (and gender)
-
-A `select` switch picks the case whose value matches the argument. Use it for any value-based choice such as
-grammatical gender; a final `other` case acts as the fallback.
-
-The apostrophe is a quoting metacharacter in ICU `MessageFormat`. A literal apostrophe must be written as two
-single quotes (`''`), e.g. `Wie geht''s ihr?` resolves to `Wie geht's ihr?`.
-
-```java
-new TransUnit(
-    Locale.forLanguageTag("en"),
-    "greeting",
-    "{recipient_gender, select, feminine {How is she?} masculine {How is he?} other {How are they?}}"
-);
-new TransUnit(
-    Locale.forLanguageTag("de"),
-    "greeting",
-    "{recipient_gender, select, feminine {Wie geht''s ihr?} masculine {Wie geht''s ihm?} other {Wie geht''s ihnen?}}"
-);
-```
-
-**getMessage()**
-
-```java
-messageSource.getMessage(
-    "greeting",
-    new Object[] { Map.of("recipient_gender", "feminine") },
-    Locale.forLanguageTag("de")
-);
-```
-
-**Result:** `Wie geht's ihr?`
-
-> [!IMPORTANT]
-> ICU4J uses Unicode CLDR locale data, so locale-sensitive output (number, date and currency formatting,
-> plural categories) can differ from the JDK's. Verify the formatted result after enabling ICU4J.
 
 ### With custom CatalogInterface
 
@@ -477,6 +346,117 @@ public class MessageConfig {
     }
 }
 ```
+
+## Message formatting
+
+A resolved value is formatted before it is returned, applying the arguments passed to `getMessage(...)` to
+the message pattern. Two formatters are available: the default `java.text.MessageFormat` and, once
+`enableICU4j()` is set, `com.ibm.icu.text.MessageFormat`.
+
+> [!IMPORTANT]
+> Named arguments and ICU `plural`/`select` patterns (e.g. `{count, plural, …}`) cannot be resolved by the default `java.text.MessageFormat` and fail at `getMessage()` time. To use them you **must** enable ICU4J via `enableICU4j()`.
+>
+> ICU4J is the [`com.ibm.icu:icu4j`](https://central.sonatype.com/artifact/com.ibm.icu/icu4j) dependency, which is shipped transitively with this package — no extra dependency is required. Its `com.ibm.icu.text.MessageFormat` is a syntax superset of `java.text.MessageFormat`, so existing numeric-index patterns keep working.
+>
+> Note that the two are not fully output-compatible: ICU4J uses Unicode CLDR locale data, so the formatted result for a given locale can differ from the JDK's — for example the decimal and grouping separators in numbers (`.` vs `,`). Verify locale-sensitive output after enabling ICU4J.
+
+### Default (java.text.MessageFormat)
+
+Without `enableICU4j()`, values are formatted with [`java.text.MessageFormat`](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/text/MessageFormat.html) —
+the same formatter Spring's `ResourceBundleMessageSource` uses. It only understands **numeric argument
+indices** (`{0}`, `{1}`, …), passed positionally as an `Object[]`. Numbers are formatted locale-aware
+(grouping separators differ per locale).
+
+```java
+new TransUnit(Locale.forLanguageTag("en"), "files", "There are {0,number,integer} files.");
+new TransUnit(Locale.forLanguageTag("de"), "files", "Es gibt {0,number,integer} Dateien.");
+
+messageSource.getMessage(
+    "files",
+    new Object[] { 10000 },
+    Locale.forLanguageTag("de")
+);
+```
+
+**Result:** `Es gibt 10.000 Dateien.`
+
+### ICU4J (com.ibm.icu.text.MessageFormat)
+
+Enable ICU4J on the builder to format with [ICU4J's `MessageFormat`](https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/text/MessageFormat.html):
+
+```java
+@Bean
+public MessageSource messageSource() {
+    return CatalogMessageSourceBuilder
+        .builder(this.transUnits, Locale.forLanguageTag("en"))
+        .enableICU4j() // required for named arguments and plural/select
+        .build();
+}
+```
+
+With ICU4J enabled, patterns can use **named arguments** and the ICU `plural`/`select` constructs. Named
+arguments are passed as a single `Map` (not as positional `{0}` / `{1}` arguments); the catalog detects a lone
+`Map` argument and formats the pattern with it.
+
+#### Plural
+
+A `plural` switch selects a variant based on a number. Each case is either an **exact number** — matched as
+`=N` — or a **CLDR plural keyword** (`zero`, `one`, `two`, `few`, `many`, `other`) that the locale's plural
+rules select from the number. The number itself is inserted into a case by referencing the argument name,
+`{count}`.
+
+Which keywords a language uses, and how each number maps to one, is defined per language in the
+[Unicode CLDR Language Plural Rules](https://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html).
+
+```java
+new TransUnit(
+    Locale.forLanguageTag("en"),
+    "file_deleted",
+    "{count, plural, =0 {You deleted no files.} =1 {You deleted one file.} other {You deleted {count} files.}}"
+);
+new TransUnit(
+    Locale.forLanguageTag("de"),
+    "file_deleted",
+    "{count, plural, =0 {Sie haben keine Dateien gelöscht.} =1 {Sie haben eine Datei gelöscht.} other {Sie haben {count} Dateien gelöscht.}}"
+);
+
+messageSource.getMessage(
+    "file_deleted",
+    new Object[] { Map.of("count", 1000) },
+    Locale.forLanguageTag("de")
+);
+```
+
+**Result:** `Sie haben 1.000 Dateien gelöscht.`
+
+#### Select (and gender)
+
+A `select` switch picks the case whose value matches the argument. Use it for any value-based choice such as
+grammatical gender; a final `other` case acts as the fallback.
+
+The apostrophe is a quoting metacharacter in ICU `MessageFormat`. A literal apostrophe must be written as two
+single quotes (`''`), e.g. `Wie geht''s ihr?` resolves to `Wie geht's ihr?`.
+
+```java
+new TransUnit(
+    Locale.forLanguageTag("en"),
+    "greeting",
+    "{recipient_gender, select, feminine {How is she?} masculine {How is he?} other {How are they?}}"
+);
+new TransUnit(
+    Locale.forLanguageTag("de"),
+    "greeting",
+    "{recipient_gender, select, feminine {Wie geht''s ihr?} masculine {Wie geht''s ihm?} other {Wie geht''s ihnen?}}"
+);
+
+messageSource.getMessage(
+    "greeting",
+    new Object[] { Map.of("recipient_gender", "feminine") },
+    Locale.forLanguageTag("de")
+);
+```
+
+**Result:** `Wie geht's ihr?`
 
 ## Javadoc
 
