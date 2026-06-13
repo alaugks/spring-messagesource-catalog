@@ -13,6 +13,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.NoSuchMessageException;
@@ -41,6 +42,74 @@ class CatalogMessageSourceBuilderTest {
 
 		assertEquals("Es gibt 10,000 Dateien", ms.getMessage("list_files", new Object[] {10000}, "", en));
 		assertEquals("Es gibt 10.000 Dateien", ms.getMessage("list_files", new Object[] {10000}, "", de));
+	}
+
+	// README "Message formatting": default java.text.MessageFormat with a positional argument.
+	@Test
+	void test_readme_defaultFormat_positionalArgument() {
+		Locale en = Locale.forLanguageTag("en");
+		Locale de = Locale.forLanguageTag("de");
+
+		List<TransUnitInterface> transUnits = List.of(
+			new TransUnit(en, "files", "There are {0,number,integer} files."),
+			new TransUnit(de, "files", "Es gibt {0,number,integer} Dateien.")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+			.builder(transUnits, en)
+			.build();
+
+		assertEquals(
+			"Es gibt 10.000 Dateien.",
+			ms.getMessage("files", new Object[] {10000}, de)
+		);
+	}
+
+	@Test
+	void test_readme_icu4j_plural() {
+		Locale en = Locale.forLanguageTag("en");
+		Locale de = Locale.forLanguageTag("de");
+
+		List<TransUnitInterface> transUnits = List.of(
+			new TransUnit(en, "file_deleted",
+				"{count, plural, =0 {You deleted no files.} =1 {You deleted one file.} other {You deleted {count} files.}}"),
+			new TransUnit(de, "file_deleted",
+				"{count, plural, =0 {Sie haben keine Dateien gelöscht.} =1 {Sie haben eine Datei gelöscht.} other {Sie haben {count} Dateien gelöscht.}}")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+			.builder(transUnits, en)
+			.enableICU4j()
+			.build();
+
+		assertEquals(
+			"Sie haben 1.000 Dateien gelöscht.",
+			ms.getMessage("file_deleted", new Object[] {Map.of("count", 1000)}, de)
+		);
+	}
+
+	// README "Message formatting": ICU4J select with a named argument and escaped apostrophes.
+	@Test
+	void test_readme_icu4j_select() {
+		Locale en = Locale.forLanguageTag("en");
+		Locale de = Locale.forLanguageTag("de");
+
+		List<TransUnitInterface> transUnits = List.of(
+			new TransUnit(en, "greeting",
+				"{recipient_gender, select, feminine {How is she?} masculine {How is he?} other {How are they?}}"),
+			new TransUnit(de, "greeting",
+				"{recipient_gender, select, feminine {Wie geht''s ihr?} masculine {Wie geht''s ihm?} other {Wie geht''s ihnen?}}")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+			.builder(transUnits, en)
+			.enableICU4j()
+			.build();
+
+		assertEquals(
+			"Wie geht's ihr?",
+			ms.getMessage("greeting", new Object[] {Map.of("recipient_gender", "feminine")}, de)
+		);
 	}
 
 	@Test
@@ -226,21 +295,6 @@ class CatalogMessageSourceBuilderTest {
 				Locale.forLanguageTag("en")
 		));
 	}
-
-//	@Test
-//	void test_CatalogMessageSource_setParentMessageSource() {
-//		CatalogMessageSourceBuilder messageSource = CatalogMessageSourceBuilder
-//				.builder(new ArrayList<>(), locale)
-//				.build();
-//
-//		messageSource.setParentMessageSource(new MockMessageSource());
-//
-//		assertEquals("code_value", messageSource.getMessage(
-//				"code",
-//				new Object[] {},
-//				Locale.forLanguageTag("en")
-//		));
-//	}
 
 	static class MockMessageSource extends AbstractMessageSource {
 
