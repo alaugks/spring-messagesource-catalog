@@ -81,6 +81,26 @@ class CatalogMessageSourceBuilderTest {
 	}
 
 	@Test
+	void test_set_use_icu4j_true_enables_icu4j() {
+		List<TransUnitInterface> transUnits = List.of(
+			new TransUnit(LOCALE_EN, "file_deleted",
+				"{count, plural, =0 {You deleted no files.} =1 {You deleted one file.} other {You deleted {count} files.}}"),
+			new TransUnit(LOCALE_DE, "file_deleted",
+				"{count, plural, =0 {Sie haben keine Dateien gelöscht.} =1 {Sie haben eine Datei gelöscht.} other {Sie haben {count} Dateien gelöscht.}}")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+			.builder(transUnits, LOCALE_EN)
+			.setUseICU4j(true)
+			.build();
+
+		assertEquals(
+			"Sie haben 1.000 Dateien gelöscht.",
+			ms.getMessage("file_deleted", new Object[] {Map.of("count", 1000)}, LOCALE_DE)
+		);
+	}
+
+	@Test
 	void test_readme_icu4j_select() {
 		List<TransUnitInterface> transUnits = List.of(
 			new TransUnit(LOCALE_EN, "greeting",

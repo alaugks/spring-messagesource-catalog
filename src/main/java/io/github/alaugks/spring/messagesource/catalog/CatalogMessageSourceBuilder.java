@@ -314,17 +314,9 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	 * Fluent builder for {@link CatalogMessageSourceBuilder}. Holds the configured sources,
 	 * the default locale, and the default domain until {@link #build()} is called.
 	 */
-	public static final class Builder {
-
-		private final Locale defaultLocale;
+	public static final class Builder extends AbstractCatalogMessageSourceBuilder<Builder> {
 
 		private final List<CatalogInterface> sources = new ArrayList<>();
-
-		private String defaultDomain = DEFAULT_DOMAIN;
-
-		private boolean useICU4j = false;
-
-		private MessageSource parentMessageSource = null;
 
 		/**
 		 * Creates a new builder seeded with an initial source.
@@ -334,40 +326,10 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		 *                      for the requested locale; must not be {@code null}
 		 */
 		public Builder(CatalogInterface catalogSource, Locale defaultLocale) {
+			super(defaultLocale);
 			Assert.notNull(catalogSource, "Argument catalogSource must not be null");
-			Assert.notNull(defaultLocale, "Argument defaultLocale must not be null");
 
-			this.defaultLocale = defaultLocale;
 			this.sources.add(catalogSource);
-		}
-
-		/**
-		 * Sets the default domain. Codes stored under this domain are also accessible via
-		 * their name without the domain prefix; codes stored under any other domain require the
-		 * {@code <domain>.<code>} prefix.
-		 *
-		 * @param defaultDomain the default domain; must not be {@code null}
-		 * @return this builder
-		 */
-		public Builder defaultDomain(String defaultDomain) {
-			Assert.notNull(defaultDomain, "Argument defaultDomain must not be null");
-
-			this.defaultDomain = defaultDomain;
-
-			return this;
-		}
-
-		/**
-		 * Enables ICU4J message formatting. When enabled, resolved messages are formatted with
-		 * {@link com.ibm.icu.text.MessageFormat} (supporting ICU syntax such as named arguments
-		 * and {@code plural}/{@code select}); otherwise {@link java.text.MessageFormat} is used.
-		 *
-		 * @return this builder
-		 */
-		public Builder enableICU4j() {
-			this.useICU4j = true;
-
-			return this;
 		}
 
 		/**
@@ -400,19 +362,6 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		}
 
 		/**
-		 * Sets the parent message source to be used as a fallback when a message cannot be resolved
-		 * from the current sources or domains.
-		 *
-		 * @param messageSource the parent message source; must not be {@code null}
-		 * @return this builder instance
-		 */
-		public Builder parentMessageSource(MessageSource messageSource) {
-			this.parentMessageSource = messageSource;
-
-			return this;
-		}
-
-		/**
 		 * Builds a {@link CatalogMessageSourceBuilder} from the configured sources, default
 		 * locale, and default domain. Trans units are aggregated and the source chain is
 		 * wired up at this point; subsequent mutations of the builder have no effect on the
@@ -423,10 +372,10 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		public CatalogMessageSourceBuilder build() {
 			return new CatalogMessageSourceBuilder(
 					this.sources,
-					this.defaultLocale,
-					this.defaultDomain,
-					this.useICU4j,
-					this.parentMessageSource
+					this.getDefaultLocale(),
+					this.getDefaultDomain(),
+					this.isICU4jEnabled(),
+					this.getParentMessageSource()
 				);
 		}
 	}
