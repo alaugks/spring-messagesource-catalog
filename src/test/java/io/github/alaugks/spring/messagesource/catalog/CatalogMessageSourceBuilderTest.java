@@ -478,7 +478,7 @@ class CatalogMessageSourceBuilderTest {
 			.build();
 
 		assertEquals("value_en_1", ms.getMessage("key_1", null, LOCALE_EN));
-		assertEquals("ParentMessageSource with args: 1.234", ms.getMessage("parent-messagesource-code", new Object[]{1234L}, LOCALE_EN));
-		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("not_exists", null, null));
+		assertEquals("ParentMessageSource with args: 1,234", ms.getMessage("parent-messagesource-code", new Object[]{1234L}, LOCALE_EN));
+		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("not_exists", null, LOCALE_EN));
 	}
 }

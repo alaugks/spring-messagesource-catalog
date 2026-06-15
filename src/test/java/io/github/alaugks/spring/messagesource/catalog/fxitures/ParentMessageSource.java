@@ -11,7 +11,7 @@ public class ParentMessageSource extends AbstractMessageSource {
     @Override
     protected MessageFormat resolveCode(String code, Locale locale) {
         if (code.equals("parent-messagesource-code")) {
-            return new MessageFormat("ParentMessageSource with args: {0,number,integer}");
+            return new MessageFormat("ParentMessageSource with args: {0,number,integer}", locale);
         }
         return null;
     }
