@@ -50,7 +50,7 @@ class TranslationFileTest {
 	}
 
 	@Test
-	void test_hashCode() {
+	void test_hash_code() {
 		TranslationFile a = new TranslationFile(
 				"my-domain",
 				Locale.forLanguageTag("en-US"),
@@ -66,7 +66,7 @@ class TranslationFileTest {
 	}
 
 	@Test
-	void test_toString() {
+	void test_to_string() {
 		TranslationFile translationFile = new TranslationFile(
 				"my-domain",
 				Locale.forLanguageTag("en-US"),

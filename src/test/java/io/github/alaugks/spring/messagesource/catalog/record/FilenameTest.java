@@ -14,21 +14,21 @@ import org.junit.jupiter.api.Test;
 class FilenameTest {
 
 	@Test
-	void test_hasNoLocale() {
+	void test_has_no_locale() {
 		Filename filename = new Filename("messages", null, null);
 
 		assertFalse(filename.hasLocale());
 	}
 
 	@Test
-	void test_hasLocale() {
+	void test_has_locale() {
 		Filename filename = new Filename("messages", "en", null);
 
 		assertTrue(filename.hasLocale());
 	}
 
 	@Test
-	void test_formatedException() {
+	void test_invalid_locale_exception() {
 		Filename filename = new Filename("messages", "en", "bar");
 
 		assertThrows(CatalogMessageSourceRuntimeException.class, filename::locale);

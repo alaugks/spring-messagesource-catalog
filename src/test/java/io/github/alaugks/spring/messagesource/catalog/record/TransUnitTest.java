@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class TransUnitTest {
 
 	@Test
-	void test_withoutDomain() {
+	void test_without_domain() {
 		TransUnit transUnit = new TransUnit(Locale.forLanguageTag("en"), "the-code", "the-value");
 
 		assertEquals(Locale.forLanguageTag("en"), transUnit.locale());
@@ -23,7 +23,7 @@ class TransUnitTest {
 	}
 
 	@Test
-	void test_witDomain() {
+	void test_with_domain() {
 		TransUnit transUnit = new TransUnit(Locale.forLanguageTag("en"), "the-code", "the-value", "my-domain");
 
 		assertEquals(Locale.forLanguageTag("en"), transUnit.locale());

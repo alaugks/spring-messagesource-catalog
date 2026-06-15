@@ -69,8 +69,8 @@ class BenchmarkMessageSourceTest {
 	}
 
 	@ParameterizedTest()
-	@MethodSource("dataProvider_examples")
-	void test_CatalogMessageSource(String locale, String code, Object[] args, Object expected) {
+	@MethodSource("provider_examples")
+	void test_catalog_message_source(String locale, String code, Object[] args, Object expected) {
 		assertEquals(expected, catalogMessageSourceBuilder.getMessage(
 				code,
 				args,
@@ -79,8 +79,8 @@ class BenchmarkMessageSourceTest {
 	}
 
 	@ParameterizedTest()
-	@MethodSource("dataProvider_examples_icu4j")
-	void test_CatalogMessageSource_icu4j(String locale, String code, Object[] args, Object expected) {
+	@MethodSource("provider_examples_icu4j")
+	void test_catalog_message_source_icu4j(String locale, String code, Object[] args, Object expected) {
 		assertEquals(expected, catalogMessageSourceBuilderICU4j.getMessage(
 			code,
 			args,
@@ -89,8 +89,8 @@ class BenchmarkMessageSourceTest {
 	}
 
 	@ParameterizedTest()
-	@MethodSource("dataProvider_examples")
-	void test_ResourceBundleMessageSource(String locale, String code, Object[] args, Object expected) {
+	@MethodSource("provider_examples")
+	void test_resource_bundle_message_source(String locale, String code, Object[] args, Object expected) {
 		assertEquals(expected, resourceBundleMessageSource.getMessage(
 				this.concatCode(code),
 				args,
@@ -99,8 +99,8 @@ class BenchmarkMessageSourceTest {
 	}
 
 	@ParameterizedTest()
-	@MethodSource("dataProvider_examples")
-	void test_ReloadableResourceBundleMessageSource(String locale, String code, Object[] args, Object expected) {
+	@MethodSource("provider_examples")
+	void test_reloadable_resource_bundle_message_source(String locale, String code, Object[] args, Object expected) {
 		assertEquals(expected, reloadableResourceBundleMessageSource.getMessage(
 				this.concatCode(code),
 				args,
@@ -108,13 +108,13 @@ class BenchmarkMessageSourceTest {
 		));
 	}
 
-	private static Stream<Arguments> dataProvider_examples_icu4j() {
+	private static Stream<Arguments> provider_examples_icu4j() {
 		return Stream.of(
 				Arguments.of("de", "messages.list_files_icu4j", new Object[] {Map.of("file_count", 10000L)}, "Sie haben 10.000 Dateien gelöscht.")
 		);
 	}
 
-	private static Stream<Arguments> dataProvider_examples() {
+	private static Stream<Arguments> provider_examples() {
 		return Stream.of(
 				Arguments.of("en", "headline", null, "Headline (en)"),
 				Arguments.of("en", "messages.headline", null, "Headline (en)"),

@@ -18,10 +18,12 @@ import org.junit.jupiter.api.Test;
 
 class ResourcesLoaderTest {
 
+	static final Locale LOCALE_EN = Locale.forLanguageTag("en");
+
 	@Test
-	void test_setLocationPatterns() {
+	void test_set_location_patterns() {
 		ResourcesLoader resourcesLoader = new ResourcesLoader(
-			Locale.forLanguageTag("en"),
+			LOCALE_EN,
 			new LocationPattern("translations/*"),
 			List.of("txt")
 		);
@@ -30,9 +32,9 @@ class ResourcesLoaderTest {
 	}
 
 	@Test
-	void test_setLocationPatterns_domainMessages() {
+	void test_set_location_patterns_domain_messages() {
 		ResourcesLoader resourcesLoader = new ResourcesLoader(
-				Locale.forLanguageTag("en"),
+				LOCALE_EN,
 				new LocationPattern("translations/messages*"),
 				List.of("txt")
 		);
@@ -42,9 +44,9 @@ class ResourcesLoaderTest {
 
 
 	@Test
-	void test_setLocationPatterns_languageDe() {
+	void test_set_location_patterns_language_de() {
 		ResourcesLoader resourcesLoader = new ResourcesLoader(
-				Locale.forLanguageTag("en"),
+				LOCALE_EN,
 				new LocationPattern("translations/*_de*"),
 				List.of("txt")
 		);
@@ -53,9 +55,9 @@ class ResourcesLoaderTest {
 	}
 
 	@Test
-	void test_setLocationPatternsPattern() {
+	void test_set_location_patterns_list() {
 		ResourcesLoader resourcesLoader = new ResourcesLoader(
-				Locale.forLanguageTag("en"),
+				LOCALE_EN,
 				new LocationPattern(List.of("translations_en/*", "translations_de/*")),
 				List.of("txt")
 		);
@@ -64,9 +66,9 @@ class ResourcesLoaderTest {
 	}
 
 	@Test
-	void test_Record() {
+	void test_record() {
 		ResourcesLoader resourcesLoader = new ResourcesLoader(
-				Locale.forLanguageTag("en"),
+				LOCALE_EN,
 				new LocationPattern(List.of("translations_en_US/*")),
 				List.of("txt")
 		);
@@ -79,9 +81,9 @@ class ResourcesLoaderTest {
 	}
 
 	@Test
-	void test_parseFileName_null() {
+	void test_parse_file_name_null() {
 		ResourcesLoader resourcesLoader = new ResourcesLoader(
-				Locale.forLanguageTag("en"),
+				LOCALE_EN,
 				new LocationPattern("translations/.txt"),
 				List.of("txt")
 		);
@@ -90,9 +92,9 @@ class ResourcesLoaderTest {
 	}
 
 	@Test
-	void test_Exception() {
+	void test_exception() {
 		ResourcesLoader resourcesLoader = new ResourcesLoader(
-			Locale.forLanguageTag("en"),
+			LOCALE_EN,
 			new LocationPattern("translations/not-exists.txt"),
 			List.of("txt")
 		);

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 class ResourcesFilenameParserTest {
 
 	@Test
-	void test_domain_withoutLocale() {
+	void test_domain_without_locale() {
 		Filename filename = new ResourcesFileNameParser("message.ext").parse();
 		assertEquals("message", filename.domain());
 		assertNull(filename.language());
@@ -29,7 +29,7 @@ class ResourcesFilenameParserTest {
 	}
 
 	@Test
-	void test_domain_en_withDash() {
+	void test_domain_en_with_dash() {
 		Filename filename = new ResourcesFileNameParser("message-en.ext").parse();
 		assertEquals("message", filename.domain());
 		assertEquals("en", filename.language());
@@ -38,7 +38,7 @@ class ResourcesFilenameParserTest {
 	}
 
 	@Test
-	void test_domain_enGB() {
+	void test_domain_en_gb() {
 		Filename filename = new ResourcesFileNameParser("message_en_GB.ext").parse();
 		assertEquals("message", filename.domain());
 		assertEquals("en", filename.language());
@@ -47,7 +47,7 @@ class ResourcesFilenameParserTest {
 	}
 
 	@Test
-	void test_domain_enGB_withDash() {
+	void test_domain_en_gb_with_dash() {
 		Filename filename = new ResourcesFileNameParser("message-en-GB.ext").parse();
 		assertEquals("message", filename.domain());
 		assertEquals("en", filename.language());

@@ -17,7 +17,6 @@ import java.util.concurrent.ConcurrentMap;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -50,7 +49,9 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 
 	private final boolean useICU4j;
 
-	/**
+    private final MessageSource parentMessageSource;
+
+    /**
 	 * Aggregates trans units into the catalog map and wires the source chain
 	 * for late-binding fallback.
 	 */
@@ -58,12 +59,14 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 			List<CatalogInterface> sources,
 			Locale defaultLocale,
 			String defaultDomain,
-        	boolean useICU4j
+        	boolean useICU4j,
+			MessageSource parentMessageSource
 	) {
 		this.defaultLocale = defaultLocale;
 		this.defaultDomain = defaultDomain;
 		this.useICU4j = useICU4j;
-		this.catalogMap = new ConcurrentHashMap<>();
+        this.parentMessageSource = parentMessageSource;
+        this.catalogMap = new ConcurrentHashMap<>();
 
 		for (CatalogInterface source : sources) {
 			source.getTransUnits().forEach(t -> this.put(t.locale(), t.code(), t.value(), t.domain()));
@@ -108,10 +111,10 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		return new Builder(catalogSource, defaultLocale);
 	}
 
-	@Override
 	@Nullable
-	public final String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
-		String msg = getMessageInternal(code, args, locale);
+	@Override
+	public final String getMessage(String code, @Nullable Object[] args, @Nullable String defaultMessage, @Nullable Locale locale){
+		String msg = this.getMessageInternal(code, args, locale);
 		if (msg != null) {
 			return msg;
 		}
@@ -120,14 +123,19 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	}
 
 	@Override
-	public final String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
+	public final String getMessage(String code, @Nullable Object[] args, @Nullable Locale locale) throws NoSuchMessageException {
 		String msg = this.getMessageInternal(code, args, locale);
 		if (msg != null) {
 			return msg;
 		}
 
-        throw new NoSuchMessageException(code, locale);
-    }
+		if (locale == null) {
+			throw new NoSuchMessageException(code);
+		}
+		else {
+			throw new NoSuchMessageException(code, locale);
+		}
+	}
 
 	@Override
 	public final String getMessage(MessageSourceResolvable resolvable, @Nullable Locale locale) throws NoSuchMessageException {
@@ -139,6 +147,11 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 					return message;
 				}
 			}
+		}
+
+		String defaultMessage = resolvable.getDefaultMessage();
+		if (defaultMessage != null) {
+			return defaultMessage;
 		}
 
 		String code = !ObjectUtils.isEmpty(codes) ? codes[codes.length - 1] : "";
@@ -162,10 +175,17 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	 * @return the {@link MessageFormat}, or {@code null} if the code cannot be resolved
 	 */
 	@Nullable
-	protected String getMessageInternal(@NonNull String code, Object[] args, @NonNull Locale locale) {
-		String value = this.resolveFromCatalog(code, locale);
+	protected String getMessageInternal(@Nullable String code, @Nullable Object[] args, @Nullable Locale locale) {
+		if (code == null) {
+			return null;
+		}
+		if (locale == null) {
+			locale = Locale.getDefault();
+		}
 
-		if (args == null || value == null) {
+		String value = this.resolveFromCatalog(code, locale, args);
+
+		if (ObjectUtils.isEmpty(args) || value == null) {
 			return value;
 		}
 
@@ -192,7 +212,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	 * Looks up the code in the catalog map, falling back to the source chain
 	 * and caching the result.
 	 */
-	public String resolveFromCatalog(String code, Locale locale) {
+	private String resolveFromCatalog(String code, Locale locale, @Nullable Object[] args) {
 		if (locale.getLanguage().isEmpty() || code.isEmpty()) {
 			return null;
 		}
@@ -206,6 +226,10 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		if (tu != null) {
 			this.put(tu.locale(), tu.code(), tu.value(), tu.domain());
 			return tu.value();
+		}
+
+		if (this.parentMessageSource != null) {
+			return this.parentMessageSource.getMessage(code, args, null, locale);
 		}
 
 		return null;
@@ -300,6 +324,8 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 
 		private boolean useICU4j = false;
 
+		private MessageSource parentMessageSource = null;
+
 		/**
 		 * Creates a new builder seeded with an initial source.
 		 *
@@ -374,6 +400,19 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		}
 
 		/**
+		 * Sets the parent message source to be used as a fallback when a message cannot be resolved
+		 * from the current sources or domains.
+		 *
+		 * @param messageSource the parent message source; must not be {@code null}
+		 * @return this builder instance
+		 */
+		public Builder parentMessageSource(MessageSource messageSource) {
+			this.parentMessageSource = messageSource;
+
+			return this;
+		}
+
+		/**
 		 * Builds a {@link CatalogMessageSourceBuilder} from the configured sources, default
 		 * locale, and default domain. Trans units are aggregated and the source chain is
 		 * wired up at this point; subsequent mutations of the builder have no effect on the
@@ -383,8 +422,12 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		 */
 		public CatalogMessageSourceBuilder build() {
 			return new CatalogMessageSourceBuilder(
-					this.sources, this.defaultLocale, this.defaultDomain, this.useICU4j
-			);
+					this.sources,
+					this.defaultLocale,
+					this.defaultDomain,
+					this.useICU4j,
+					this.parentMessageSource
+				);
 		}
 	}
 }

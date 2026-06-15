@@ -4,308 +4,467 @@
 package io.github.alaugks.spring.messagesource.catalog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.github.alaugks.spring.messagesource.catalog.catalog.AbstractCatalog;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
-import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
-import org.springframework.context.support.AbstractMessageSource;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 
 @SuppressWarnings({"java:S4144"})
 class CatalogMessageSourceBuilderTest {
 
-	public final Locale locale = Locale.forLanguageTag("en");
-
-
+	static final Locale LOCALE_EN = Locale.forLanguageTag("en");
+	static final Locale LOCALE_DE = Locale.forLanguageTag("de");
+	static final Locale LOCALE_EN_US = Locale.forLanguageTag("en-US");
+	
 	@Test
-	void test_resolution_messageFormat() {
-		Locale en = Locale.forLanguageTag("en");
-		Locale de = Locale.forLanguageTag("de");
-		Locale enUs = Locale.forLanguageTag("en-US");
-
+	void test_resolution_message_format() {
 		List<TransUnitInterface> transUnits = List.of(
-			new TransUnit(en, "list_files", "Es gibt {0,choice,0#keine Datei|1#eine Datei|1<{0,number,integer} Dateien}"),
-			new TransUnit(de, "list_files", "Es gibt {0,choice,0#keine Datei|1#eine Datei|1<{0,number,integer} Dateien}")
+			new TransUnit(LOCALE_EN, "list_files", "Es gibt {0,choice,0#keine Datei|1#eine Datei|1<{0,number,integer} Dateien}"),
+			new TransUnit(LOCALE_DE, "list_files", "Es gibt {0,choice,0#keine Datei|1#eine Datei|1<{0,number,integer} Dateien}")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-			.builder(transUnits, en)
+			.builder(transUnits, LOCALE_EN)
 			.build();
 
-		assertEquals("Es gibt 10,000 Dateien", ms.getMessage("list_files", new Object[] {10000}, "", en));
-		assertEquals("Es gibt 10.000 Dateien", ms.getMessage("list_files", new Object[] {10000}, "", de));
+		assertEquals("Es gibt 10,000 Dateien", ms.getMessage("list_files", new Object[] {10000}, "", LOCALE_EN));
+		assertEquals("Es gibt 10.000 Dateien", ms.getMessage("list_files", new Object[] {10000}, "", LOCALE_DE));
+		assertEquals("Es gibt 10,000 Dateien", ms.getMessage("list_files", new Object[] {10000}, "", LOCALE_EN_US));
 	}
 
 	// README "Message formatting": default java.text.MessageFormat with a positional argument.
 	@Test
-	void test_readme_defaultFormat_positionalArgument() {
-		Locale en = Locale.forLanguageTag("en");
-		Locale de = Locale.forLanguageTag("de");
-
+	void test_readme_default_format_positional_argument() {
 		List<TransUnitInterface> transUnits = List.of(
-			new TransUnit(en, "files", "There are {0,number,integer} files."),
-			new TransUnit(de, "files", "Es gibt {0,number,integer} Dateien.")
+			new TransUnit(LOCALE_EN, "files", "There are {0,number,integer} files."),
+			new TransUnit(LOCALE_DE, "files", "Es gibt {0,number,integer} Dateien.")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-			.builder(transUnits, en)
+			.builder(transUnits, LOCALE_EN)
 			.build();
 
 		assertEquals(
 			"Es gibt 10.000 Dateien.",
-			ms.getMessage("files", new Object[] {10000}, de)
+			ms.getMessage("files", new Object[] {10000}, LOCALE_DE)
 		);
 	}
 
 	@Test
 	void test_readme_icu4j_plural() {
-		Locale en = Locale.forLanguageTag("en");
-		Locale de = Locale.forLanguageTag("de");
-
 		List<TransUnitInterface> transUnits = List.of(
-			new TransUnit(en, "file_deleted",
+			new TransUnit(LOCALE_EN, "file_deleted",
 				"{count, plural, =0 {You deleted no files.} =1 {You deleted one file.} other {You deleted {count} files.}}"),
-			new TransUnit(de, "file_deleted",
+			new TransUnit(LOCALE_DE, "file_deleted",
 				"{count, plural, =0 {Sie haben keine Dateien gelöscht.} =1 {Sie haben eine Datei gelöscht.} other {Sie haben {count} Dateien gelöscht.}}")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-			.builder(transUnits, en)
+			.builder(transUnits, LOCALE_EN)
 			.enableICU4j()
 			.build();
 
 		assertEquals(
 			"Sie haben 1.000 Dateien gelöscht.",
-			ms.getMessage("file_deleted", new Object[] {Map.of("count", 1000)}, de)
+			ms.getMessage("file_deleted", new Object[] {Map.of("count", 1000)}, LOCALE_DE)
 		);
 	}
 
 	// README "Message formatting": ICU4J select with a named argument and escaped apostrophes.
 	@Test
 	void test_readme_icu4j_select() {
-		Locale en = Locale.forLanguageTag("en");
-		Locale de = Locale.forLanguageTag("de");
-
 		List<TransUnitInterface> transUnits = List.of(
-			new TransUnit(en, "greeting",
+			new TransUnit(LOCALE_EN, "greeting",
 				"{recipient_gender, select, feminine {How is she?} masculine {How is he?} other {How are they?}}"),
-			new TransUnit(de, "greeting",
+			new TransUnit(LOCALE_DE, "greeting",
 				"{recipient_gender, select, feminine {Wie geht''s ihr?} masculine {Wie geht''s ihm?} other {Wie geht''s ihnen?}}")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-			.builder(transUnits, en)
+			.builder(transUnits, LOCALE_EN)
 			.enableICU4j()
 			.build();
 
 		assertEquals(
 			"Wie geht's ihr?",
-			ms.getMessage("greeting", new Object[] {Map.of("recipient_gender", "feminine")}, de)
+			ms.getMessage("greeting", new Object[] {Map.of("recipient_gender", "feminine")}, LOCALE_DE)
 		);
 	}
 
 	@Test
-	void test_builder_withList() {
+	void test_builder_with_list() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(this.locale, "key", "messages_value")
+				new TransUnit(LOCALE_EN, "key", "messages_value")
 		);
 
 		assertEquals(
 				"messages_value",
 				CatalogMessageSourceBuilder
-						.builder(transUnits, this.locale)
-						.build().getMessage("key", null, this.locale)
+						.builder(transUnits, LOCALE_EN)
+						.build().getMessage("key", null, LOCALE_EN)
 		);
 	}
 
 	@Test
-	void test_builder_withCatalogInterface() {
+	void test_builder_with_catalog_interface() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(this.locale, "key", "messages_value")
+				new TransUnit(LOCALE_EN, "key", "messages_value")
 		);
 
 		assertEquals(
 				"messages_value",
 				CatalogMessageSourceBuilder
-						.builder(new TransUnitsCatalog(transUnits), this.locale)
+						.builder(new TransUnitsCatalog(transUnits), LOCALE_EN)
 						.build()
-						.getMessage("key", null, this.locale)
+						.getMessage("key", null, LOCALE_EN)
 		);
 	}
 
 	@Test
-	void test_withSetDefaultDomain() {
+	void test_with_set_default_domain() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(this.locale, "key", "messages_value"),
-				new TransUnit(this.locale, "key", "foo_value", "foo")
+				new TransUnit(LOCALE_EN, "key", "messages_value"),
+				new TransUnit(LOCALE_EN, "key", "foo_value", "foo")
 		);
 
 		assertEquals(
 				"foo_value",
 				CatalogMessageSourceBuilder
-						.builder(new TransUnitsCatalog(transUnits), this.locale)
+						.builder(new TransUnitsCatalog(transUnits), LOCALE_EN)
 						.defaultDomain("foo")
 						.build()
-						.getMessage("key", null, this.locale)
+						.getMessage("key", null, LOCALE_EN)
 		);
 	}
 
 	@Test
-	void test_resolution_multiDomain() {
-		Locale en = Locale.forLanguageTag("en");
-		Locale de = Locale.forLanguageTag("de");
-		Locale enUs = Locale.forLanguageTag("en-US");
-
+	void test_resolution_multi_domain() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(en, "key_1", "value_en_1"),
-				new TransUnit(en, "key_2", "value_en_2"),
-				new TransUnit(de, "key_1", "value_de_1"),
-				new TransUnit(de, "key_2", "value_de_2"),
-				new TransUnit(en, "key_1", "value_en_1", "foobar"),
-				new TransUnit(en, "key_2", "value_en_2", "foobar"),
-				new TransUnit(enUs, "key_1", "value_en_us_1", "messages")
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1"),
+				new TransUnit(LOCALE_EN, "key_2", "value_en_2"),
+				new TransUnit(LOCALE_DE, "key_1", "value_de_1"),
+				new TransUnit(LOCALE_DE, "key_2", "value_de_2"),
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1", "foobar"),
+				new TransUnit(LOCALE_EN, "key_2", "value_en_2", "foobar"),
+				new TransUnit(LOCALE_EN_US, "key_1", "value_en_us_1", "messages")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, en)
+				.builder(transUnits, LOCALE_EN)
 				.build();
 
-		assertEquals("value_en_1", ms.getMessage("key_1", null, en));
-		assertEquals("value_en_1", ms.getMessage("messages.key_1", null, en));
-		assertEquals("value_en_2", ms.getMessage("messages.key_2", null, en));
-		assertEquals("value_en_1", ms.getMessage("foobar.key_1", null, en));
-		assertEquals("value_en_2", ms.getMessage("foobar.key_2", null, en));
+		assertEquals("value_en_1", ms.getMessage("key_1", null, LOCALE_EN));
+		assertEquals("value_en_1", ms.getMessage("messages.key_1", null, LOCALE_EN));
+		assertEquals("value_en_2", ms.getMessage("messages.key_2", null, LOCALE_EN));
+		assertEquals("value_en_1", ms.getMessage("foobar.key_1", null, LOCALE_EN));
+		assertEquals("value_en_2", ms.getMessage("foobar.key_2", null, LOCALE_EN));
 
-		assertEquals("value_de_1", ms.getMessage("messages.key_1", null, de));
-		assertEquals("value_de_2", ms.getMessage("messages.key_2", null, de));
+		assertEquals("value_de_1", ms.getMessage("messages.key_1", null, LOCALE_DE));
+		assertEquals("value_de_2", ms.getMessage("messages.key_2", null, LOCALE_DE));
 
-		assertEquals("value_en_us_1", ms.getMessage("messages.key_1", null, enUs));
+		assertEquals("value_en_us_1", ms.getMessage("messages.key_1", null, LOCALE_EN_US));
 	}
 
 	@Test
-	void test_addSource_catalogInterface() {
+	void test_add_source_catalog_interface() {
 		List<TransUnitInterface> first = List.of(
-				new TransUnit(this.locale, "key_a", "value_a")
+				new TransUnit(LOCALE_EN, "key_a", "value_a")
 		);
 		List<TransUnitInterface> second = List.of(
-				new TransUnit(this.locale, "key_b", "value_b")
+				new TransUnit(LOCALE_EN, "key_b", "value_b")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(first, this.locale)
+				.builder(first, LOCALE_EN)
 				.addSource(new TransUnitsCatalog(second))
 				.build();
 
-		assertEquals("value_a", ms.getMessage("key_a", null, this.locale));
-		assertEquals("value_b", ms.getMessage("key_b", null, this.locale));
+		assertEquals("value_a", ms.getMessage("key_a", null, LOCALE_EN));
+		assertEquals("value_b", ms.getMessage("key_b", null, LOCALE_EN));
 	}
 
 	@Test
-	void test_addSource_transUnitsList() {
+	void test_add_source_trans_units_list() {
 		List<TransUnitInterface> first = List.of(
-				new TransUnit(this.locale, "key_a", "value_a")
+				new TransUnit(LOCALE_EN, "key_a", "value_a")
 		);
 		List<TransUnitInterface> second = List.of(
-				new TransUnit(this.locale, "key_b", "value_b")
+				new TransUnit(LOCALE_EN, "key_b", "value_b")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(first, this.locale)
+				.builder(first, LOCALE_EN)
 				.addSource(second)
 				.build();
 
-		assertEquals("value_a", ms.getMessage("key_a", null, this.locale));
-		assertEquals("value_b", ms.getMessage("key_b", null, this.locale));
+		assertEquals("value_a", ms.getMessage("key_a", null, LOCALE_EN));
+		assertEquals("value_b", ms.getMessage("key_b", null, LOCALE_EN));
 	}
 
 	@Test
-	void test_addSource_multipleAppendInOrder() {
+	void test_add_source_multiple_append_in_order() {
 		List<TransUnitInterface> first = List.of(
-				new TransUnit(this.locale, "key_a", "value_a")
+				new TransUnit(LOCALE_EN, "key_a", "value_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(first, this.locale)
-				.addSource(List.of(new TransUnit(this.locale, "key_b", "value_b")))
+				.builder(first, LOCALE_EN)
+				.addSource(List.of(new TransUnit(LOCALE_EN, "key_b", "value_b")))
 				.addSource(new FooBarCatalog())
 				.build();
 
-		assertEquals("value_a", ms.getMessage("key_a", null, this.locale));
-		assertEquals("value_b", ms.getMessage("key_b", null, this.locale));
-		assertEquals("foobar_value", ms.getMessage("dummy", null, this.locale));
+		assertEquals("value_a", ms.getMessage("key_a", null, LOCALE_EN));
+		assertEquals("value_b", ms.getMessage("key_b", null, LOCALE_EN));
+		assertEquals("foobar_value", ms.getMessage("dummy", null, LOCALE_EN));
 	}
 
 	@Test
-	void test_resolution_chainFallback() {
+	void test_resolution_chain_fallback() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(this.locale, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
 		);
 
 		TransUnitsCatalog source = new TransUnitsCatalog(transUnits);
 		source.nextCatalog(new FooBarCatalog());
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(source, this.locale)
+				.builder(source, LOCALE_EN)
 				.build();
 
-		assertEquals("value_en_1", ms.getMessage("key_1", null, this.locale));
-		assertEquals("foobar_value", ms.getMessage("dummy", null, this.locale));
-		assertEquals("foobar_value", ms.getMessage("messages.dummy", null, this.locale));
+		assertEquals("value_en_1", ms.getMessage("key_1", null, LOCALE_EN));
+		assertEquals("foobar_value", ms.getMessage("dummy", null, LOCALE_EN));
+		assertEquals("foobar_value", ms.getMessage("messages.dummy", null, LOCALE_EN));
 	}
 
 	@Test
-	void test_resolution_notResolved() {
+	void test_resolution_not_resolved() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(this.locale, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, this.locale)
+				.builder(transUnits, LOCALE_EN)
 				.build();
 
 		assertThrows(NoSuchMessageException.class,
-				() -> ms.getMessage("not_exists", null, this.locale));
+				() -> ms.getMessage("not_exists", null, LOCALE_EN));
 		assertThrows(NoSuchMessageException.class,
-				() -> ms.getMessage("messages.not_exists", null, this.locale));
+				() -> ms.getMessage("messages.not_exists", null, LOCALE_EN));
 	}
 
 	@Test
-	void test_CatalogMessageSource_asParentMessageSource() {
-		List <TransUnitInterface> transUnits = new ArrayList<>();
-		transUnits.add(new TransUnit(this.locale, "key", "key_value"));
+	void test_get_message_returns_default_message_when_code_not_resolved() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+		);
 
-		CatalogMessageSourceBuilder catalogMessageSourceBuilder = CatalogMessageSourceBuilder
-				.builder(transUnits, locale)
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
 				.build();
 
-		MockMessageSource mockMessageSource = new MockMessageSource();
-		mockMessageSource.setParentMessageSource(catalogMessageSourceBuilder);
-
-		assertEquals("key_value", mockMessageSource.getMessage(
-				"key",
-				new Object[] {},
-				Locale.forLanguageTag("en")
-		));
+		assertEquals(
+				"default_message",
+				ms.getMessage("not_exists", null, "default_message", LOCALE_EN)
+		);
+		assertEquals(
+				"default_message",
+				ms.getMessage("messages.not_exists", new Object[] {}, "default_message", LOCALE_EN)
+		);
 	}
 
-	static class MockMessageSource extends AbstractMessageSource {
+	@Test
+	void test_resolvable_resolves_first_code() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+		);
 
-		@Override
-		protected MessageFormat resolveCode(String code, Locale locale) {
-			if (code.equals("code")) {
-				return new MessageFormat("code_value");
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.build();
+
+		DefaultMessageSourceResolvable resolvable =
+				new DefaultMessageSourceResolvable(new String[] {"key_1"});
+
+		assertEquals("value_en_1", ms.getMessage(resolvable, LOCALE_EN));
+	}
+
+	@Test
+	void test_resolvable_falls_back_to_next_code() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "key_2", "value_en_2")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.build();
+
+		DefaultMessageSourceResolvable resolvable =
+				new DefaultMessageSourceResolvable(new String[] {"not_exists", "key_2"});
+
+		assertEquals("value_en_2", ms.getMessage(resolvable, LOCALE_EN));
+	}
+
+	@Test
+	void test_resolvable_applies_arguments() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "files", "There are {0,number,integer} files.")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.build();
+
+		DefaultMessageSourceResolvable resolvable =
+				new DefaultMessageSourceResolvable(new String[] {"files"}, new Object[] {10000});
+
+		assertEquals("There are 10,000 files.", ms.getMessage(resolvable, LOCALE_EN));
+	}
+
+	@Test
+	void test_resolvable_not_resolved_with_locale_throws() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.build();
+
+		DefaultMessageSourceResolvable resolvable =
+				new DefaultMessageSourceResolvable(new String[] {"not_exists"});
+
+		assertThrows(NoSuchMessageException.class,
+				() -> ms.getMessage(resolvable, LOCALE_EN));
+	}
+
+	@Test
+	void test_resolvable_not_resolved_null_locale_throws() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.build();
+
+		DefaultMessageSourceResolvable resolvable =
+				new DefaultMessageSourceResolvable(new String[] {"not_exists"});
+
+		assertThrows(NoSuchMessageException.class,
+				() -> ms.getMessage(resolvable, null));
+	}
+
+	@Test
+	void test_resolvable_null_codes_with_locale_throws() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.build();
+
+		MessageSourceResolvable resolvable = new MessageSourceResolvable() {
+			@Override
+			public String[] getCodes() {
+				return null;
 			}
-			return null;
-		}
 
+			@Override
+			public String getDefaultMessage() {
+				return null;
+			}
+		};
+
+		assertThrows(NoSuchMessageException.class,
+				() -> ms.getMessage(resolvable, LOCALE_EN));
+	}
+
+	@Test
+	void test_resolvable_empty_codes_null_locale_throws() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.build();
+
+		DefaultMessageSourceResolvable resolvable =
+				new DefaultMessageSourceResolvable(new String[] {});
+
+		assertThrows(NoSuchMessageException.class,
+				() -> ms.getMessage(resolvable, null));
+	}
+
+	@Test
+	void test_empty_args_returns_raw_value_icu4j_named_pattern() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "greeting", "There are {count} files")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.enableICU4j()
+				.build();
+
+		assertEquals(
+				"There are {count} files",
+				ms.getMessage("greeting", new Object[] {}, LOCALE_EN)
+		);
+	}
+
+	@Test
+	void test_get_message_returns_null_default_message_when_code_not_resolved() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.build();
+
+		assertNull(ms.getMessage("not_exists", null, null, LOCALE_EN));
+	}
+
+	@Test
+	void test_resolvable_returns_resolvable_default_message_when_not_resolved() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.build();
+
+		DefaultMessageSourceResolvable resolvable =
+				new DefaultMessageSourceResolvable(new String[] {"not_exists"}, null, "default_message");
+
+		assertEquals("default_message", ms.getMessage(resolvable, LOCALE_EN));
+	}
+
+	@Test
+	void test_get_message_null_locale_not_resolved_throws() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.build();
+
+		assertThrows(NoSuchMessageException.class,
+				() -> ms.getMessage("not_exists", null, null));
 	}
 
 	static class FooBarCatalog extends AbstractCatalog {
