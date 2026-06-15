@@ -7,13 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.github.alaugks.spring.messagesource.catalog.catalog.AbstractCatalog;
+import io.github.alaugks.spring.messagesource.catalog.fxitures.FooBarCatalog;
+import io.github.alaugks.spring.messagesource.catalog.fxitures.ParentMessageSource;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
@@ -80,7 +80,6 @@ class CatalogMessageSourceBuilderTest {
 		);
 	}
 
-	// README "Message formatting": ICU4J select with a named argument and escaped apostrophes.
 	@Test
 	void test_readme_icu4j_select() {
 		List<TransUnitInterface> transUnits = List.of(
@@ -467,14 +466,19 @@ class CatalogMessageSourceBuilderTest {
 				() -> ms.getMessage("not_exists", null, null));
 	}
 
-	static class FooBarCatalog extends AbstractCatalog {
+	@Test
+	void test_parent_message_source() {
+		List<TransUnitInterface> transUnits = List.of(
+			new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+		);
 
-		@Override
-		public TransUnitInterface resolveTransUnit(String code, Locale locale) {
-			if (Objects.equals(code, "dummy") || Objects.equals(code, "messages.dummy")) {
-				return new TransUnit(locale, code, "foobar_value");
-			}
-			return null;
-		}
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+			.builder(transUnits, LOCALE_EN)
+			.parentMessageSource(new ParentMessageSource())
+			.build();
+
+		assertEquals("value_en_1", ms.getMessage("key_1", null, LOCALE_EN));
+		assertEquals("ParentMessageSource with args: 1.234", ms.getMessage("parent-messagesource-code", new Object[]{1234L}, LOCALE_EN));
+		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("not_exists", null, null));
 	}
 }
