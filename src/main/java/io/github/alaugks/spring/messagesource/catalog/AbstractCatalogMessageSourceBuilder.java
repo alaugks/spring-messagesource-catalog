@@ -33,12 +33,6 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
         this.defaultLocale = defaultLocale;
     }
 
-    // Returns this typed as B for the recursive self-type; safe because B is always the concrete subtype.
-    @SuppressWarnings("unchecked")
-    private B self() {
-        return (B) this;
-    }
-
     /**
      * Returns the default locale used as a fallback when a code cannot be resolved for the
      * requested locale.
@@ -57,6 +51,22 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
      */
     protected String getDefaultDomain() {
         return this.defaultDomain;
+    }
+
+    /**
+     * Sets the default domain. Codes stored under this domain are also accessible via
+     * their name without the domain prefix; codes stored under any other domain require the
+     * {@code <domain>.<code>} prefix.
+     *
+     * @param defaultDomain the default domain; must not be {@code null}
+     * @return this builder
+     */
+    public B defaultDomain(String defaultDomain) {
+        Assert.notNull(defaultDomain, "Argument defaultDomain must not be null");
+
+        this.defaultDomain = defaultDomain;
+
+        return (B) this;
     }
 
     /**
@@ -79,7 +89,7 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
     public B setUseICU4j(boolean useICU4j) {
         this.useICU4j = useICU4j;
 
-        return this.self();
+        return (B) this;
     }
 
     /**
@@ -92,33 +102,7 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
     public B enableICU4j() {
         this.useICU4j = true;
 
-        return this.self();
-    }
-
-    /**
-     * Returns the parent message source used as a fallback, or {@code null} if none is configured.
-     *
-     * @return the parent message source, or {@code null}
-     * @see #parentMessageSource(MessageSource)
-     */
-    protected MessageSource getParentMessageSource() {
-        return this.parentMessageSource;
-    }
-
-    /**
-     * Sets the default domain. Codes stored under this domain are also accessible via
-     * their name without the domain prefix; codes stored under any other domain require the
-     * {@code <domain>.<code>} prefix.
-     *
-     * @param defaultDomain the default domain; must not be {@code null}
-     * @return this builder
-     */
-    public B defaultDomain(String defaultDomain) {
-        Assert.notNull(defaultDomain, "Argument defaultDomain must not be null");
-
-        this.defaultDomain = defaultDomain;
-
-        return this.self();
+        return (B) this;
     }
 
     /**
@@ -131,6 +115,16 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
     public B parentMessageSource(MessageSource messageSource) {
         this.parentMessageSource = messageSource;
 
-        return this.self();
+        return (B) this;
+    }
+
+    /**
+     * Returns the parent message source used as a fallback, or {@code null} if none is configured.
+     *
+     * @return the parent message source, or {@code null}
+     * @see #parentMessageSource(MessageSource)
+     */
+    protected MessageSource getParentMessageSource() {
+        return this.parentMessageSource;
     }
 }
