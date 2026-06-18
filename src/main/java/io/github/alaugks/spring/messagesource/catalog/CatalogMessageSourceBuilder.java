@@ -164,15 +164,16 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	}
 
 	/**
-	 * Resolves the given code to a {@link MessageFormat} for the requested locale.
+	 * Resolves the given code for the requested locale and formats it with the given arguments.
 	 *
 	 * <p>Lookup order: the in-memory catalog map (with domain, no-region, and default-locale
 	 * fallbacks), then the late-binding source chain. Resolved values from the chain are
 	 * cached for subsequent calls.
 	 *
 	 * @param code the message code to resolve
+	 * @param args the arguments to format the message with, or {@code null} for none
 	 * @param locale the locale to resolve for
-	 * @return the {@link MessageFormat}, or {@code null} if the code cannot be resolved
+	 * @return the resolved message, or {@code null} if the code cannot be resolved
 	 */
 	@Nullable
 	protected String getMessageInternal(@Nullable String code, @Nullable Object[] args, @Nullable Locale locale) {
@@ -189,13 +190,9 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 			return value;
 		}
 
-		// When ICU4J is enabled the value is formatted with ICU4J's MessageFormat; otherwise
-		// java.text.MessageFormat is used to keep Spring Core compatibility.
 		if (this.useICU4j) {
 			com.ibm.icu.text.MessageFormat messageFormat = new com.ibm.icu.text.MessageFormat(value, locale);
 
-			// Named/alphanumeric arguments are passed as a single Map (format(Map)); positional
-			// arguments use the array path (format(Object[])).
 			if (args.length == 1 && args[0] instanceof java.util.Map<?, ?> map) {
 				@SuppressWarnings("unchecked")
 				java.util.Map<String, Object> namedArgs = (java.util.Map<String, Object>) map;
@@ -297,7 +294,9 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		return value != null ? value : bucket.get(domainCode);
 	}
 
-	/** Returns a language-only {@link Locale} (region and variant stripped). */
+	/**
+	 * Returns a language-only {@link Locale} (region and variant stripped).
+	 */
 	private Locale buildLocaleWithoutRegion(Locale locale) {
 		return new Locale.Builder().setLanguage(locale.getLanguage()).build();
 	}
