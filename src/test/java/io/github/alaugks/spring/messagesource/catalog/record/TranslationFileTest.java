@@ -3,14 +3,14 @@
 
 package io.github.alaugks.spring.messagesource.catalog.record;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import io.github.alaugks.spring.messagesource.catalog.records.TranslationFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class TranslationFileTest {
 
@@ -50,7 +50,7 @@ class TranslationFileTest {
 	}
 
 	@Test
-	void test_hashCode() {
+	void test_hash_code() {
 		TranslationFile a = new TranslationFile(
 				"my-domain",
 				Locale.forLanguageTag("en-US"),
@@ -66,7 +66,7 @@ class TranslationFileTest {
 	}
 
 	@Test
-	void test_toString() {
+	void test_to_string() {
 		TranslationFile translationFile = new TranslationFile(
 				"my-domain",
 				Locale.forLanguageTag("en-US"),

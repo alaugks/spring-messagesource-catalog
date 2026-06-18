@@ -3,8 +3,6 @@
 
 package io.github.alaugks.spring.messagesource.catalog;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogInterface;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
@@ -13,9 +11,12 @@ import io.github.alaugks.spring.messagesource.catalog.resources.LocationPattern;
 import io.github.alaugks.spring.messagesource.catalog.resources.ResourcesLoader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -26,6 +27,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  * This test compares the logic when resolving the code of CatalogMessageSourceBuilder vs. ResourceBundleMessageSource
  * and ReloadableResourceBundleMessageSource. Behaviour must be equal.
@@ -34,6 +37,8 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 class BenchmarkMessageSourceTest {
 
 	static CatalogMessageSourceBuilder catalogMessageSourceBuilder;
+
+	static CatalogMessageSourceBuilder catalogMessageSourceBuilderICU4j;
 
 	static ResourceBundleMessageSource resourceBundleMessageSource;
 
@@ -45,6 +50,11 @@ class BenchmarkMessageSourceTest {
 	static void beforeAll() throws IOException {
 		catalogMessageSourceBuilder = CatalogMessageSourceBuilder
 				.builder(createTransUnitListFromMessagesPropertiesFiles(), defaultLocale)
+				.build();
+
+		catalogMessageSourceBuilderICU4j = CatalogMessageSourceBuilder
+				.builder(createTransUnitListFromMessagesPropertiesFiles(), defaultLocale)
+				.enableICU4j()
 				.build();
 
 		resourceBundleMessageSource = new ResourceBundleMessageSource();
@@ -59,8 +69,8 @@ class BenchmarkMessageSourceTest {
 	}
 
 	@ParameterizedTest()
-	@MethodSource("dataProvider_examples")
-	void test_CatalogMessageSource(String locale, String code, Object[] args, Object expected) {
+	@MethodSource("provider_examples")
+	void test_catalog_message_source(String locale, String code, Object[] args, Object expected) {
 		assertEquals(expected, catalogMessageSourceBuilder.getMessage(
 				code,
 				args,
@@ -69,8 +79,18 @@ class BenchmarkMessageSourceTest {
 	}
 
 	@ParameterizedTest()
-	@MethodSource("dataProvider_examples")
-	void test_ResourceBundleMessageSource(String locale, String code, Object[] args, Object expected) {
+	@MethodSource("provider_examples_icu4j")
+	void test_catalog_message_source_icu4j(String locale, String code, Object[] args, Object expected) {
+		assertEquals(expected, catalogMessageSourceBuilderICU4j.getMessage(
+			code,
+			args,
+			Locale.forLanguageTag(locale)
+		));
+	}
+
+	@ParameterizedTest()
+	@MethodSource("provider_examples")
+	void test_resource_bundle_message_source(String locale, String code, Object[] args, Object expected) {
 		assertEquals(expected, resourceBundleMessageSource.getMessage(
 				this.concatCode(code),
 				args,
@@ -79,8 +99,8 @@ class BenchmarkMessageSourceTest {
 	}
 
 	@ParameterizedTest()
-	@MethodSource("dataProvider_examples")
-	void test_ReloadableResourceBundleMessageSource(String locale, String code, Object[] args, Object expected) {
+	@MethodSource("provider_examples")
+	void test_reloadable_resource_bundle_message_source(String locale, String code, Object[] args, Object expected) {
 		assertEquals(expected, reloadableResourceBundleMessageSource.getMessage(
 				this.concatCode(code),
 				args,
@@ -88,7 +108,13 @@ class BenchmarkMessageSourceTest {
 		));
 	}
 
-	private static Stream<Arguments> dataProvider_examples() {
+	private static Stream<Arguments> provider_examples_icu4j() {
+		return Stream.of(
+				Arguments.of("de", "messages.list_files_icu4j", new Object[] {Map.of("file_count", 10000L)}, "Sie haben 10.000 Dateien gelöscht.")
+		);
+	}
+
+	private static Stream<Arguments> provider_examples() {
 		return Stream.of(
 				Arguments.of("en", "headline", null, "Headline (en)"),
 				Arguments.of("en", "messages.headline", null, "Headline (en)"),
@@ -159,7 +185,10 @@ class BenchmarkMessageSourceTest {
 
 		for (TranslationFile translationFile : resourcesLoader.getTranslationFiles()) {
 			Properties properties = new Properties();
-			properties.load(new ByteArrayInputStream(translationFile.content()));
+			properties.load(new InputStreamReader(
+					new ByteArrayInputStream(translationFile.content()),
+					StandardCharsets.UTF_8
+			));
 			for (Entry<Object, Object> property : properties.entrySet()) {
 
 				Object key = property.getKey();

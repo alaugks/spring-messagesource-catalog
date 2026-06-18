@@ -3,7 +3,26 @@
 This package extends the [AbstractMessageSource](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/support/AbstractMessageSource.html) and provides the [MessageSource interface](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/MessageSource.html).
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=alaugks_spring-messagesource-catalog&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=alaugks_spring-messagesource-catalog)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.alaugks/spring-messagesource-catalog.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.alaugks/spring-messagesource-catalog/0.6.0)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.alaugks/spring-messagesource-catalog.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.alaugks/spring-messagesource-catalog/0.7.0)
+
+## Table of Contents
+
+- [Dependency](#dependency)
+  - [Maven](#maven)
+  - [Gradle](#gradle)
+- [Packages that use the catalog as a base package](#packages-that-use-the-catalog-as-a-base-package)
+- [CatalogMessageSource Configuration](#catalogmessagesource-configuration)
+  - [Options](#options)
+  - [TransUnit Record](#transunit-record)
+  - [Configuration example](#configuration-example)
+  - [With custom CatalogInterface](#with-custom-cataloginterface)
+- [Message formatting](#message-formatting)
+  - [Default (java.text.MessageFormat)](#default-javatextmessageformat)
+  - [ICU4J (com.ibm.icu.text.MessageFormat)](#icu4j-comibmicutextmessageformat)
+    - [Plural](#plural)
+    - [Select (and gender)](#select-and-gender)
+- [Javadoc](#javadoc)
+- [License](#license)
 
 ## Dependency
 
@@ -13,14 +32,14 @@ This package extends the [AbstractMessageSource](https://docs.spring.io/spring-f
 <dependency>
     <groupId>io.github.alaugks</groupId>
     <artifactId>spring-messagesource-catalog</artifactId>
-    <version>0.6.0</version>
+    <version>0.7.0</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```
-implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog', version: '0.6.0'
+implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog', version: '0.7.0'
 ```
 
 ## Packages that use the catalog as a base package
@@ -33,24 +52,15 @@ implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog',
 
 ### Options
 
-`builder(CatalogInterface catalogSource, Locale defaultLocale)` (required)
-
-* Argument `CatalogInterface catalogSource`: Initial source.
-* Argument `Locale defaultLocale`: Locale used as a fallback when a code cannot be resolved for the requested locale.
-
-`builder(List<TransUnitInterface> transUnits, Locale defaultLocale)` (required, alternative)
-
-* Argument `List<TransUnitInterface> transUnits`: Trans units used as the initial source (wrapped in a `TransUnitsCatalog`).
-* Argument `Locale defaultLocale`: Locale used as a fallback when a code cannot be resolved for the requested locale.
-
-`addSource(CatalogInterface source)`
-* Appends another source. Sources are aggregated additively at `build()`; their lazy `resolveTransUnit` lookups are also chained in the order they were added.
-
-`addSource(List<TransUnitInterface> transUnits)`
-* Convenience overload that wraps the trans units in a `TransUnitsCatalog`.
-
-`defaultDomain(String defaultDomain)`
-* If the default domain is not set, the default is **messages**.
+| Method | Default | Description |
+|---|---|---|
+| `builder(CatalogInterface catalogSource, Locale defaultLocale)` | — | Entry point.<br><br>`catalogSource` is the initial source.<br><br>`defaultLocale` is the locale to fall back to when a code cannot be resolved for the requested locale. |
+| `builder(List<TransUnitInterface> transUnits, Locale defaultLocale)` | — | Entry point (alternative).<br><br>`transUnits` are used as the initial source, wrapped in a `TransUnitsCatalog`.<br><br>`defaultLocale` is the locale to fall back to when a code cannot be resolved for the requested locale. |
+| `addSource(CatalogInterface source)` | — | Appends another source. Sources are aggregated additively at `build()`; their lazy `resolveTransUnit` lookups are also chained in the order they were added. |
+| `addSource(List<TransUnitInterface> transUnits)` | — | Convenience overload of `addSource` that wraps the trans units in a `TransUnitsCatalog`. |
+| `defaultDomain(String defaultDomain)` | `messages` | The default domain. Codes stored under this domain are also accessible without the domain prefix; codes under any other domain require the `<domain>.<code>` prefix. |
+| `enableICU4j()` | disabled | Format messages with ICU4J's `com.ibm.icu.text.MessageFormat` instead of the default `java.text.MessageFormat`, adding named arguments and ICU `plural`/`select` patterns. See [Message formatting](#message-formatting) for details and examples. |
+| `parentMessageSource(MessageSource parentMessageSource)` | — | Sets a parent [`MessageSource`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/MessageSource.html) to delegate to. When a code cannot be resolved in the catalog, the lookup falls back to the parent source. |
 
 ### TransUnit Record
 
@@ -324,6 +334,117 @@ public class MessageConfig {
     }
 }
 ```
+
+## Message formatting
+
+A resolved value is formatted before it is returned, applying the arguments passed to `getMessage(...)` to
+the message pattern. Two formatters are available: the default `java.text.MessageFormat` and, once
+`enableICU4j()` is set, `com.ibm.icu.text.MessageFormat`.
+
+> [!IMPORTANT]
+> Named arguments and ICU `plural`/`select` patterns (e.g. `{count, plural, …}`) cannot be resolved by the default `java.text.MessageFormat` and fail at `getMessage()` time. To use them you **must** enable ICU4J via `enableICU4j()`.
+>
+> ICU4J is the [`com.ibm.icu:icu4j`](https://central.sonatype.com/artifact/com.ibm.icu/icu4j) dependency, which is shipped transitively with this package — no extra dependency is required. Its `com.ibm.icu.text.MessageFormat` is a syntax superset of `java.text.MessageFormat`, so existing numeric-index patterns keep working.
+>
+> Note that the two are not fully output-compatible: ICU4J uses Unicode CLDR locale data, so the formatted result for a given locale can differ from the JDK's — for example the decimal and grouping separators in numbers (`.` vs `,`). Verify locale-sensitive output after enabling ICU4J.
+
+### Default (java.text.MessageFormat)
+
+Without `enableICU4j()`, values are formatted with [`java.text.MessageFormat`](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/text/MessageFormat.html) —
+the same formatter Spring's `ResourceBundleMessageSource` uses. It only understands **numeric argument
+indices** (`{0}`, `{1}`, …), passed positionally as an `Object[]`. Numbers are formatted locale-aware
+(grouping separators differ per locale).
+
+```java
+new TransUnit(Locale.forLanguageTag("en"), "files", "There are {0,number,integer} files.");
+new TransUnit(Locale.forLanguageTag("de"), "files", "Es gibt {0,number,integer} Dateien.");
+
+messageSource.getMessage(
+    "files",
+    new Object[] { 10000 },
+    Locale.forLanguageTag("de")
+);
+```
+
+**Result:** `Es gibt 10.000 Dateien.`
+
+### ICU4J (com.ibm.icu.text.MessageFormat)
+
+Enable ICU4J on the builder to format with [ICU4J's `MessageFormat`](https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/text/MessageFormat.html):
+
+```java
+@Bean
+public MessageSource messageSource() {
+    return CatalogMessageSourceBuilder
+        .builder(this.transUnits, Locale.forLanguageTag("en"))
+        .enableICU4j() // required for named arguments and plural/select
+        .build();
+}
+```
+
+With ICU4J enabled, patterns can use **named arguments** and the ICU `plural`/`select` constructs. Named
+arguments are passed as a single `Map` (not as positional `{0}` / `{1}` arguments); the catalog detects a lone
+`Map` argument and formats the pattern with it.
+
+#### Plural
+
+A `plural` switch selects a variant based on a number. Each case is either an **exact number** — matched as
+`=N` — or a **CLDR plural keyword** (`zero`, `one`, `two`, `few`, `many`, `other`) that the locale's plural
+rules select from the number. The number itself is inserted into a case by referencing the argument name,
+`{count}`.
+
+Which keywords a language uses, and how each number maps to one, is defined per language in the
+[Unicode CLDR Language Plural Rules](https://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html).
+
+```java
+new TransUnit(
+    Locale.forLanguageTag("en"),
+    "file_deleted",
+    "{count, plural, =0 {You deleted no files.} =1 {You deleted one file.} other {You deleted {count} files.}}"
+);
+new TransUnit(
+    Locale.forLanguageTag("de"),
+    "file_deleted",
+    "{count, plural, =0 {Sie haben keine Dateien gelöscht.} =1 {Sie haben eine Datei gelöscht.} other {Sie haben {count} Dateien gelöscht.}}"
+);
+
+messageSource.getMessage(
+    "file_deleted",
+    new Object[] { Map.of("count", 1000) },
+    Locale.forLanguageTag("de")
+);
+```
+
+**Result:** `Sie haben 1.000 Dateien gelöscht.`
+
+#### Select (and gender)
+
+A `select` switch picks the case whose value matches the argument. Use it for any value-based choice such as
+grammatical gender; a final `other` case acts as the fallback.
+
+The apostrophe is a quoting metacharacter in ICU `MessageFormat`. A literal apostrophe must be written as two
+single quotes (`''`), e.g. `Wie geht''s ihr?` resolves to `Wie geht's ihr?`.
+
+```java
+new TransUnit(
+    Locale.forLanguageTag("en"),
+    "greeting",
+    "{recipient_gender, select, feminine {How is she?} masculine {How is he?} other {How are they?}}"
+);
+new TransUnit(
+    Locale.forLanguageTag("de"),
+    "greeting",
+    "{recipient_gender, select, feminine {Wie geht''s ihr?} masculine {Wie geht''s ihm?} other {Wie geht''s ihnen?}}"
+);
+
+messageSource.getMessage(
+    "greeting",
+    new Object[] { Map.of("recipient_gender", "feminine") },
+    Locale.forLanguageTag("de")
+);
+```
+
+**Result:** `Wie geht's ihr?`
 
 ## Javadoc
 

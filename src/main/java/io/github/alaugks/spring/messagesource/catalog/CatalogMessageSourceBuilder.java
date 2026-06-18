@@ -14,10 +14,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.springframework.context.support.AbstractMessageSource;
-import org.springframework.lang.NonNull;
+import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Spring {@link org.springframework.context.MessageSource} backed by one or more
@@ -32,7 +34,7 @@ import org.springframework.util.Assert;
  * to obtain a {@link Builder} and configure additional sources via
  * {@link Builder#addSource(CatalogInterface)}.
  */
-public class CatalogMessageSourceBuilder extends AbstractMessageSource {
+public class CatalogMessageSourceBuilder implements MessageSource {
 
 	/** Default domain used when none is configured: {@value}. */
 	public static final String DEFAULT_DOMAIN = "messages";
@@ -45,14 +47,26 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 
 	private final CatalogInterface chainHead;
 
-	/**
+	private final boolean useICU4j;
+
+    private final MessageSource parentMessageSource;
+
+    /**
 	 * Aggregates trans units into the catalog map and wires the source chain
 	 * for late-binding fallback.
 	 */
-	private CatalogMessageSourceBuilder(List<CatalogInterface> sources, Locale defaultLocale, String defaultDomain) {
+	private CatalogMessageSourceBuilder(
+			List<CatalogInterface> sources,
+			Locale defaultLocale,
+			String defaultDomain,
+        	boolean useICU4j,
+			MessageSource parentMessageSource
+	) {
 		this.defaultLocale = defaultLocale;
 		this.defaultDomain = defaultDomain;
-		this.catalogMap = new ConcurrentHashMap<>();
+		this.useICU4j = useICU4j;
+        this.parentMessageSource = parentMessageSource;
+        this.catalogMap = new ConcurrentHashMap<>();
 
 		for (CatalogInterface source : sources) {
 			source.getTransUnits().forEach(t -> this.put(t.locale(), t.code(), t.value(), t.domain()));
@@ -97,34 +111,105 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 		return new Builder(catalogSource, defaultLocale);
 	}
 
+	@Nullable
+	@Override
+	public final String getMessage(String code, @Nullable Object[] args, @Nullable String defaultMessage, @Nullable Locale locale){
+		String msg = this.getMessageInternal(code, args, locale);
+		if (msg != null) {
+			return msg;
+		}
+
+		return defaultMessage;
+	}
+
+	@Override
+	public final String getMessage(String code, @Nullable Object[] args, @Nullable Locale locale) throws NoSuchMessageException {
+		String msg = this.getMessageInternal(code, args, locale);
+		if (msg != null) {
+			return msg;
+		}
+
+		if (locale == null) {
+			throw new NoSuchMessageException(code);
+		}
+		else {
+			throw new NoSuchMessageException(code, locale);
+		}
+	}
+
+	@Override
+	public final String getMessage(MessageSourceResolvable resolvable, @Nullable Locale locale) throws NoSuchMessageException {
+		String[] codes = resolvable.getCodes();
+		if (codes != null) {
+			for (String code : codes) {
+				String message = this.getMessageInternal(code, resolvable.getArguments(), locale);
+				if (message != null) {
+					return message;
+				}
+			}
+		}
+
+		String defaultMessage = resolvable.getDefaultMessage();
+		if (defaultMessage != null) {
+			return defaultMessage;
+		}
+
+		String code = !ObjectUtils.isEmpty(codes) ? codes[codes.length - 1] : "";
+		if (locale == null ) {
+			throw new NoSuchMessageException(code);
+		}
+		else {
+			throw new NoSuchMessageException(code, locale);
+		}
+	}
+
 	/**
-	 * Resolves the given code to a {@link MessageFormat} for the requested locale.
+	 * Resolves the given code for the requested locale and formats it with the given arguments.
 	 *
 	 * <p>Lookup order: the in-memory catalog map (with domain, no-region, and default-locale
 	 * fallbacks), then the late-binding source chain. Resolved values from the chain are
 	 * cached for subsequent calls.
 	 *
 	 * @param code the message code to resolve
+	 * @param args the arguments to format the message with, or {@code null} for none
 	 * @param locale the locale to resolve for
-	 * @return the {@link MessageFormat}, or {@code null} if the code cannot be resolved
+	 * @return the resolved message, or {@code null} if the code cannot be resolved
 	 */
-	@Override
 	@Nullable
-	protected MessageFormat resolveCode(@NonNull String code, @NonNull Locale locale) {
-		String value = this.resolveFromCatalog(code, locale);
-
-		if (value != null) {
-			return new MessageFormat(value, locale);
+	protected String getMessageInternal(@Nullable String code, @Nullable Object[] args, @Nullable Locale locale) {
+		if (code == null) {
+			return null;
+		}
+		if (locale == null) {
+			locale = Locale.getDefault();
 		}
 
-		return null;
+		String value = this.resolveFromCatalog(code, locale, args);
+
+		if (ObjectUtils.isEmpty(args) || value == null) {
+			return value;
+		}
+
+		if (this.useICU4j) {
+			com.ibm.icu.text.MessageFormat messageFormat = new com.ibm.icu.text.MessageFormat(value, locale);
+
+			if (args.length == 1 && args[0] instanceof java.util.Map<?, ?> map) {
+				@SuppressWarnings("unchecked")
+				java.util.Map<String, Object> namedArgs = (java.util.Map<String, Object>) map;
+				return messageFormat.format(namedArgs);
+			}
+
+			return messageFormat.format(args);
+		}
+
+		return new MessageFormat(value, locale).format(args);
 	}
 
 	/**
 	 * Looks up the code in the catalog map, falling back to the source chain
 	 * and caching the result.
 	 */
-	private String resolveFromCatalog(String code, Locale locale) {
+	private String resolveFromCatalog(String code, Locale locale, @Nullable Object[] args) {
 		if (locale.getLanguage().isEmpty() || code.isEmpty()) {
 			return null;
 		}
@@ -138,6 +223,10 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 		if (tu != null) {
 			this.put(tu.locale(), tu.code(), tu.value(), tu.domain());
 			return tu.value();
+		}
+
+		if (this.parentMessageSource != null) {
+			return this.parentMessageSource.getMessage(code, args, null, locale);
 		}
 
 		return null;
@@ -205,7 +294,9 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 		return value != null ? value : bucket.get(domainCode);
 	}
 
-	/** Returns a language-only {@link Locale} (region and variant stripped). */
+	/**
+	 * Returns a language-only {@link Locale} (region and variant stripped).
+	 */
 	private Locale buildLocaleWithoutRegion(Locale locale) {
 		return new Locale.Builder().setLanguage(locale.getLanguage()).build();
 	}
@@ -222,13 +313,9 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 	 * Fluent builder for {@link CatalogMessageSourceBuilder}. Holds the configured sources,
 	 * the default locale, and the default domain until {@link #build()} is called.
 	 */
-	public static final class Builder {
-
-		private final Locale defaultLocale;
+	public static final class Builder extends AbstractCatalogMessageSourceBuilder<Builder> {
 
 		private final List<CatalogInterface> sources = new ArrayList<>();
-
-		private String defaultDomain = DEFAULT_DOMAIN;
 
 		/**
 		 * Creates a new builder seeded with an initial source.
@@ -238,27 +325,10 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 		 *                      for the requested locale; must not be {@code null}
 		 */
 		public Builder(CatalogInterface catalogSource, Locale defaultLocale) {
+			super(defaultLocale);
 			Assert.notNull(catalogSource, "Argument catalogSource must not be null");
-			Assert.notNull(defaultLocale, "Argument defaultLocale must not be null");
 
-			this.defaultLocale = defaultLocale;
 			this.sources.add(catalogSource);
-		}
-
-		/**
-		 * Sets the default domain. Codes stored under this domain are also accessible via
-		 * their name without the domain prefix; codes stored under any other domain require the
-		 * {@code <domain>.<code>} prefix.
-		 *
-		 * @param defaultDomain the default domain; must not be {@code null}
-		 * @return this builder
-		 */
-		public Builder defaultDomain(String defaultDomain) {
-			Assert.notNull(defaultDomain, "Argument defaultDomain must not be null");
-
-			this.defaultDomain = defaultDomain;
-
-			return this;
 		}
 
 		/**
@@ -299,7 +369,13 @@ public class CatalogMessageSourceBuilder extends AbstractMessageSource {
 		 * @return a new {@link CatalogMessageSourceBuilder} instance
 		 */
 		public CatalogMessageSourceBuilder build() {
-			return new CatalogMessageSourceBuilder(this.sources, this.defaultLocale, this.defaultDomain);
+			return new CatalogMessageSourceBuilder(
+					this.sources,
+					this.getDefaultLocale(),
+					this.getDefaultDomain(),
+					this.isICU4jEnabled(),
+					this.getParentMessageSource()
+				);
 		}
 	}
 }

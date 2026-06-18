@@ -1,0 +1,130 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2024 André Laugks <alaugks@gmail.com>
+
+package io.github.alaugks.spring.messagesource.catalog;
+
+import java.util.Locale;
+import org.springframework.context.MessageSource;
+import org.springframework.util.Assert;
+
+/**
+ * Base class for fluent builders that share the common catalog configuration: default locale,
+ * default domain, ICU4J formatting, and an optional parent message source.
+ *
+ * <p>The recursive type parameter {@code B} lets each concrete builder return its own type from
+ * the shared fluent methods, so chaining stays type-safe across subclasses (including sibling
+ * builders in other packages).
+ *
+ * @param <B> the concrete builder type returned by the fluent methods
+ */
+public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCatalogMessageSourceBuilder<B>> {
+
+    private final Locale defaultLocale;
+
+    private String defaultDomain = CatalogMessageSourceBuilder.DEFAULT_DOMAIN;
+
+    private boolean useICU4j = false;
+
+    private MessageSource parentMessageSource = null;
+
+    protected AbstractCatalogMessageSourceBuilder(Locale defaultLocale) {
+        Assert.notNull(defaultLocale, "Argument defaultLocale must not be null");
+
+        this.defaultLocale = defaultLocale;
+    }
+
+    /**
+     * Returns the default locale used as a fallback when a code cannot be resolved for the
+     * requested locale.
+     *
+     * @return the default locale; never {@code null}
+     */
+    protected Locale getDefaultLocale() {
+        return this.defaultLocale;
+    }
+
+    /**
+     * Returns the configured default domain.
+     *
+     * @return the default domain
+     * @see #defaultDomain(String)
+     */
+    protected String getDefaultDomain() {
+        return this.defaultDomain;
+    }
+
+    /**
+     * Sets the default domain. Codes stored under this domain are also accessible via
+     * their name without the domain prefix; codes stored under any other domain require the
+     * {@code <domain>.<code>} prefix.
+     *
+     * @param defaultDomain the default domain; must not be {@code null}
+     * @return this builder
+     */
+    public B defaultDomain(String defaultDomain) {
+        Assert.notNull(defaultDomain, "Argument defaultDomain must not be null");
+
+        this.defaultDomain = defaultDomain;
+
+        return (B) this;
+    }
+
+    /**
+     * Returns whether ICU4J message formatting is enabled.
+     *
+     * @return {@code true} if ICU4J formatting is enabled, {@code false} otherwise
+     * @see #enableICU4j()
+     */
+    protected boolean isICU4jEnabled() {
+        return this.useICU4j;
+    }
+
+    /**
+     * Configures whether ICU4J message formatting is enabled.
+     *
+     * @param useICU4j {@code true} to enable ICU4J message formatting,
+     *                 {@code false} to use standard Java message formatting
+     * @return this builder instance for method chaining
+     */
+    public B setUseICU4j(boolean useICU4j) {
+        this.useICU4j = useICU4j;
+
+        return (B) this;
+    }
+
+    /**
+     * Enables ICU4J message formatting. When enabled, resolved messages are formatted with
+     * {@link com.ibm.icu.text.MessageFormat} (supporting ICU syntax such as named arguments
+     * and {@code plural}/{@code select}); otherwise {@link java.text.MessageFormat} is used.
+     *
+     * @return this builder
+     */
+    public B enableICU4j() {
+        this.useICU4j = true;
+
+        return (B) this;
+    }
+
+    /**
+     * Sets the parent message source to be used as a fallback when a message cannot be resolved
+     * from the current sources or domains.
+     *
+     * @param messageSource the parent message source; must not be {@code null}
+     * @return this builder
+     */
+    public B parentMessageSource(MessageSource messageSource) {
+        this.parentMessageSource = messageSource;
+
+        return (B) this;
+    }
+
+    /**
+     * Returns the parent message source used as a fallback, or {@code null} if none is configured.
+     *
+     * @return the parent message source, or {@code null}
+     * @see #parentMessageSource(MessageSource)
+     */
+    protected MessageSource getParentMessageSource() {
+        return this.parentMessageSource;
+    }
+}
