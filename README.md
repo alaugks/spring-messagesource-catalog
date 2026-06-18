@@ -52,27 +52,15 @@ implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog',
 
 ### Options
 
-`builder(CatalogInterface catalogSource, Locale defaultLocale)` (required)
-
-* Argument `CatalogInterface catalogSource`: Initial source.
-* Argument `Locale defaultLocale`: Locale used as a fallback when a code cannot be resolved for the requested locale.
-
-`builder(List<TransUnitInterface> transUnits, Locale defaultLocale)` (required, alternative)
-
-* Argument `List<TransUnitInterface> transUnits`: Trans units used as the initial source (wrapped in a `TransUnitsCatalog`).
-* Argument `Locale defaultLocale`: Locale used as a fallback when a code cannot be resolved for the requested locale.
-
-`addSource(CatalogInterface source)`
-* Appends another source. Sources are aggregated additively at `build()`; their lazy `resolveTransUnit` lookups are also chained in the order they were added.
-
-`addSource(List<TransUnitInterface> transUnits)`
-* Convenience overload that wraps the trans units in a `TransUnitsCatalog`.
-
-`defaultDomain(String defaultDomain)`
-* If the default domain is not set, the default is **messages**.
-
-`enableICU4j()`
-* Formats messages with ICU4J's `com.ibm.icu.text.MessageFormat` instead of the default `java.text.MessageFormat`, adding named arguments and ICU `plural`/`select` patterns. See [Message formatting](#message-formatting) for details and examples.
+| Method | Default | Description |
+|---|---|---|
+| `builder(CatalogInterface catalogSource, Locale defaultLocale)` | — | Entry point.<br><br>`catalogSource` is the initial source.<br><br>`defaultLocale` is the locale to fall back to when a code cannot be resolved for the requested locale. |
+| `builder(List<TransUnitInterface> transUnits, Locale defaultLocale)` | — | Entry point (alternative).<br><br>`transUnits` are used as the initial source, wrapped in a `TransUnitsCatalog`.<br><br>`defaultLocale` is the locale to fall back to when a code cannot be resolved for the requested locale. |
+| `addSource(CatalogInterface source)` | — | Appends another source. Sources are aggregated additively at `build()`; their lazy `resolveTransUnit` lookups are also chained in the order they were added. |
+| `addSource(List<TransUnitInterface> transUnits)` | — | Convenience overload of `addSource` that wraps the trans units in a `TransUnitsCatalog`. |
+| `defaultDomain(String defaultDomain)` | `messages` | The default domain. Codes stored under this domain are also accessible without the domain prefix; codes under any other domain require the `<domain>.<code>` prefix. |
+| `enableICU4j()` | disabled | Format messages with ICU4J's `com.ibm.icu.text.MessageFormat` instead of the default `java.text.MessageFormat`, adding named arguments and ICU `plural`/`select` patterns. See [Message formatting](#message-formatting) for details and examples. |
+| `parentMessageSource(MessageSource parentMessageSource)` | — | Sets a parent [`MessageSource`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/MessageSource.html) to delegate to. When a code cannot be resolved in the catalog, the lookup falls back to the parent source. |
 
 ### TransUnit Record
 
