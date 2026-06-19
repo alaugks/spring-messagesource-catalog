@@ -27,8 +27,8 @@ import org.springframework.util.Assert;
 public class ResourcesFileNameParser {
 
 	private static final Pattern PATTERN = Pattern.compile(
-			"^(?<domain>[a-z0-9]+)(?:([_-](?<language>[a-z]+))(?:[_-](?<region>[a-z]+))?)?",
-			Pattern.CASE_INSENSITIVE
+		"^(?<domain>[a-z0-9]+)(?:[_.-](?<language>[a-z]+)(?:[_-](?<region>[a-z]+))?)?\\.[a-z0-9]+$",
+		Pattern.CASE_INSENSITIVE
 	);
 
 	private final String filename;
