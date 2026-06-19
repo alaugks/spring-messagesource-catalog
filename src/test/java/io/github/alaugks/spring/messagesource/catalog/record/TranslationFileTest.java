@@ -10,6 +10,7 @@ import java.util.Locale;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class TranslationFileTest {
@@ -47,6 +48,33 @@ class TranslationFileTest {
 		);
 
 		assertEquals(a, b);
+		assertEquals(a, a);
+	}
+
+	@Test
+	void test_not_equals() {
+		TranslationFile a = new TranslationFile(
+				"my-domain",
+				Locale.forLanguageTag("en-US"),
+				new byte[] {1, 2, 3}
+		);
+
+		assertNotEquals(null, a);
+		assertNotEquals(a, new TranslationFile(
+				"other-domain",
+				Locale.forLanguageTag("en-US"),
+				new byte[] {1, 2, 3}
+		));
+		assertNotEquals(a, new TranslationFile(
+				"my-domain",
+				Locale.forLanguageTag("de-DE"),
+				new byte[] {1, 2, 3}
+		));
+		assertNotEquals(a, new TranslationFile(
+				"my-domain",
+				Locale.forLanguageTag("en-US"),
+				new byte[] {4, 5, 6}
+		));
 	}
 
 	@Test
@@ -74,5 +102,16 @@ class TranslationFileTest {
 		);
 
         assertEquals("TranslationFile[domain=my-domain, locale=en_US, content=3 bytes]", translationFile.toString());
+	}
+
+	@Test
+	void test_to_string_null_content() {
+		TranslationFile translationFile = new TranslationFile(
+				"my-domain",
+				Locale.forLanguageTag("en-US"),
+				null
+		);
+
+		assertEquals("TranslationFile[domain=my-domain, locale=en_US, content=null]", translationFile.toString());
 	}
 }

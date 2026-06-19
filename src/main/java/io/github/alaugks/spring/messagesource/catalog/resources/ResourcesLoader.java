@@ -102,7 +102,9 @@ public class ResourcesLoader {
 		return null;
 	}
 
-	/** Checks whether the resource's file extension is in the configured allow-list. */
+	/**
+	 * Checks whether the resource's file extension is in the configured allow-list.
+	 */
 	private boolean isFileExtensionSupported(Resource resource) {
 		String fileName = resource.getFilename();
 		return fileName != null && this.fileExtensions.contains(fileName.substring(fileName.lastIndexOf(".") + 1));

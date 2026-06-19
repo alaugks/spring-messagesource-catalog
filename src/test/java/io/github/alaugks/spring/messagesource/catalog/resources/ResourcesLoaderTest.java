@@ -92,6 +92,17 @@ class ResourcesLoaderTest {
 	}
 
 	@Test
+	void test_file_extension_not_supported() {
+		ResourcesLoader resourcesLoader = new ResourcesLoader(
+				LOCALE_EN,
+				new LocationPattern("translations/*"),
+				List.of("json")
+		);
+
+		assertTrue(resourcesLoader.getTranslationFiles().isEmpty());
+	}
+
+	@Test
 	void test_exception() {
 		ResourcesLoader resourcesLoader = new ResourcesLoader(
 			LOCALE_EN,
