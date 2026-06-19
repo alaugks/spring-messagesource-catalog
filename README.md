@@ -21,6 +21,11 @@ This package extends the [AbstractMessageSource](https://docs.spring.io/spring-f
   - [ICU4J (com.ibm.icu.text.MessageFormat)](#icu4j-comibmicutextmessageformat)
     - [Plural](#plural)
     - [Select (and gender)](#select-and-gender)
+- [Resource classes](#resource-classes)
+  - [LocationPattern](#locationpattern)
+  - [ResourcesLoader](#resourcesloader)
+  - [File name convention](#file-name-convention)
+  - [Records: Filename and TranslationFile](#records-filename-and-translationfile)
 - [Javadoc](#javadoc)
 - [License](#license)
 
@@ -445,6 +450,76 @@ messageSource.getMessage(
 ```
 
 **Result:** `Wie geht's ihr?`
+
+## Resource classes
+
+The `resources` package loads translation files from the classpath or filesystem so a format-specific parser
+can turn them into `TransUnit`s. It is the shared file-loading stage used by the sibling packages
+[spring-messagesource-xliff](https://github.com/alaugks/spring-messagesource-xliff) and
+[spring-messagesource-json](https://github.com/alaugks/spring-messagesource-json). Applications that consume
+the catalog through one of those packages do not call these classes directly, but a custom file-based source
+can reuse them.
+
+The stages are: a `LocationPattern` describes where to look, `ResourcesLoader` resolves and reads the
+matching files, `ResourcesFileNameParser` derives the domain and locale from each file name, and the result
+is a list of `TranslationFile` records (domain + locale + raw bytes).
+
+### LocationPattern
+
+Holds one or more [Spring resource location patterns](https://docs.spring.io/spring-framework/reference/core/resources.html#resources-resource-strings)
+(e.g. `classpath:/translations/*`) that tell `ResourcesLoader` where to look. Accepts either a single pattern
+or a list; duplicate patterns are eliminated.
+
+```java
+new LocationPattern("classpath:/translations/*");
+
+new LocationPattern(List.of(
+    "classpath:/translations/*",
+    "classpath:/translations_extra/*"
+));
+```
+
+### ResourcesLoader
+
+Resolves every configured pattern, keeps the resources whose file extension is in the allow-list **and**
+whose file name parses, and reads each one into a `TranslationFile`. File names that do not match the
+[naming convention](#file-name-convention) are skipped. Resource resolution or read errors are wrapped in a
+`CatalogMessageSourceRuntimeException`.
+
+```java
+ResourcesLoader loader = new ResourcesLoader(
+    Locale.forLanguageTag("en"), // default locale for files without a locale part
+    new LocationPattern("classpath:/translations/*"),
+    List.of("ext")               // accepted file extensions (without leading dot)
+);
+
+List<TranslationFile> files = loader.getTranslationFiles();
+```
+
+### File name convention
+
+`ResourcesFileNameParser` derives the domain and locale from each file name. Matching is case-insensitive
+and the file extension is ignored — `.ext` below stands for any extension, the convention does not depend on
+the file type. The domain and the locale part can be separated by `_`, `-` or `.`; language and region are
+separated by `_` or `-`. When a file name carries no locale part, the default locale passed to
+`ResourcesLoader` is used.
+
+| File name              | Domain     | Locale  |
+|------------------------|------------|---------|
+| `messages.ext`         | `messages` | default |
+| `messages_de.ext`      | `messages` | `de`    |
+| `messages.de.ext`      | `messages` | `de`    |
+| `messages_en-US.ext`   | `messages` | `en_US` |
+| `payment_de.ext`       | `payment`  | `de`    |
+
+File names that do not match this pattern are ignored by `ResourcesLoader`.
+
+### Records: Filename and TranslationFile
+
+- `Filename` — the parsed parts of a file name (`domain`, `language`, `region`). `hasLocale()` reports
+  whether a language part was present and `locale()` builds the `Locale` from the parts.
+- `TranslationFile` — a loaded file: `domain`, `locale` and the raw `content` bytes. The byte content is
+  compared by value in `equals`/`hashCode`.
 
 ## Javadoc
 
