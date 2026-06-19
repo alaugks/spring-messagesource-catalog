@@ -11,24 +11,29 @@ import org.springframework.util.Assert;
 /**
  * Parses translation resource file names into a {@link Filename} record.
  *
- * <p>Matches case-insensitively; {@code _} and {@code -} both work as separators.
- * The file extension is ignored — only the leading segments are inspected.
+ * <p>Matches case-insensitively. The domain and the locale part may be separated by {@code _}, {@code -}
+ * or {@code .}; language and region may be separated by {@code _} or {@code -}. The file extension is
+ * ignored — only the leading segments are inspected.
  *
- * <p>Examples (the extension is shown for context but ignored by the parser):
+ * <p>All separator combinations (the extension is shown for context but ignored by the parser):
  * <ul>
  *   <li>{@code messages.ext} &rarr; domain={@code messages}</li>
  *   <li>{@code messages_de.ext} &rarr; domain={@code messages}, language={@code de}</li>
+ *   <li>{@code messages-de.ext} &rarr; domain={@code messages}, language={@code de}</li>
+ *   <li>{@code messages.de.ext} &rarr; domain={@code messages}, language={@code de}</li>
+ *   <li>{@code messages_en_US.ext} &rarr; domain={@code messages}, language={@code en}, region={@code US}</li>
  *   <li>{@code messages_en-US.ext} &rarr; domain={@code messages}, language={@code en}, region={@code US}</li>
- *   <li>{@code payment.ext} &rarr; domain={@code payment}</li>
- *   <li>{@code payment_de.ext} &rarr; domain={@code payment}, language={@code de}</li>
- *   <li>{@code payment_en-US.ext} &rarr; domain={@code payment}, language={@code en}, region={@code US}</li>
+ *   <li>{@code messages-en_US.ext} &rarr; domain={@code messages}, language={@code en}, region={@code US}</li>
+ *   <li>{@code messages-en-US.ext} &rarr; domain={@code messages}, language={@code en}, region={@code US}</li>
+ *   <li>{@code messages.en_US.ext} &rarr; domain={@code messages}, language={@code en}, region={@code US}</li>
+ *   <li>{@code messages.en-US.ext} &rarr; domain={@code messages}, language={@code en}, region={@code US}</li>
  * </ul>
  */
 public class ResourcesFileNameParser {
 
 	private static final Pattern PATTERN = Pattern.compile(
-			"^(?<domain>[a-z0-9]+)(?:([_-](?<language>[a-z]+))(?:[_-](?<region>[a-z]+))?)?",
-			Pattern.CASE_INSENSITIVE
+		"^(?<domain>[a-z0-9]+)(?:[_.-](?<language>[a-z]+)(?:[_-](?<region>[a-z]+))?)?\\.[a-z0-9]+$",
+		Pattern.CASE_INSENSITIVE
 	);
 
 	private final String filename;

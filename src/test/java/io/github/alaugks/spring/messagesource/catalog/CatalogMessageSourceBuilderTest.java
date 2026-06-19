@@ -44,7 +44,7 @@ class CatalogMessageSourceBuilderTest {
 
 	// README "Message formatting": default java.text.MessageFormat with a positional argument.
 	@Test
-	void test_readme_default_format_positional_argument() {
+	void test_readme_default_format_java_text_messageformat_argument() {
 		List<TransUnitInterface> transUnits = List.of(
 			new TransUnit(LOCALE_EN, "files", "There are {0,number,integer} files."),
 			new TransUnit(LOCALE_DE, "files", "Es gibt {0,number,integer} Dateien.")
@@ -362,8 +362,7 @@ class CatalogMessageSourceBuilderTest {
 		DefaultMessageSourceResolvable resolvable =
 				new DefaultMessageSourceResolvable(new String[] {"not_exists"});
 
-		assertThrows(NoSuchMessageException.class,
-				() -> ms.getMessage(resolvable, LOCALE_EN));
+		assertThrows(NoSuchMessageException.class, () -> ms.getMessage(resolvable, LOCALE_EN));
 	}
 
 	@Test
@@ -379,8 +378,7 @@ class CatalogMessageSourceBuilderTest {
 		DefaultMessageSourceResolvable resolvable =
 				new DefaultMessageSourceResolvable(new String[] {"not_exists"});
 
-		assertThrows(NoSuchMessageException.class,
-				() -> ms.getMessage(resolvable, null));
+		assertThrows(NoSuchMessageException.class, () -> ms.getMessage(resolvable, null));
 	}
 
 	@Test
@@ -405,8 +403,7 @@ class CatalogMessageSourceBuilderTest {
 			}
 		};
 
-		assertThrows(NoSuchMessageException.class,
-				() -> ms.getMessage(resolvable, LOCALE_EN));
+		assertThrows(NoSuchMessageException.class, () -> ms.getMessage(resolvable, LOCALE_EN));
 	}
 
 	@Test
@@ -422,8 +419,7 @@ class CatalogMessageSourceBuilderTest {
 		DefaultMessageSourceResolvable resolvable =
 				new DefaultMessageSourceResolvable(new String[] {});
 
-		assertThrows(NoSuchMessageException.class,
-				() -> ms.getMessage(resolvable, null));
+		assertThrows(NoSuchMessageException.class, () -> ms.getMessage(resolvable, null));
 	}
 
 	@Test
@@ -482,8 +478,130 @@ class CatalogMessageSourceBuilderTest {
 				.builder(transUnits, LOCALE_EN)
 				.build();
 
-		assertThrows(NoSuchMessageException.class,
-				() -> ms.getMessage("not_exists", null, null));
+		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("not_exists", null, null));
+	}
+
+	@Test
+	void test_get_message_null_code_returns_default_message() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.build();
+
+		assertEquals("default_message", ms.getMessage(null, null, "default_message", LOCALE_EN));
+	}
+
+	@Test
+	void test_get_message_unresolved_with_args_returns_default_message() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.build();
+
+		assertEquals("default_message", ms.getMessage("not_exists", new Object[] {"arg"}, "default_message", LOCALE_EN));
+	}
+
+	@Test
+	void test_icu4j_single_java_text_messageformat_argument() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "value", "Foo {0}")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.enableICU4j()
+				.build();
+
+		assertEquals("Foo Bar", ms.getMessage("value", new Object[] {"Bar"}, LOCALE_EN));
+	}
+
+	@Test
+	void test_icu4j_multiple_java_text_messageformat_arguments() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "value", "{0} and {1}")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.enableICU4j()
+				.build();
+
+		assertEquals("Foo and Bar", ms.getMessage("value", new Object[] {"Foo", "Bar"}, LOCALE_EN));
+	}
+
+	@Test
+	void test_empty_code_not_resolved_throws() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.build();
+
+		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("", null, LOCALE_EN));
+	}
+
+	@Test
+	void test_empty_language_locale_not_resolved_throws() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.build();
+
+		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("key_1", null, Locale.ROOT));
+	}
+
+	@Test
+	void test_source_with_empty_language_locale_is_skipped() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1"),
+				new TransUnit(Locale.ROOT, "key_root", "value_root")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.build();
+
+		assertEquals("value_en_1", ms.getMessage("key_1", null, LOCALE_EN));
+		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("key_root", null, LOCALE_EN));
+	}
+
+	@Test
+	void test_resolution_falls_back_to_default_locale() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.build();
+
+		assertEquals("value_en_1", ms.getMessage("key_1", null, Locale.forLanguageTag("fr-FR")));
+	}
+
+	@Test
+	void test_resolution_default_locale_fallback_misses_throws() {
+		List<TransUnitInterface> transUnits = List.of(
+				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+				.builder(transUnits, LOCALE_EN)
+				.build();
+
+		Locale locale = Locale.forLanguageTag("fr-FR");
+
+		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("not_exists", null, locale));
 	}
 
 	@Test
@@ -498,7 +616,7 @@ class CatalogMessageSourceBuilderTest {
 			.build();
 
 		assertEquals("value_en_1", ms.getMessage("key_1", null, LOCALE_EN));
-		assertEquals("ParentMessageSource with args: 1,234", ms.getMessage("parent-messagesource-code", new Object[]{1234L}, LOCALE_EN));
+		assertEquals("ParentMessageSource with args: 1,234", ms.getMessage("parent-messagesource-code", new Object[]{1234}, LOCALE_EN));
 		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("not_exists", null, LOCALE_EN));
 	}
 }
