@@ -3,7 +3,7 @@
 This package extends the [AbstractMessageSource](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/support/AbstractMessageSource.html) and provides the [MessageSource interface](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/MessageSource.html).
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=alaugks_spring-messagesource-catalog&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=alaugks_spring-messagesource-catalog)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.alaugks/spring-messagesource-catalog.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.alaugks/spring-messagesource-catalog/0.7.0)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.alaugks/spring-messagesource-catalog.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.alaugks/spring-messagesource-catalog/0.8.0-SNAPSHOT)
 
 ## Table of Contents
 
@@ -32,14 +32,14 @@ This package extends the [AbstractMessageSource](https://docs.spring.io/spring-f
 <dependency>
     <groupId>io.github.alaugks</groupId>
     <artifactId>spring-messagesource-catalog</artifactId>
-    <version>0.7.0</version>
+    <version>0.8.0-SNAPSHOT</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```
-implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog', version: '0.7.0'
+implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog', version: '0.8.0-SNAPSHOT'
 ```
 
 ## Packages that use the catalog as a base package
