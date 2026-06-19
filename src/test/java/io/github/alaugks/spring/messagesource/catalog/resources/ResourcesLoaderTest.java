@@ -32,6 +32,20 @@ class ResourcesLoaderTest {
 	}
 
 	@Test
+	void test_set_location_patterns_classpath_prefix() {
+		ResourcesLoader resourcesLoader = new ResourcesLoader(
+			LOCALE_EN,
+			new LocationPattern(List.of(
+				"classpath:/translations_en/*",
+				"classpath:/translations_de/*"
+			)),
+			List.of("txt")
+		);
+
+		assertEquals(4, resourcesLoader.getTranslationFiles().size());
+	}
+
+	@Test
 	void test_set_location_patterns_domain_messages() {
 		ResourcesLoader resourcesLoader = new ResourcesLoader(
 				LOCALE_EN,
