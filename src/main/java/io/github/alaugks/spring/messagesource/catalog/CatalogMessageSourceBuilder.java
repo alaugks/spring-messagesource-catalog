@@ -7,11 +7,16 @@ import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogInterface;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.springframework.context.MessageSource;
@@ -38,6 +43,25 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 
 	/** Default domain used when none is configured: {@value}. */
 	public static final String DEFAULT_DOMAIN = "messages";
+
+	/** Internal base name for the {@link ResourceBundle} that serves the catalog. */
+	private static final String BUNDLE_BASE_NAME = CatalogMessageSourceBuilder.class.getPackageName();
+
+	/**Internal bundle format name handled by {@link CatalogControl}. */
+	private static final String BUNDLE_FORMAT = "catalog";
+
+	private final ResourceBundle.Control control = new CatalogControl();
+
+	/**
+	 * Per-instance cache of resolved bundles, keyed by the requested locale. Mirrors the own cache
+	 * of Spring's {@code ResourceBundleMessageSource}: the bundle (and its locale-fallback chain) is
+	 * built once per locale and reused, rather than rebuilt on every lookup. The JDK's own
+	 * {@link ResourceBundle} cache is left disabled ({@link CatalogControl#getTimeToLive}) so that
+	 * instances never collide in the shared, class-loader-scoped cache and no instance state leaks
+	 * into it. The cached bundles hold their catalog buckets by live reference, so late-binding
+	 * entries added later via {@link #put} stay visible.
+	 */
+	private final ConcurrentMap<Locale, ResourceBundle> cachedBundles = new ConcurrentHashMap<>();
 
 	private final ConcurrentMap<Locale, ConcurrentMap<String, String>> catalogMap;
 
@@ -166,9 +190,9 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	/**
 	 * Resolves the given code for the requested locale and formats it with the given arguments.
 	 *
-	 * <p>Lookup order: the in-memory catalog map (with domain, no-region, and default-locale
-	 * fallbacks), then the late-binding source chain. Resolved values from the chain are
-	 * cached for subsequent calls.
+	 * <p>Lookup order: the in-memory catalog (locale fallback delegated to the JDK via
+	 * {@link ResourceBundle}, default-domain prefix probed), then the late-binding source chain,
+	 * then the parent message source. Resolved values from the chain are cached for subsequent calls.
 	 *
 	 * @param code the message code to resolve
 	 * @param args the arguments to format the message with, or {@code null} for none
@@ -206,17 +230,17 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	}
 
 	/**
-	 * Looks up the code in the catalog map, falling back to the source chain
-	 * and caching the result.
+	 * Resolves the code through the JDK-driven bundle (locale fallback applied), then falls back
+	 * to the late-binding source chain and finally the parent message source.
 	 */
 	private String resolveFromCatalog(String code, Locale locale, @Nullable Object[] args) {
 		if (locale.getLanguage().isEmpty() || code.isEmpty()) {
 			return null;
 		}
 
-		Optional<String> value = this.resolveFromCatalogMap(code, locale);
-		if (value.isPresent()) {
-			return value.get();
+		String value = this.resolveFromBundle(code, locale);
+		if (value != null) {
+			return value;
 		}
 
 		TransUnitInterface tu = this.chainHead.resolveTransUnit(code, locale);
@@ -252,53 +276,47 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	}
 
 	/**
-	 * Walks the locale and code-key fallbacks (region → language → default
-	 * locale, code without domain prefix → code with domain prefix).
+	 * Resolves the code against the in-memory catalog using the JDK locale fallback: a
+	 * {@link ResourceBundle} is loaded through {@link CatalogControl}, so the candidate-locale
+	 * chain (region → language → root, where root serves the configured default locale) and the
+	 * per-locale bundle chaining are handled by
+	 * {@link ResourceBundle#getBundle(String, Locale, ResourceBundle.Control)}. The code is probed
+	 * both without and with the default-domain prefix.
 	 */
-	private Optional<String> resolveFromCatalogMap(String code, Locale locale) {
-		String domainCode = this.concatCode(this.defaultDomain, code);
-
-		String value = this.lookup(locale, code, domainCode);
-		if (value != null) {
-			return Optional.of(value);
-		}
-
-		Locale languageOnly = this.buildLocaleWithoutRegion(locale);
-		if (!languageOnly.equals(locale)) {
-			value = this.lookup(languageOnly, code, domainCode);
-			if (value != null) {
-				return Optional.of(value);
-			}
-		}
-
-		if (!this.defaultLocale.equals(locale) && !this.defaultLocale.equals(languageOnly)) {
-			value = this.lookup(this.defaultLocale, code, domainCode);
-			if (value != null) {
-				return Optional.of(value);
-			}
-		}
-
-		return Optional.empty();
-	}
-
-	/**
-	 * Reads the bucket for {@code locale} once and probes the code both
-	 * without and with the domain prefix.
-	 */
-	private String lookup(Locale locale, String code, String domainCode) {
-		ConcurrentMap<String, String> bucket = this.catalogMap.get(locale);
-		if (bucket == null) {
+	private String resolveFromBundle(String code, Locale locale) {
+		ResourceBundle bundle = this.getResourceBundle(locale);
+		if (bundle == null) {
 			return null;
 		}
-		String value = bucket.get(code);
-		return value != null ? value : bucket.get(domainCode);
+
+		String domainCode = this.concatCode(this.defaultDomain, code);
+		if (bundle.containsKey(code)) {
+			return bundle.getString(code);
+		}
+		if (bundle.containsKey(domainCode)) {
+			return bundle.getString(domainCode);
+		}
+
+		return null;
 	}
 
 	/**
-	 * Returns a language-only {@link Locale} (region and variant stripped).
+	 * Returns the bundle for the locale from the per-instance {@link #cachedBundles} cache, building
+	 * it once via {@link ResourceBundle#getBundle(String, Locale, ResourceBundle.Control)} on a miss.
 	 */
-	private Locale buildLocaleWithoutRegion(Locale locale) {
-		return new Locale.Builder().setLanguage(locale.getLanguage()).build();
+	private ResourceBundle getResourceBundle(Locale locale) {
+		ResourceBundle cached = this.cachedBundles.get(locale);
+		if (cached != null) {
+			return cached;
+		}
+
+		try {
+			ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE_NAME, locale, this.control);
+			this.cachedBundles.put(locale, bundle);
+			return bundle;
+		} catch (MissingResourceException e) {
+			return null;
+		}
 	}
 
 	/**
@@ -307,6 +325,80 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	 */
 	private String concatCode(String domain, String code) {
 		return Optional.ofNullable(domain).orElse(DEFAULT_DOMAIN) + "." + code;
+	}
+
+	/**
+	 * A {@link java.util.ResourceBundle.Control} that serves the in-memory {@link #catalogMap}
+	 * instead of {@code .properties}/{@code .class} files, delegating the locale fallback to the
+	 * JDK. The default {@link #getCandidateLocales(String, Locale)} is kept (it yields
+	 * region → language → {@link Locale#ROOT}); {@link Locale#ROOT} is mapped to the configured
+	 * default locale, so the chain bottoms out there — preserving the builder's configurable
+	 * {@code defaultLocale} fallback. The JDK's own bundle cache is disabled
+	 * ({@link #getTimeToLive} returns {@link #TTL_DONT_CACHE}) so instances never collide in the
+	 * shared, class-loader-scoped {@code ResourceBundle} cache and nothing leaks into it; caching is
+	 * done per instance in {@link #cachedBundles}. {@link #newBundle} creates the locale's catalog
+	 * bucket eagerly (never returns {@code null}) and the {@link CatalogResourceBundle} holds it by
+	 * live reference, so late-binding entries added later via {@link #put} stay visible to the cached
+	 * bundle chain.
+	 */
+	private final class CatalogControl extends ResourceBundle.Control {
+
+		@Override
+		public List<String> getFormats(String baseName) {
+			return List.of(BUNDLE_FORMAT);
+		}
+
+		@Override
+		public Locale getFallbackLocale(String baseName, Locale locale) {
+			return null;
+		}
+
+		@Override
+		public long getTimeToLive(String baseName, Locale locale) {
+			return TTL_DONT_CACHE;
+		}
+
+		@Override
+		public ResourceBundle newBundle(
+				String baseName,
+				Locale locale,
+				String format,
+				ClassLoader loader,
+				boolean reload
+		) {
+			Locale bucketLocale = locale.equals(Locale.ROOT)
+					? CatalogMessageSourceBuilder.this.defaultLocale
+					: locale;
+			ConcurrentMap<String, String> bucket = CatalogMessageSourceBuilder.this.catalogMap.computeIfAbsent(
+					bucketLocale, l -> new ConcurrentHashMap<>()
+			);
+
+			return new CatalogResourceBundle(bucket);
+		}
+	}
+
+	/**
+	 * A {@link ResourceBundle} over a single locale's catalog bucket. {@code handleGetObject}
+	 * returns {@code null} on a miss (rather than throwing) so the JDK locale fallback is not
+	 * short-circuited. The bucket is referenced live, so entries added later are picked up.
+	 */
+	private static final class CatalogResourceBundle extends ResourceBundle {
+
+		private final Map<String, String> entries;
+
+		CatalogResourceBundle(Map<String, String> entries) {
+			this.entries = entries;
+		}
+
+		@Override
+		protected Object handleGetObject(String key) {
+			return this.entries.get(key);
+		}
+
+		@Override
+		public Enumeration<String> getKeys() {
+			return Collections.enumeration(this.entries.keySet());
+		}
 	}
 
 	/**
