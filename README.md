@@ -5,6 +5,19 @@ This package extends the [AbstractMessageSource](https://docs.spring.io/spring-f
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=alaugks_spring-messagesource-catalog&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=alaugks_spring-messagesource-catalog)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.alaugks/spring-messagesource-catalog.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.alaugks/spring-messagesource-catalog/0.8.0)
 
+> [!IMPORTANT]
+> This package is the **base** for other message source packages (such as
+> [spring-messagesource-xliff](https://github.com/alaugks/spring-messagesource-xliff) and
+> [spring-messagesource-json](https://github.com/alaugks/spring-messagesource-json)). As it evolves, its
+> behaviour may still change, so version updates can introduce breaking changes.
+>
+> For the `CatalogInterface`, the following applies:
+> - `getTransUnits()` is considered stable and will remain part of the interface.
+> - `nextCatalog()` and `resolveTransUnit()` are not guaranteed and may change or be removed in future versions.
+>
+> Because of this, the recommendation is to **clone this package and reuse the code directly** rather than
+> depending on it as a published dependency.
+
 ## Table of Contents
 
 - [Dependency](#dependency)
