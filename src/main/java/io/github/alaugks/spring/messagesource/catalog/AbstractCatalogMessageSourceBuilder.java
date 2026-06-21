@@ -19,6 +19,9 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCatalogMessageSourceBuilder<B>> {
 
+    /** String constant used to separate the domain and the code in message keys. */
+    protected static final String DOMAIN_DIVIDER = ".";
+
     private final Locale defaultLocale;
 
     private String defaultDomain = CatalogMessageSourceBuilder.DEFAULT_DOMAIN;
@@ -26,6 +29,8 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
     private boolean useICU4j = false;
 
     private MessageSource parentMessageSource = null;
+
+    private String domainDivider = DOMAIN_DIVIDER;
 
     protected AbstractCatalogMessageSourceBuilder(Locale defaultLocale) {
         Assert.notNull(defaultLocale, "Argument defaultLocale must not be null");
@@ -126,5 +131,29 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
      */
     protected MessageSource getParentMessageSource() {
         return this.parentMessageSource;
+    }
+
+    /**
+     * Sets the domain divider to be used when building domain-based message catalogs.
+     * Default is {@code .}
+     *
+     * @param domainDivider the domain divider string; must not be {@code null}
+     * @return this builder instance for method chaining
+     */
+    public B domainDivider(String domainDivider) {
+        this.domainDivider = domainDivider;
+
+        return (B) this;
+    }
+
+    /**
+     * Retrieves the domain divider used to separate domains in message codes.
+     * The domain divider is used in domain-based message catalogs to distinguish
+     * domain-specific message entries.
+     *
+     * @return the domain divider string
+     */
+    protected String getDomainDivider() {
+        return this.domainDivider;
     }
 }

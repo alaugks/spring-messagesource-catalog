@@ -75,7 +75,9 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 
     private final MessageSource parentMessageSource;
 
-    /**
+	private final String domainDivider;
+
+	/**
 	 * Aggregates trans units into the catalog map and wires the source chain
 	 * for late-binding fallback.
 	 */
@@ -84,13 +86,15 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 			Locale defaultLocale,
 			String defaultDomain,
         	boolean useICU4j,
-			MessageSource parentMessageSource
+			MessageSource parentMessageSource,
+			String domainDivider
 	) {
 		this.defaultLocale = defaultLocale;
 		this.defaultDomain = defaultDomain;
 		this.useICU4j = useICU4j;
         this.parentMessageSource = parentMessageSource;
-        this.catalogMap = new ConcurrentHashMap<>();
+		this.domainDivider = domainDivider;
+		this.catalogMap = new ConcurrentHashMap<>();
 
 		for (CatalogInterface source : sources) {
 			source.getTransUnits().forEach(t -> this.put(t.locale(), t.code(), t.value(), t.domain()));
@@ -324,7 +328,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	 * {@link #DEFAULT_DOMAIN} when {@code domain} is {@code null}.
 	 */
 	private String concatCode(String domain, String code) {
-		return Optional.ofNullable(domain).orElse(DEFAULT_DOMAIN) + "." + code;
+		return Optional.ofNullable(domain).orElse(DEFAULT_DOMAIN) + this.domainDivider + code;
 	}
 
 	/**
@@ -466,7 +470,8 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 					this.getDefaultLocale(),
 					this.getDefaultDomain(),
 					this.isICU4jEnabled(),
-					this.getParentMessageSource()
+					this.getParentMessageSource(),
+					this.getDomainDivider()
 				);
 		}
 	}

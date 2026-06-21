@@ -619,4 +619,18 @@ class CatalogMessageSourceBuilderTest {
 		assertEquals("ParentMessageSource with args: 1,234", ms.getMessage("parent-messagesource-code", new Object[]{1234}, LOCALE_EN));
 		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("not_exists", null, LOCALE_EN));
 	}
+
+	@Test
+	void test_domain_divider() {
+		List<TransUnitInterface> transUnits = List.of(
+			new TransUnit(LOCALE_EN, "key_1", "value_en_1", "domain")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+			.builder(transUnits, LOCALE_EN)
+			.domainDivider("|")
+			.build();
+
+		assertEquals("value_en_1", ms.getMessage("domain|key_1", null, LOCALE_EN));
+	}
 }
