@@ -22,7 +22,7 @@ class AbstractCatalogTest {
 		AbstractCatalog catalog = new NoopCatalog();
 
 		assertTrue(catalog.getTransUnits().isEmpty());
-		assertNull(catalog.resolveTransUnit("any_key", EN));
+		assertNull(catalog.resolveTransUnit("code", EN));
 	}
 
 	@Test
@@ -30,15 +30,15 @@ class AbstractCatalogTest {
 		AbstractCatalog catalog = new EagerCatalog();
 
 		assertEquals("eager_value", catalog.getTransUnits().get(0).value());
-		assertNull(catalog.resolveTransUnit("any_key", EN));
+		assertNull(catalog.resolveTransUnit("code", EN));
 	}
 
 	@Test
 	void test_lazy_override_answers_or_returns_null() {
 		AbstractCatalog catalog = new LazyCatalog();
 
-		assertEquals("lazy_value", catalog.resolveTransUnit("lazy_key", EN).value());
-		assertNull(catalog.resolveTransUnit("unknown_key", EN));
+		assertEquals("lazy_value", catalog.resolveTransUnit("lazy_code", EN).value());
+		assertNull(catalog.resolveTransUnit("unknown_code", EN));
 		assertTrue(catalog.getTransUnits().isEmpty());
 	}
 }
@@ -50,7 +50,7 @@ class EagerCatalog extends AbstractCatalog {
 
 	@Override
 	public List<TransUnitInterface> getTransUnits() {
-		return List.of(new TransUnit(Locale.forLanguageTag("en"), "eager_key", "eager_value"));
+		return List.of(new TransUnit(Locale.forLanguageTag("en"), "eager_code", "eager_value"));
 	}
 }
 
@@ -58,7 +58,7 @@ class LazyCatalog extends AbstractCatalog {
 
 	@Override
 	public TransUnitInterface resolveTransUnit(String code, Locale locale) {
-		if (code.equals("lazy_key")) {
+		if (code.equals("lazy_code")) {
 			return new TransUnit(locale, code, "lazy_value");
 		}
 

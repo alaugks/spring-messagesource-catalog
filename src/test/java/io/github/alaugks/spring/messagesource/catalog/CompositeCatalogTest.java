@@ -20,8 +20,8 @@ class CompositeCatalogTest {
 	@Test
 	void test_get_trans_units_concatenated_in_order() {
 		CompositeCatalog composite = new CompositeCatalog(List.of(
-				new TransUnitsCatalog(List.of(new TransUnit(EN, "key_a", "value_a"))),
-				new TransUnitsCatalog(List.of(new TransUnit(EN, "key_b", "value_b")))
+				new TransUnitsCatalog(List.of(new TransUnit(EN, "code_a", "value_a"))),
+				new TransUnitsCatalog(List.of(new TransUnit(EN, "code_b", "value_b")))
 		));
 
 		List<TransUnitInterface> all = composite.getTransUnits();
@@ -34,27 +34,27 @@ class CompositeCatalogTest {
 	@Test
 	void test_resolve_first_non_null_wins() {
 		CompositeCatalog composite = new CompositeCatalog(List.of(
-				new KeyCatalog("key", "first"),
-				new KeyCatalog("key", "second")
+				new KeyCatalog("code", "first"),
+				new KeyCatalog("code", "second")
 		));
 
-		assertEquals("first", composite.resolveTransUnit("key", EN).value());
+		assertEquals("first", composite.resolveTransUnit("code", EN).value());
 	}
 
 	@Test
 	void test_resolve_falls_through_to_next_source() {
 		CompositeCatalog composite = new CompositeCatalog(List.of(
-				new KeyCatalog("key_a", "value_a"),
-				new KeyCatalog("key_b", "value_b")
+				new KeyCatalog("code_a", "value_a"),
+				new KeyCatalog("code_b", "value_b")
 		));
 
-		assertEquals("value_b", composite.resolveTransUnit("key_b", EN).value());
+		assertEquals("value_b", composite.resolveTransUnit("code_b", EN).value());
 	}
 
 	@Test
 	void test_resolve_returns_null_when_no_source_answers() {
 		CompositeCatalog composite = new CompositeCatalog(List.of(
-				new KeyCatalog("key_a", "value_a")
+				new KeyCatalog("code_a", "value_a")
 		));
 
 		assertNull(composite.resolveTransUnit("unknown", EN));
@@ -63,17 +63,17 @@ class CompositeCatalogTest {
 
 class KeyCatalog extends AbstractCatalog {
 
-	private final String key;
+	private final String code;
 
 	private final String value;
 
-	KeyCatalog(String key, String value) {
-		this.key = key;
+	KeyCatalog(String code, String value) {
+		this.code = code;
 		this.value = value;
 	}
 
 	@Override
 	public TransUnitInterface resolveTransUnit(String code, Locale locale) {
-		return code.equals(this.key) ? new TransUnit(locale, code, this.value) : null;
+		return code.equals(this.code) ? new TransUnit(locale, code, this.value) : null;
 	}
 }
