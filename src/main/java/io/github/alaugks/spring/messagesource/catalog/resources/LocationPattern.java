@@ -15,6 +15,7 @@ import org.springframework.util.Assert;
  */
 public class LocationPattern {
 
+	/** Configured location patterns, deduplicated. */
 	private final Set<String> locationPatterns;
 
 	/**

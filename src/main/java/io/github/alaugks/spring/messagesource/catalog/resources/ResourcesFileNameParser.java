@@ -31,11 +31,13 @@ import org.springframework.util.Assert;
  */
 public class ResourcesFileNameParser {
 
+	/** Matches domain, optional language and optional region in a resource file name. */
 	private static final Pattern PATTERN = Pattern.compile(
 		"^(?<domain>[a-z0-9]+)(?:[_.-](?<language>[a-z]+)(?:[_-](?<region>[a-z]+))?)?\\.[a-z0-9]+$",
 		Pattern.CASE_INSENSITIVE
 	);
 
+	/** File name this parser is bound to. */
 	private final String filename;
 
 	/**

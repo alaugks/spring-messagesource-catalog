@@ -25,10 +25,13 @@ import org.springframework.util.Assert;
  */
 public class ResourcesLoader {
 
+	/** Locale used when a file name carries no locale part. */
 	private final Locale defaultLocale;
 
+	/** Resource location patterns to scan for translation files. */
 	private final Set<String> locationPatterns;
 
+	/** Accepted file extensions, without leading dot. */
 	private final List<String> fileExtensions;
 
 	/**
@@ -81,8 +84,8 @@ public class ResourcesLoader {
 	}
 
 	/**
-	 * Builds a {@link TranslationFile} by parsing the resource file name and reading its
-	 * bytes; returns {@code null} when the name does not match.
+	 * Builds a TranslationFile by parsing the resource file name and reading its bytes; returns
+	 * null when the name does not match.
 	 */
 	private TranslationFile parseFileName(Resource resource) throws IOException {
 		Filename filename = new ResourcesFileNameParser(resource.getFilename()).parse();

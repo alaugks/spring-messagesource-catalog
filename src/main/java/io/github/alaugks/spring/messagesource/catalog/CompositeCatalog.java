@@ -19,6 +19,7 @@ import java.util.Locale;
  */
 final class CompositeCatalog implements CatalogInterface {
 
+	/** Sources consulted in order, copied defensively at construction. */
 	private final List<CatalogInterface> sources;
 
 	CompositeCatalog(List<CatalogInterface> sources) {

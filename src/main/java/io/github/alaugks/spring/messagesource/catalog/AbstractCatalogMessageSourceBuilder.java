@@ -22,14 +22,19 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
     /** String constant used to separate the domain and the code in message keys. */
     protected static final String DOMAIN_DIVIDER = ".";
 
+    /** Locale used as fallback when a code cannot be resolved for the requested locale. */
     private final Locale defaultLocale;
 
+    /** Domain applied when a code is requested without an explicit domain. */
     private String defaultDomain = CatalogMessageSourceBuilder.DEFAULT_DOMAIN;
 
+    /** Whether messages are formatted with ICU4J. */
     private boolean useICU4j = false;
 
+    /** Optional parent consulted when a code cannot be resolved locally. */
     private MessageSource parentMessageSource = null;
 
+    /** Separator between domain and code in a qualified code. */
     private String domainDivider = DOMAIN_DIVIDER;
 
     protected AbstractCatalogMessageSourceBuilder(Locale defaultLocale) {

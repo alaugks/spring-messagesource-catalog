@@ -43,37 +43,37 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	/** Default domain used when none is configured: {@value}. */
 	public static final String DEFAULT_DOMAIN = "messages";
 
-	/** Internal base name for the {@link ResourceBundle} that serves the catalog. */
+	/** Internal base name for the ResourceBundle that serves the catalog. */
 	private static final String BUNDLE_BASE_NAME = CatalogMessageSourceBuilder.class.getPackageName();
 
-	/**Internal bundle format name handled by {@link CatalogControl}. */
+	/** Internal bundle format name handled by CatalogControl. */
 	private static final String BUNDLE_FORMAT = "catalog";
 
+	/** Loads and merges the locale's catalog buckets into a bundle. */
 	private final ResourceBundle.Control control = new CatalogControl();
 
-	/**
-	 * Per-instance cache of resolved bundles, keyed by the requested locale. Mirrors the own cache
-	 * of Spring's {@code ResourceBundleMessageSource}: the bundle (and its locale-fallback chain) is
-	 * built once per locale and reused, rather than rebuilt on every lookup. The JDK's own
-	 * {@link ResourceBundle} cache is left disabled ({@link CatalogControl#getTimeToLive}) so that
-	 * instances never collide in the shared, class-loader-scoped cache and no instance state leaks
-	 * into it. The cached bundles hold their catalog buckets by live reference, so late-binding
-	 * entries added later via {@link #put} stay visible.
-	 */
+	/** Per-instance cache of resolved bundles, keyed by locale. */
 	private final ConcurrentMap<Locale, ResourceBundle> cachedBundles = new ConcurrentHashMap<>();
 
+	/** Resolved messages, keyed by locale and then by domain-qualified code. */
 	private final ConcurrentMap<Locale, ConcurrentMap<String, String>> catalogMap;
 
+	/** Locale used as fallback when a code cannot be resolved for the requested locale. */
 	private final Locale defaultLocale;
 
+	/** Domain applied when a code is requested without an explicit domain. */
 	private final String defaultDomain;
 
+	/** Aggregated source providing the trans units for the catalog. */
 	private final CatalogInterface catalog;
 
+	/** Whether messages are formatted with ICU4J. */
 	private final boolean useICU4j;
 
+	/** Optional parent consulted when a code cannot be resolved locally. */
     private final MessageSource parentMessageSource;
 
+	/** Separator between domain and code in a qualified code. */
 	private final String domainDivider;
 
 	/**
@@ -269,12 +269,8 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	}
 
 	/**
-	 * Resolves the code against the in-memory catalog using the JDK locale fallback: a
-	 * {@link ResourceBundle} is loaded through {@link CatalogControl}, so the candidate-locale
-	 * chain (region → language → root, where root serves the configured default locale) and the
-	 * per-locale bundle chaining are handled by
-	 * {@link ResourceBundle#getBundle(String, Locale, ResourceBundle.Control)}. The code is probed
-	 * both without and with the default-domain prefix.
+	 * Resolves the code against the in-memory catalog using the JDK locale fallback. The code is
+	 * probed both without and with the default-domain prefix.
 	 */
 	private String resolveFromBundle(String code, Locale locale) {
 		ResourceBundle bundle = this.getResourceBundle(locale);
@@ -294,8 +290,8 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	}
 
 	/**
-	 * Returns the bundle for the locale from the per-instance {@link #cachedBundles} cache, building
-	 * it once via {@link ResourceBundle#getBundle(String, Locale, ResourceBundle.Control)} on a miss.
+	 * Returns the bundle for the locale from the per-instance cachedBundles cache, building it
+	 * once on a miss.
 	 */
 	private ResourceBundle getResourceBundle(Locale locale) {
 		ResourceBundle cached = this.cachedBundles.get(locale);
@@ -313,26 +309,23 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	}
 
 	/**
-	 * Joins {@code domain} and {@code code} with a dot, defaulting to
-	 * {@link #DEFAULT_DOMAIN} when {@code domain} is {@code null}.
+	 * Joins domain and code with the domain divider, defaulting to DEFAULT_DOMAIN when domain
+	 * is null.
 	 */
 	private String concatCode(String domain, String code) {
 		return Optional.ofNullable(domain).orElse(DEFAULT_DOMAIN) + this.domainDivider + code;
 	}
 
 	/**
-	 * A {@link java.util.ResourceBundle.Control} that serves the in-memory {@link #catalogMap}
-	 * instead of {@code .properties}/{@code .class} files, delegating the locale fallback to the
-	 * JDK. The default {@link #getCandidateLocales(String, Locale)} is kept (it yields
-	 * region → language → {@link Locale#ROOT}); {@link Locale#ROOT} is mapped to the configured
-	 * default locale, so the chain bottoms out there — preserving the builder's configurable
-	 * {@code defaultLocale} fallback. The JDK's own bundle cache is disabled
-	 * ({@link #getTimeToLive} returns {@link #TTL_DONT_CACHE}) so instances never collide in the
-	 * shared, class-loader-scoped {@code ResourceBundle} cache and nothing leaks into it; caching is
-	 * done per instance in {@link #cachedBundles}. {@link #newBundle} creates the locale's catalog
-	 * bucket eagerly (never returns {@code null}) and the {@link CatalogResourceBundle} holds it by
-	 * live reference, so late-binding entries added later via {@link #put} stay visible to the cached
-	 * bundle chain.
+	 * A ResourceBundle.Control that serves the in-memory catalogMap instead of .properties/.class
+	 * files, delegating the locale fallback to the JDK. The default candidate-locale chain is kept
+	 * (region → language → root); root is mapped to the configured default locale, so the chain
+	 * bottoms out there — preserving the builder's configurable defaultLocale fallback. The JDK's
+	 * own bundle cache is disabled (TTL_DONT_CACHE) so instances never collide in the shared,
+	 * class-loader-scoped cache and nothing leaks into it; caching is done per instance in
+	 * cachedBundles. newBundle creates the locale's catalog bucket eagerly (never returns null) and
+	 * the CatalogResourceBundle holds it by live reference, so late-binding entries added later via
+	 * put stay visible to the cached bundle chain.
 	 */
 	private final class CatalogControl extends ResourceBundle.Control {
 
@@ -371,9 +364,9 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	}
 
 	/**
-	 * A {@link ResourceBundle} over a single locale's catalog bucket. {@code handleGetObject}
-	 * returns {@code null} on a miss (rather than throwing) so the JDK locale fallback is not
-	 * short-circuited. The bucket is referenced live, so entries added later are picked up.
+	 * A ResourceBundle over a single locale's catalog bucket. handleGetObject returns null on a
+	 * miss (rather than throwing) so the JDK locale fallback is not short-circuited. The bucket is
+	 * referenced live, so entries added later are picked up.
 	 */
 	private static final class CatalogResourceBundle extends ResourceBundle {
 
