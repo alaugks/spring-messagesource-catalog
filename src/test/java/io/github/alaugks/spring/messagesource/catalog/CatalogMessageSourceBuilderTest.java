@@ -253,11 +253,9 @@ class CatalogMessageSourceBuilderTest {
 				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
 		);
 
-		TransUnitsCatalog source = new TransUnitsCatalog(transUnits);
-		source.nextCatalog(new FooBarCatalog());
-
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(source, LOCALE_EN)
+				.builder(new TransUnitsCatalog(transUnits), LOCALE_EN)
+				.addSource(new FooBarCatalog())
 				.build();
 
 		assertEquals("value_en_1", ms.getMessage("key_1", null, LOCALE_EN));

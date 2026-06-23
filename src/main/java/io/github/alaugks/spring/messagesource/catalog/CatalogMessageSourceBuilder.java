@@ -9,7 +9,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -32,7 +31,7 @@ import org.springframework.util.ObjectUtils;
  *
  * <p>Translation units from all configured sources are aggregated into an in-memory map
  * during construction. Codes are resolved from that map first; on a miss, the configured
- * source chain is consulted via {@link CatalogInterface#resolveTransUnit(String, Locale)}
+ * sources are consulted in order via {@link CatalogInterface#resolveTransUnit(String, Locale)}
  * for late-binding sources, and the result is cached.
  *
  * <p>Use {@link #builder(List, Locale)} or {@link #builder(CatalogInterface, Locale)}
@@ -69,7 +68,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 
 	private final String defaultDomain;
 
-	private final CatalogInterface chainHead;
+	private final CatalogInterface catalog;
 
 	private final boolean useICU4j;
 
@@ -78,8 +77,8 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	private final String domainDivider;
 
 	/**
-	 * Aggregates trans units into the catalog map and wires the source chain
-	 * for late-binding fallback.
+	 * Aggregates trans units into the catalog map and composes the sources for
+	 * late-binding fallback.
 	 */
 	private CatalogMessageSourceBuilder(
 			List<CatalogInterface> sources,
@@ -95,19 +94,9 @@ public class CatalogMessageSourceBuilder implements MessageSource {
         this.parentMessageSource = parentMessageSource;
 		this.domainDivider = domainDivider;
 		this.catalogMap = new ConcurrentHashMap<>();
+		this.catalog = new CompositeCatalog(sources);
 
-		for (CatalogInterface source : sources) {
-			source.getTransUnits().forEach(t -> this.put(t.locale(), t.code(), t.value(), t.domain()));
-		}
-
-		Iterator<CatalogInterface> it = sources.iterator();
-		this.chainHead = it.next();
-		CatalogInterface current = this.chainHead;
-		while (it.hasNext()) {
-			CatalogInterface next = it.next();
-			current.nextCatalog(next);
-			current = next;
-		}
+		this.catalog.getTransUnits().forEach(t -> this.put(t.locale(), t.code(), t.value(), t.domain()));
 	}
 
 	/**
@@ -195,8 +184,8 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	 * Resolves the given code for the requested locale and formats it with the given arguments.
 	 *
 	 * <p>Lookup order: the in-memory catalog (locale fallback delegated to the JDK via
-	 * {@link ResourceBundle}, default-domain prefix probed), then the late-binding source chain,
-	 * then the parent message source. Resolved values from the chain are cached for subsequent calls.
+	 * {@link ResourceBundle}, default-domain prefix probed), then the late-binding sources in order,
+	 * then the parent message source. Resolved values from the sources are cached for subsequent calls.
 	 *
 	 * @param code the message code to resolve
 	 * @param args the arguments to format the message with, or {@code null} for none
@@ -235,7 +224,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 
 	/**
 	 * Resolves the code through the JDK-driven bundle (locale fallback applied), then falls back
-	 * to the late-binding source chain and finally the parent message source.
+	 * to the late-binding sources and finally the parent message source.
 	 */
 	private String resolveFromCatalog(String code, Locale locale, @Nullable Object[] args) {
 		if (locale.getLanguage().isEmpty() || code.isEmpty()) {
@@ -247,7 +236,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 			return value;
 		}
 
-		TransUnitInterface tu = this.chainHead.resolveTransUnit(code, locale);
+		TransUnitInterface tu = this.catalog.resolveTransUnit(code, locale);
 		if (tu != null) {
 			this.put(tu.locale(), tu.code(), tu.value(), tu.domain());
 			return tu.value();
@@ -429,7 +418,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 
 		/**
 		 * Appends another source. Sources are aggregated additively at {@link #build()};
-		 * their {@code resolveTransUnit} late-binding methods are also chained in the order
+		 * their {@code resolveTransUnit} late-binding methods are consulted in the order
 		 * they were added.
 		 *
 		 * @param source the source to append; must not be {@code null}
@@ -458,8 +447,8 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 
 		/**
 		 * Builds a {@link CatalogMessageSourceBuilder} from the configured sources, default
-		 * locale, and default domain. Trans units are aggregated and the source chain is
-		 * wired up at this point; subsequent mutations of the builder have no effect on the
+		 * locale, and default domain. Trans units are aggregated and the sources are composed
+		 * at this point; subsequent mutations of the builder have no effect on the
 		 * returned instance.
 		 *
 		 * @return a new {@link CatalogMessageSourceBuilder} instance
