@@ -377,8 +377,8 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		}
 
 		@Override
-		protected Object handleGetObject(String key) {
-			return this.entries.get(key);
+		protected Object handleGetObject(String code) {
+			return this.entries.get(code);
 		}
 
 		@Override
