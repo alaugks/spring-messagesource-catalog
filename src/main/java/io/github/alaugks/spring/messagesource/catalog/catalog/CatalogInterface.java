@@ -19,22 +19,13 @@ import java.util.Locale;
  *       is cached in the map, so subsequent lookups for the same key hit memory.</li>
  * </ul>
  *
- * <p>Sources are wired into a <em>Chain of Responsibility</em> via
- * {@link #nextCatalog(CatalogInterface)}: each link decides whether it can answer the request
- * and delegates to the next otherwise. {@link AbstractCatalog} provides the chain plumbing
- * and no-op defaults; subclasses that override {@link #resolveTransUnit(String, Locale)}
- * must forward by returning {@code super.resolveTransUnit(code, locale)} when they cannot
- * answer — a direct {@code return null} ends the chain at that link.
+ * <p>Multiple sources are aggregated additively by the builder, which composes them in the
+ * order they were added (see {@code CatalogMessageSourceBuilder.Builder#addSource}). Eager
+ * units from all sources are concatenated; on a lazy lookup the sources are consulted in
+ * order and the first non-{@code null} result wins. Each source therefore only answers for
+ * what it knows and returns {@code null} otherwise — it does not delegate to other sources.
  */
 public interface CatalogInterface {
-
-	/**
-	 * Sets the next catalog in the chain. Called by the builder when wiring sources together.
-	 *
-	 * @param handler the next catalog
-	 * @return the same {@code handler}, to allow fluent chaining
-	 */
-	CatalogInterface nextCatalog(CatalogInterface handler);
 
 	/**
 	 * Returns the translation units this source contributes eagerly. Aggregated into the

@@ -11,8 +11,8 @@ import java.util.Locale;
 /**
  * Convenient base class for {@link CatalogInterface} implementations.
  *
- * <p>Provides the chain plumbing ({@link #nextCatalog(CatalogInterface)}) and no-op
- * defaults for both data methods. Subclasses contribute by overriding exactly one of them:
+ * <p>Provides no-op defaults for both data methods. Subclasses contribute by overriding
+ * the one that fits:
  *
  * <ul>
  *   <li><b>Eager</b> — override {@link #getTransUnits()} to return the trans units the
@@ -21,12 +21,10 @@ import java.util.Locale;
  *       single trans unit on demand.</li>
  * </ul>
  *
- * <p>Once the builder has wired the chain, the unchanged defaults delegate to the next
- * catalog, so a non-overriding subclass behaves as a transparent link in the chain.
+ * <p>A non-overriding subclass contributes nothing: it serves no eager units and resolves
+ * nothing. Aggregating multiple sources is the builder's responsibility, not the source's.
  */
 public abstract class AbstractCatalog implements CatalogInterface {
-
-	private CatalogInterface nextCatalog;
 
 	/**
 	 * Default constructor for use by subclasses.
@@ -35,51 +33,27 @@ public abstract class AbstractCatalog implements CatalogInterface {
 	}
 
 	/**
-	 * Stores the next catalog in the chain and returns it, so calls can be chained fluently.
+	 * Default eager source: returns an empty (mutable) list. Subclasses override to
+	 * contribute trans units.
 	 *
-	 * @param catalog the next catalog
-	 * @return the same {@code catalog}, to allow fluent chaining
-	 */
-	public CatalogInterface nextCatalog(CatalogInterface catalog) {
-		this.nextCatalog = catalog;
-		return catalog;
-	}
-
-	/**
-	 * Default eager source: returns an empty list, or — once a next catalog has been wired —
-	 * delegates to it. Subclasses override to contribute trans units.
-	 *
-	 * @return the trans units from the next catalog, or an empty list when this is the last link
+	 * @return an empty list
 	 */
 	public List<TransUnitInterface> getTransUnits() {
-		if (this.nextCatalog == null) {
-			return new ArrayList<>();
-		}
-
-		return this.nextCatalog.getTransUnits();
+		return new ArrayList<>();
 	}
 
 	/**
-	 * Default lazy lookup: returns {@code null}, or — once a next catalog has been wired —
-	 * delegates to it. Subclasses override to resolve on demand.
-	 *
-	 * <p><strong>Chain semantics:</strong> when an override cannot answer the request, it
-	 * must return {@code super.resolveTransUnit(code, locale)} so this default forwards to
-	 * the next link; a direct {@code return null} ends the chain at this source.
+	 * Default lazy lookup: resolves nothing. Subclasses override to resolve on demand and
+	 * return {@code null} for codes they cannot answer.
 	 *
 	 * <p>See {@link CatalogInterface#resolveTransUnit(String, Locale)} for the {@code code}
 	 * format (with or without a domain prefix).
 	 *
 	 * @param code the message code, with or without a domain prefix ({@code "<domain>.<code>"})
 	 * @param locale the locale to resolve for
-	 * @return the resolved trans unit from the next catalog, or {@code null} when this is
-	 *         the last link or the next catalog cannot resolve it
+	 * @return always {@code null}
 	 */
 	public TransUnitInterface resolveTransUnit(String code, Locale locale) {
-		if (this.nextCatalog == null) {
-			return null;
-		}
-
-		return this.nextCatalog.resolveTransUnit(code, locale);
+		return null;
 	}
 }

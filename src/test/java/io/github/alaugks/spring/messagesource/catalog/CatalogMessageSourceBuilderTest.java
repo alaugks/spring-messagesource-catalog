@@ -123,21 +123,21 @@ class CatalogMessageSourceBuilderTest {
 	@Test
 	void test_builder_with_list() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key", "messages_value")
+				new TransUnit(LOCALE_EN, "code", "messages_value")
 		);
 
 		assertEquals(
 				"messages_value",
 				CatalogMessageSourceBuilder
 						.builder(transUnits, LOCALE_EN)
-						.build().getMessage("key", null, LOCALE_EN)
+						.build().getMessage("code", null, LOCALE_EN)
 		);
 	}
 
 	@Test
 	void test_builder_with_catalog_interface() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key", "messages_value")
+				new TransUnit(LOCALE_EN, "code", "messages_value")
 		);
 
 		assertEquals(
@@ -145,15 +145,15 @@ class CatalogMessageSourceBuilderTest {
 				CatalogMessageSourceBuilder
 						.builder(new TransUnitsCatalog(transUnits), LOCALE_EN)
 						.build()
-						.getMessage("key", null, LOCALE_EN)
+						.getMessage("code", null, LOCALE_EN)
 		);
 	}
 
 	@Test
 	void test_with_set_default_domain() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key", "messages_value"),
-				new TransUnit(LOCALE_EN, "key", "foo_value", "foo")
+				new TransUnit(LOCALE_EN, "code", "messages_value"),
+				new TransUnit(LOCALE_EN, "code", "foo_value", "foo")
 		);
 
 		assertEquals(
@@ -162,45 +162,45 @@ class CatalogMessageSourceBuilderTest {
 						.builder(new TransUnitsCatalog(transUnits), LOCALE_EN)
 						.defaultDomain("foo")
 						.build()
-						.getMessage("key", null, LOCALE_EN)
+						.getMessage("code", null, LOCALE_EN)
 		);
 	}
 
 	@Test
 	void test_resolution_multi_domain() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1"),
-				new TransUnit(LOCALE_EN, "key_2", "value_en_2"),
-				new TransUnit(LOCALE_DE, "key_1", "value_de_1"),
-				new TransUnit(LOCALE_DE, "key_2", "value_de_2"),
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1", "foobar"),
-				new TransUnit(LOCALE_EN, "key_2", "value_en_2", "foobar"),
-				new TransUnit(LOCALE_EN_US, "key_1", "value_en_us_1", "messages")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a"),
+				new TransUnit(LOCALE_EN, "code_b", "value_en_b"),
+				new TransUnit(LOCALE_DE, "code_a", "value_de_1"),
+				new TransUnit(LOCALE_DE, "code_b", "value_de_2"),
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a", "foobar"),
+				new TransUnit(LOCALE_EN, "code_b", "value_en_b", "foobar"),
+				new TransUnit(LOCALE_EN_US, "code_a", "value_en_us_1", "messages")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
 				.builder(transUnits, LOCALE_EN)
 				.build();
 
-		assertEquals("value_en_1", ms.getMessage("key_1", null, LOCALE_EN));
-		assertEquals("value_en_1", ms.getMessage("messages.key_1", null, LOCALE_EN));
-		assertEquals("value_en_2", ms.getMessage("messages.key_2", null, LOCALE_EN));
-		assertEquals("value_en_1", ms.getMessage("foobar.key_1", null, LOCALE_EN));
-		assertEquals("value_en_2", ms.getMessage("foobar.key_2", null, LOCALE_EN));
+		assertEquals("value_en_a", ms.getMessage("code_a", null, LOCALE_EN));
+		assertEquals("value_en_a", ms.getMessage("messages.code_a", null, LOCALE_EN));
+		assertEquals("value_en_b", ms.getMessage("messages.code_b", null, LOCALE_EN));
+		assertEquals("value_en_a", ms.getMessage("foobar.code_a", null, LOCALE_EN));
+		assertEquals("value_en_b", ms.getMessage("foobar.code_b", null, LOCALE_EN));
 
-		assertEquals("value_de_1", ms.getMessage("messages.key_1", null, LOCALE_DE));
-		assertEquals("value_de_2", ms.getMessage("messages.key_2", null, LOCALE_DE));
+		assertEquals("value_de_1", ms.getMessage("messages.code_a", null, LOCALE_DE));
+		assertEquals("value_de_2", ms.getMessage("messages.code_b", null, LOCALE_DE));
 
-		assertEquals("value_en_us_1", ms.getMessage("messages.key_1", null, LOCALE_EN_US));
+		assertEquals("value_en_us_1", ms.getMessage("messages.code_a", null, LOCALE_EN_US));
 	}
 
 	@Test
 	void test_add_source_catalog_interface() {
 		List<TransUnitInterface> first = List.of(
-				new TransUnit(LOCALE_EN, "key_a", "value_a")
+				new TransUnit(LOCALE_EN, "code_a", "value_a")
 		);
 		List<TransUnitInterface> second = List.of(
-				new TransUnit(LOCALE_EN, "key_b", "value_b")
+				new TransUnit(LOCALE_EN, "code_b", "value_b")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -208,17 +208,17 @@ class CatalogMessageSourceBuilderTest {
 				.addSource(new TransUnitsCatalog(second))
 				.build();
 
-		assertEquals("value_a", ms.getMessage("key_a", null, LOCALE_EN));
-		assertEquals("value_b", ms.getMessage("key_b", null, LOCALE_EN));
+		assertEquals("value_a", ms.getMessage("code_a", null, LOCALE_EN));
+		assertEquals("value_b", ms.getMessage("code_b", null, LOCALE_EN));
 	}
 
 	@Test
 	void test_add_source_trans_units_list() {
 		List<TransUnitInterface> first = List.of(
-				new TransUnit(LOCALE_EN, "key_a", "value_a")
+				new TransUnit(LOCALE_EN, "code_a", "value_a")
 		);
 		List<TransUnitInterface> second = List.of(
-				new TransUnit(LOCALE_EN, "key_b", "value_b")
+				new TransUnit(LOCALE_EN, "code_b", "value_b")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -226,41 +226,39 @@ class CatalogMessageSourceBuilderTest {
 				.addSource(second)
 				.build();
 
-		assertEquals("value_a", ms.getMessage("key_a", null, LOCALE_EN));
-		assertEquals("value_b", ms.getMessage("key_b", null, LOCALE_EN));
+		assertEquals("value_a", ms.getMessage("code_a", null, LOCALE_EN));
+		assertEquals("value_b", ms.getMessage("code_b", null, LOCALE_EN));
 	}
 
 	@Test
 	void test_add_source_multiple_append_in_order() {
 		List<TransUnitInterface> first = List.of(
-				new TransUnit(LOCALE_EN, "key_a", "value_a")
+				new TransUnit(LOCALE_EN, "code_a", "value_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
 				.builder(first, LOCALE_EN)
-				.addSource(List.of(new TransUnit(LOCALE_EN, "key_b", "value_b")))
+				.addSource(List.of(new TransUnit(LOCALE_EN, "code_b", "value_b")))
 				.addSource(new FooBarCatalog())
 				.build();
 
-		assertEquals("value_a", ms.getMessage("key_a", null, LOCALE_EN));
-		assertEquals("value_b", ms.getMessage("key_b", null, LOCALE_EN));
+		assertEquals("value_a", ms.getMessage("code_a", null, LOCALE_EN));
+		assertEquals("value_b", ms.getMessage("code_b", null, LOCALE_EN));
 		assertEquals("foobar_value", ms.getMessage("dummy", null, LOCALE_EN));
 	}
 
 	@Test
 	void test_resolution_chain_fallback() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
-		TransUnitsCatalog source = new TransUnitsCatalog(transUnits);
-		source.nextCatalog(new FooBarCatalog());
-
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(source, LOCALE_EN)
+				.builder(new TransUnitsCatalog(transUnits), LOCALE_EN)
+				.addSource(new FooBarCatalog())
 				.build();
 
-		assertEquals("value_en_1", ms.getMessage("key_1", null, LOCALE_EN));
+		assertEquals("value_en_a", ms.getMessage("code_a", null, LOCALE_EN));
 		assertEquals("foobar_value", ms.getMessage("dummy", null, LOCALE_EN));
 		assertEquals("foobar_value", ms.getMessage("messages.dummy", null, LOCALE_EN));
 	}
@@ -268,7 +266,7 @@ class CatalogMessageSourceBuilderTest {
 	@Test
 	void test_resolution_not_resolved() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -284,7 +282,7 @@ class CatalogMessageSourceBuilderTest {
 	@Test
 	void test_get_message_returns_default_message_when_code_not_resolved() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -304,7 +302,7 @@ class CatalogMessageSourceBuilderTest {
 	@Test
 	void test_resolvable_resolves_first_code() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -312,15 +310,15 @@ class CatalogMessageSourceBuilderTest {
 				.build();
 
 		DefaultMessageSourceResolvable resolvable =
-				new DefaultMessageSourceResolvable(new String[] {"key_1"});
+				new DefaultMessageSourceResolvable(new String[] {"code_a"});
 
-		assertEquals("value_en_1", ms.getMessage(resolvable, LOCALE_EN));
+		assertEquals("value_en_a", ms.getMessage(resolvable, LOCALE_EN));
 	}
 
 	@Test
 	void test_resolvable_falls_back_to_next_code() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_2", "value_en_2")
+				new TransUnit(LOCALE_EN, "code_b", "value_en_b")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -328,9 +326,9 @@ class CatalogMessageSourceBuilderTest {
 				.build();
 
 		DefaultMessageSourceResolvable resolvable =
-				new DefaultMessageSourceResolvable(new String[] {"not_exists", "key_2"});
+				new DefaultMessageSourceResolvable(new String[] {"not_exists", "code_b"});
 
-		assertEquals("value_en_2", ms.getMessage(resolvable, LOCALE_EN));
+		assertEquals("value_en_b", ms.getMessage(resolvable, LOCALE_EN));
 	}
 
 	@Test
@@ -352,7 +350,7 @@ class CatalogMessageSourceBuilderTest {
 	@Test
 	void test_resolvable_not_resolved_with_locale_throws() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -368,7 +366,7 @@ class CatalogMessageSourceBuilderTest {
 	@Test
 	void test_resolvable_not_resolved_null_locale_throws() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -384,7 +382,7 @@ class CatalogMessageSourceBuilderTest {
 	@Test
 	void test_resolvable_null_codes_with_locale_throws() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -409,7 +407,7 @@ class CatalogMessageSourceBuilderTest {
 	@Test
 	void test_resolvable_empty_codes_null_locale_throws() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -442,7 +440,7 @@ class CatalogMessageSourceBuilderTest {
 	@Test
 	void test_get_message_returns_null_default_message_when_code_not_resolved() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -455,7 +453,7 @@ class CatalogMessageSourceBuilderTest {
 	@Test
 	void test_resolvable_returns_resolvable_default_message_when_not_resolved() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -471,7 +469,7 @@ class CatalogMessageSourceBuilderTest {
 	@Test
 	void test_get_message_null_locale_not_resolved_throws() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -484,7 +482,7 @@ class CatalogMessageSourceBuilderTest {
 	@Test
 	void test_get_message_null_code_returns_default_message() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -497,7 +495,7 @@ class CatalogMessageSourceBuilderTest {
 	@Test
 	void test_get_message_unresolved_with_args_returns_default_message() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -538,7 +536,7 @@ class CatalogMessageSourceBuilderTest {
 	@Test
 	void test_empty_code_not_resolved_throws() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -551,48 +549,48 @@ class CatalogMessageSourceBuilderTest {
 	@Test
 	void test_empty_language_locale_not_resolved_throws() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
 				.builder(transUnits, LOCALE_EN)
 				.build();
 
-		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("key_1", null, Locale.ROOT));
+		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("code_a", null, Locale.ROOT));
 	}
 
 	@Test
 	void test_source_with_empty_language_locale_is_skipped() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1"),
-				new TransUnit(Locale.ROOT, "key_root", "value_root")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a"),
+				new TransUnit(Locale.ROOT, "code_root", "value_root")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
 				.builder(transUnits, LOCALE_EN)
 				.build();
 
-		assertEquals("value_en_1", ms.getMessage("key_1", null, LOCALE_EN));
-		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("key_root", null, LOCALE_EN));
+		assertEquals("value_en_a", ms.getMessage("code_a", null, LOCALE_EN));
+		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("code_root", null, LOCALE_EN));
 	}
 
 	@Test
 	void test_resolution_falls_back_to_default_locale() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
 				.builder(transUnits, LOCALE_EN)
 				.build();
 
-		assertEquals("value_en_1", ms.getMessage("key_1", null, Locale.forLanguageTag("fr-FR")));
+		assertEquals("value_en_a", ms.getMessage("code_a", null, Locale.forLanguageTag("fr-FR")));
 	}
 
 	@Test
 	void test_resolution_default_locale_fallback_misses_throws() {
 		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -607,7 +605,7 @@ class CatalogMessageSourceBuilderTest {
 	@Test
 	void test_parent_message_source() {
 		List<TransUnitInterface> transUnits = List.of(
-			new TransUnit(LOCALE_EN, "key_1", "value_en_1")
+			new TransUnit(LOCALE_EN, "code_a", "value_en_a")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -615,8 +613,22 @@ class CatalogMessageSourceBuilderTest {
 			.parentMessageSource(new ParentMessageSource())
 			.build();
 
-		assertEquals("value_en_1", ms.getMessage("key_1", null, LOCALE_EN));
+		assertEquals("value_en_a", ms.getMessage("code_a", null, LOCALE_EN));
 		assertEquals("ParentMessageSource with args: 1,234", ms.getMessage("parent-messagesource-code", new Object[]{1234}, LOCALE_EN));
 		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("not_exists", null, LOCALE_EN));
+	}
+
+	@Test
+	void test_domain_divider() {
+		List<TransUnitInterface> transUnits = List.of(
+			new TransUnit(LOCALE_EN, "code_a", "value_en_a", "domain")
+		);
+
+		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
+			.builder(transUnits, LOCALE_EN)
+			.domainDivider("|")
+			.build();
+
+		assertEquals("value_en_a", ms.getMessage("domain|code_a", null, LOCALE_EN));
 	}
 }

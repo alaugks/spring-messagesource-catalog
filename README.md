@@ -3,7 +3,7 @@
 This package extends the [AbstractMessageSource](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/support/AbstractMessageSource.html) and provides the [MessageSource interface](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/MessageSource.html).
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=alaugks_spring-messagesource-catalog&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=alaugks_spring-messagesource-catalog)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.alaugks/spring-messagesource-catalog.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.alaugks/spring-messagesource-catalog/0.8.0)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.alaugks/spring-messagesource-catalog.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.alaugks/spring-messagesource-catalog/0.9.0)
 
 > [!IMPORTANT]
 > This package is the **base** for other message source packages (such as
@@ -50,14 +50,14 @@ This package extends the [AbstractMessageSource](https://docs.spring.io/spring-f
 <dependency>
     <groupId>io.github.alaugks</groupId>
     <artifactId>spring-messagesource-catalog</artifactId>
-    <version>0.8.0</version>
+    <version>0.9.0</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```
-implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog', version: '0.8.0'
+implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog', version: '0.9.0'
 ```
 
 ## Packages that use the catalog as a base package
@@ -74,7 +74,7 @@ implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog',
 |---|---|---|
 | `builder(CatalogInterface catalogSource, Locale defaultLocale)` | — | Entry point.<br><br>`catalogSource` is the initial source.<br><br>`defaultLocale` is the locale to fall back to when a code cannot be resolved for the requested locale. |
 | `builder(List<TransUnitInterface> transUnits, Locale defaultLocale)` | — | Entry point (alternative).<br><br>`transUnits` are used as the initial source, wrapped in a `TransUnitsCatalog`.<br><br>`defaultLocale` is the locale to fall back to when a code cannot be resolved for the requested locale. |
-| `addSource(CatalogInterface source)` | — | Appends another source. Sources are aggregated additively at `build()`; their lazy `resolveTransUnit` lookups are also chained in the order they were added. |
+| `addSource(CatalogInterface source)` | — | Appends another source. Sources are aggregated additively at `build()`; their lazy `resolveTransUnit` lookups are consulted in the order they were added. |
 | `addSource(List<TransUnitInterface> transUnits)` | — | Convenience overload of `addSource` that wraps the trans units in a `TransUnitsCatalog`. |
 | `defaultDomain(String defaultDomain)` | `messages` | The default domain. Codes stored under this domain are also accessible without the domain prefix; codes under any other domain require the `<domain>.<code>` prefix. |
 | `enableICU4j()` | disabled | Format messages with ICU4J's `com.ibm.icu.text.MessageFormat` instead of the default `java.text.MessageFormat`, adding named arguments and ICU `plural`/`select` patterns. See [Message formatting](#message-formatting) for details and examples. |
@@ -190,21 +190,21 @@ The behaviour of resolving the target value based on the code is equivalent to t
 
 ### With custom CatalogInterface
 
-A custom source typically extends `AbstractCatalog`, which provides the chain plumbing (`nextCatalog`) and no-op defaults for the two data methods. A source then chooses one of two patterns:
+A custom source typically extends `AbstractCatalog`, which provides no-op defaults for the two data methods. A source then chooses one of two patterns:
 
 - **Eager** — override `getTransUnits()`. The list is read once at construction time and merged into the catalog map.
 - **Lazy** — override `resolveTransUnit(code, locale)` to return a `TransUnitInterface`. Called only when the catalog map has no entry for the requested key. The returned trans unit is cached in the map (using its `domain`), so subsequent lookups for the same key hit the in-memory map.
 
-#### Chain of Responsibility for lazy lookups
+#### Lazy lookups across multiple sources
 
-When the catalog map cannot resolve a key, the lazy path walks the configured sources as a **Chain of Responsibility**. Each `CatalogInterface` plays the role of a handler:
+When the catalog map cannot resolve a key, the lazy path consults the configured sources in the order they were added. For each source:
 
-1. The current source inspects the incoming `code` (and `locale`).
-2. If it can answer, it returns a `TransUnit`, the chain stops, and the result is cached in the in-memory catalog map.
-3. If it cannot answer, it forwards by calling `super.resolveTransUnit(code, locale)` — the `AbstractCatalog` default delegates to the next source set by `nextCatalog(...)`. Returning `null` directly (without calling `super`) ends the chain at this source.
+1. The source inspects the incoming `code` (and `locale`).
+2. If it can answer, it returns a `TransUnit`, the lookup stops, and the result is cached in the in-memory catalog map.
+3. If it cannot answer, it returns `null` and the next source is tried.
 4. If no source claims the request, the message ends up unresolved.
 
-A common opt-out strategy is to gate on the requested domain — a source that owns `"glossary"` declines anything that doesn't start with `"glossary."`. The `LazyCatalog` example below shows that pattern.
+A common opt-out strategy is to gate on the requested domain — a source that owns `"glossary"` returns `null` for anything that doesn't start with `"glossary."`. The `LazyCatalog` example below shows that pattern.
 
 The three examples below illustrate the patterns. They are then combined in [Combining multiple sources](#combining-multiple-sources).
 
@@ -292,8 +292,8 @@ public class LazyCatalog extends AbstractCatalog {
     @Override
     public TransUnitInterface resolveTransUnit(String code, Locale locale) {
         // code may be "<code>" (default domain) or "<domain>.<code>".
-        // This source owns only DOMAIN; anything it cannot answer is forwarded
-        // to the next source via super.resolveTransUnit(...).
+        // This source owns only DOMAIN; for anything it cannot answer it
+        // returns null, and the builder consults the next source.
         if (code.startsWith(PREFIX)) {
             String localCode = code.substring(PREFIX.length());
             String value = this.lazyCatalogRepository.findByCodeAndLocale(localCode, locale);
@@ -301,16 +301,16 @@ public class LazyCatalog extends AbstractCatalog {
                 return new TransUnit(locale, localCode, value, DOMAIN);
             }
         }
-        return super.resolveTransUnit(code, locale);
+        return null;
     }
 }
 ```
 
 #### Combining multiple sources
 
-Several sources can be combined directly on the `CatalogMessageSourceBuilder`. The example below chains the three custom catalogs above.
+Several sources can be combined directly on the `CatalogMessageSourceBuilder`. The example below combines the three custom catalogs above.
 
-Sources are added in order with `addSource(...)`. Lazy lookups walk this order as a **Chain of Responsibility** — each source decides whether it can resolve the request, otherwise it delegates to the next link, and the first non-`null` result wins. Eager sources, by contrast, are aggregated up front into the catalog map, where the first source wins on key conflicts (`putIfAbsent` semantics).
+Sources are added in order with `addSource(...)`. On a map miss, the builder consults the sources in this order and the first non-`null` `resolveTransUnit` result wins; a source that cannot answer simply returns `null`. Eager sources, by contrast, are aggregated up front into the catalog map, where the first source wins on key conflicts (`putIfAbsent` semantics).
 
 ```java
 import io.github.alaugks.spring.messagesource.catalog.CatalogMessageSourceBuilder;

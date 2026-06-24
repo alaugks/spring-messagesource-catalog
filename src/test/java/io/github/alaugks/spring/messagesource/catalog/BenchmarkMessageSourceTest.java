@@ -191,16 +191,16 @@ class BenchmarkMessageSourceTest {
 			));
 			for (Entry<Object, Object> property : properties.entrySet()) {
 
-				Object key = property.getKey();
-				int posDomainDelimiter = key.toString().lastIndexOf(".");
+				Object code = property.getKey();
+				int posDomainDelimiter = code.toString().lastIndexOf(".");
 
 				transUnits.add(new TransUnit(
 						translationFile.locale(),
-						key.toString().substring(
+						code.toString().substring(
 								posDomainDelimiter + 1
 						),
 						property.getValue().toString(),
-						key.toString().substring(
+						code.toString().substring(
 								0,
 								posDomainDelimiter
 						)
