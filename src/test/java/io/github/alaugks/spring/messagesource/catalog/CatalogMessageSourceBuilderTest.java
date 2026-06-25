@@ -81,7 +81,7 @@ class CatalogMessageSourceBuilderTest {
 	}
 
 	@Test
-	void test_set_use_icu4j_true_enables_icu4j() {
+	void test_use_icu4j_true_enables_icu4j() {
 		List<TransUnitInterface> transUnits = List.of(
 			new TransUnit(LOCALE_EN, "file_deleted",
 				"{count, plural, =0 {You deleted no files.} =1 {You deleted one file.} other {You deleted {count} files.}}"),
@@ -91,7 +91,7 @@ class CatalogMessageSourceBuilderTest {
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
 			.builder(transUnits, LOCALE_EN)
-			.setUseICU4j(true)
+			.useICU4j(true)
 			.build();
 
 		assertEquals(

@@ -96,10 +96,18 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
      *                 {@code false} to use standard Java message formatting
      * @return this builder instance for method chaining
      */
-    public B setUseICU4j(boolean useICU4j) {
+    public B useICU4j(boolean useICU4j) {
         this.useICU4j = useICU4j;
 
         return (B) this;
+    }
+    
+    /**
+     * @deprecated Will be removed in 0.10.0. Use {@link #useICU4j(boolean)}.
+     */
+    @Deprecated(since = "0.9.1", forRemoval = true)
+    public B setUseICU4j(boolean useICU4j) {
+        return this.useICU4j(useICU4j);
     }
 
     /**
