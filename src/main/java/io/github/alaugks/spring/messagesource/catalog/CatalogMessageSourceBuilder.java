@@ -147,7 +147,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		}
 
 		if (locale == null) {
-			throw new NoSuchMessageException(code);
+			throw new NoSuchMessageException(code, this.defaultLocale);
 		}
 		else {
 			throw new NoSuchMessageException(code, locale);
@@ -173,7 +173,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 
 		String code = !ObjectUtils.isEmpty(codes) ? codes[codes.length - 1] : "";
 		if (locale == null ) {
-			throw new NoSuchMessageException(code);
+			throw new NoSuchMessageException(code, this.defaultLocale);
 		}
 		else {
 			throw new NoSuchMessageException(code, locale);
