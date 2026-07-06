@@ -3,13 +3,18 @@
 
 package io.github.alaugks.spring.messagesource.catalog;
 
+import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogInterface;
+import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import org.springframework.context.MessageSource;
 import org.springframework.util.Assert;
 
 /**
- * Base class for fluent builders that share the common catalog configuration: default locale,
- * default domain, ICU4J formatting, and an optional parent message source.
+ * Base class for fluent builders that share the common catalog configuration: the configured
+ * sources, default locale, default domain, ICU4J formatting, and an optional parent message
+ * source.
  *
  * <p>The recursive type parameter {@code B} lets each concrete builder return its own type from
  * the shared fluent methods, so chaining stays type-safe across subclasses (including sibling
@@ -21,6 +26,9 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
 
     /** String constant used to separate the domain and the code in message keys. */
     protected static final String DOMAIN_DIVIDER = ".";
+
+    /** Sources aggregated additively; their late-binding methods are consulted in insertion order. */
+    private final List<CatalogInterface> sources = new ArrayList<>();
 
     /** Locale used as fallback when a code cannot be resolved for the requested locale. */
     private final Locale defaultLocale;
@@ -41,6 +49,43 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
         Assert.notNull(defaultLocale, "Argument defaultLocale must not be null");
 
         this.defaultLocale = defaultLocale;
+    }
+
+    /**
+     * Appends another source. Sources are aggregated additively at build time; their
+     * {@code resolveTransUnit} late-binding methods are consulted in the order they were added.
+     *
+     * @param source the source to append; must not be {@code null}
+     * @return this builder
+     */
+    public B addSource(CatalogInterface source) {
+        Assert.notNull(source, "Argument source must not be null");
+
+        this.sources.add(source);
+
+        return (B) this;
+    }
+
+    /**
+     * Convenience overload of {@link #addSource(CatalogInterface)} that wraps the given
+     * trans units in a {@link TransUnitsCatalog}.
+     *
+     * @param transUnits the trans units to append as a new source; must not be {@code null}
+     * @return this builder
+     */
+    public B addSource(List<TransUnitInterface> transUnits) {
+        Assert.notNull(transUnits, "Argument transUnits must not be null");
+
+        return this.addSource(new TransUnitsCatalog(transUnits));
+    }
+
+    /**
+     * Returns the configured sources in insertion order.
+     *
+     * @return the configured sources
+     */
+    protected List<CatalogInterface> getSources() {
+        return this.sources;
     }
 
     /**

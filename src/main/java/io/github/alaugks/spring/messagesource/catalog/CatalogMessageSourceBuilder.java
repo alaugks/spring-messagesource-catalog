@@ -6,7 +6,6 @@ package io.github.alaugks.spring.messagesource.catalog;
 import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogInterface;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -385,8 +384,6 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	 */
 	public static final class Builder extends AbstractCatalogMessageSourceBuilder<Builder> {
 
-		private final List<CatalogInterface> sources = new ArrayList<>();
-
 		/**
 		 * Creates a new builder seeded with an initial source.
 		 *
@@ -398,36 +395,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 			super(defaultLocale);
 			Assert.notNull(catalogSource, "Argument catalogSource must not be null");
 
-			this.sources.add(catalogSource);
-		}
-
-		/**
-		 * Appends another source. Sources are aggregated additively at {@link #build()};
-		 * their {@code resolveTransUnit} late-binding methods are consulted in the order
-		 * they were added.
-		 *
-		 * @param source the source to append; must not be {@code null}
-		 * @return this builder
-		 */
-		public Builder addSource(CatalogInterface source) {
-			Assert.notNull(source, "Argument source must not be null");
-
-			this.sources.add(source);
-
-			return this;
-		}
-
-		/**
-		 * Convenience overload of {@link #addSource(CatalogInterface)} that wraps the given
-		 * trans units in a {@link TransUnitsCatalog}.
-		 *
-		 * @param transUnits the trans units to append as a new source; must not be {@code null}
-		 * @return this builder
-		 */
-		public Builder addSource(List<TransUnitInterface> transUnits) {
-			Assert.notNull(transUnits, "Argument transUnits must not be null");
-
-			return this.addSource(new TransUnitsCatalog(transUnits));
+			this.addSource(catalogSource);
 		}
 
 		/**
@@ -440,7 +408,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		 */
 		public CatalogMessageSourceBuilder build() {
 			return new CatalogMessageSourceBuilder(
-					this.sources,
+					this.getSources(),
 					this.getDefaultLocale(),
 					this.getDefaultDomain(),
 					this.isICU4jEnabled(),
