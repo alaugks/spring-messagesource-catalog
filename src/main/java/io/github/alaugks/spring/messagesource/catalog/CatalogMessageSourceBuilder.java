@@ -12,7 +12,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.MissingResourceException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -274,9 +273,6 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	 */
 	private String resolveFromBundle(String code, Locale locale) {
 		ResourceBundle bundle = this.getResourceBundle(locale);
-		if (bundle == null) {
-			return null;
-		}
 
 		String domainCode = this.concatCode(this.defaultDomain, code);
 		if (bundle.containsKey(code)) {
@@ -299,13 +295,9 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 			return cached;
 		}
 
-		try {
-			ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE_NAME, locale, this.control);
-			this.cachedBundles.put(locale, bundle);
-			return bundle;
-		} catch (MissingResourceException e) {
-			return null;
-		}
+		ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE_NAME, locale, this.control);
+		this.cachedBundles.put(locale, bundle);
+		return bundle;
 	}
 
 	/**
@@ -336,7 +328,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 
 		@Override
 		public Locale getFallbackLocale(String baseName, Locale locale) {
-			return null;
+			return CatalogMessageSourceBuilder.this.defaultLocale;
 		}
 
 		@Override

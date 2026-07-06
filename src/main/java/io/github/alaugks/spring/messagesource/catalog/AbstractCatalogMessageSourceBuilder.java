@@ -101,14 +101,6 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
 
         return (B) this;
     }
-    
-    /**
-     * @deprecated Will be removed in 0.10.0. Use {@link #useICU4j(boolean)}.
-     */
-    @Deprecated(since = "0.9.1", forRemoval = true)
-    public B setUseICU4j(boolean useICU4j) {
-        return this.useICU4j(useICU4j);
-    }
 
     /**
      * Enables ICU4J message formatting. When enabled, resolved messages are formatted with
