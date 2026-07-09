@@ -377,6 +377,41 @@ messageSource.getMessage(
 
 **Result:** `Es gibt 10.000 Dateien.`
 
+#### Plural (`choice` format)
+
+`java.text.MessageFormat` has no `plural` keyword, but its `choice` sub-format covers the common plural
+case by mapping **numeric ranges** to variants. A limit followed by `#` matches values from that number
+up, `<` matches values strictly greater; each `|`-separated case is itself a pattern, so reference the
+number again as `{0,number,integer}` to insert it.
+
+```java
+new TransUnit(
+    Locale.forLanguageTag("en"),
+    "file_deleted",
+    "{0,choice,0#You deleted no files.|1#You deleted one file.|1<You deleted {0,number,integer} files.}"
+);
+new TransUnit(
+    Locale.forLanguageTag("de"),
+    "file_deleted",
+    "{0,choice,0#Sie haben keine Dateien gelöscht.|1#Sie haben eine Datei gelöscht.|1<Sie haben {0,number,integer} Dateien gelöscht.}"
+);
+
+messageSource.getMessage(
+    "file_deleted",
+    new Object[] { 1000 },
+    Locale.forLanguageTag("de")
+);
+```
+
+**Result:** `Sie haben 1.000 Dateien gelöscht.`
+
+#### Select
+
+`java.text.MessageFormat` has **no** `select` construct: it can only branch on numbers via `choice`, not
+on arbitrary string values, so value-based choices such as grammatical gender cannot be expressed. For
+string-based `select` (and CLDR plural categories like `few`/`many`), enable
+[ICU4J](#icu4j-comibmicutextmessageformat).
+
 ### ICU4J (com.ibm.icu.text.MessageFormat)
 
 Enable ICU4J on the builder to format with [ICU4J's `MessageFormat`](https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/text/MessageFormat.html):
@@ -432,7 +467,7 @@ A `select` switch picks the case whose value matches the argument. Use it for an
 grammatical gender; a final `other` case acts as the fallback.
 
 The apostrophe is a quoting metacharacter in ICU `MessageFormat`. A literal apostrophe must be written as two
-single quotes (`''`), e.g. `Wie geht''s ihr?` resolves to `Wie geht's ihr?`.
+single quotes (`''`), e.g. `Wie geht es ihr?` resolves to `Wie geht's ihr?`.
 
 ```java
 new TransUnit(
@@ -443,7 +478,7 @@ new TransUnit(
 new TransUnit(
     Locale.forLanguageTag("de"),
     "greeting",
-    "{recipient_gender, select, feminine {Wie geht''s ihr?} masculine {Wie geht''s ihm?} other {Wie geht''s ihnen?}}"
+    "{recipient_gender, select, feminine {Wie geht es ihr?} masculine {Wie geht es ihm?} other {Wie geht es ihnen?}}"
 );
 
 messageSource.getMessage(
