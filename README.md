@@ -22,6 +22,8 @@ This package extends the [AbstractMessageSource](https://docs.spring.io/spring-f
   - [With custom CatalogInterface](#with-custom-cataloginterface)
 - [Message formatting](#message-formatting)
   - [Default (java.text.MessageFormat)](#default-javatextmessageformat)
+    - [Plural (choice format)](#plural-choice-format)
+    - [Select](#select)
   - [ICU4J (com.ibm.icu.text.MessageFormat)](#icu4j-comibmicutextmessageformat)
     - [Plural](#plural)
     - [Select (and gender)](#select-and-gender)
