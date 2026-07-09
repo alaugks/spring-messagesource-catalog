@@ -106,7 +106,7 @@ class CatalogMessageSourceBuilderTest {
 			new TransUnit(LOCALE_EN, "greeting",
 				"{recipient_gender, select, feminine {How is she?} masculine {How is he?} other {How are they?}}"),
 			new TransUnit(LOCALE_DE, "greeting",
-				"{recipient_gender, select, feminine {Wie geht''s ihr?} masculine {Wie geht''s ihm?} other {Wie geht''s ihnen?}}")
+				"{recipient_gender, select, feminine {Wie geht es ihr?} masculine {Wie geht es ihm?} other {Wie geht es ihnen?}}")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
