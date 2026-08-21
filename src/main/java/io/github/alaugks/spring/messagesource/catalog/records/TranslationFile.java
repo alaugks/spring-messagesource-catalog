@@ -5,7 +5,8 @@ package io.github.alaugks.spring.messagesource.catalog.records;
 
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.Objects;import org.springframework.lang.NonNull;
+import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Raw, loaded translation resource: domain, locale and file bytes.
@@ -17,32 +18,31 @@ import java.util.Objects;import org.springframework.lang.NonNull;
  * @param locale  the locale parsed from the file name, or the default locale when none was given
  * @param content the raw file bytes
  */
-public record TranslationFile(String domain, Locale locale, byte[] content) {
+public record TranslationFile(String domain, Locale locale, byte[] content) implements TranslationFileInterface {
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (!(o instanceof TranslationFile other)) {
 			return false;
 		}
-		return Objects.equals(domain, other.domain)
-				&& Objects.equals(locale, other.locale)
-				&& Arrays.equals(content, other.content);
+		return Objects.equals(this.domain, other.domain)
+				&& Objects.equals(this.locale, other.locale)
+				&& Arrays.equals(this.content, other.content);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(domain, locale, Arrays.hashCode(content));
+		return Objects.hash(this.domain, this.locale, Arrays.hashCode(this.content));
 	}
 
 	@Override
-	@NonNull
 	public String toString() {
-		return "TranslationFile[domain=" + domain
-				+ ", locale=" + locale
-				+ ", content=" + (content == null ? "null" : content.length + " bytes")
+		return "TranslationFile[domain=" + this.domain
+				+ ", locale=" + this.locale
+				+ ", content=" + (this.content == null ? "null" : this.content.length + " bytes")
 				+ "]";
 	}
 }

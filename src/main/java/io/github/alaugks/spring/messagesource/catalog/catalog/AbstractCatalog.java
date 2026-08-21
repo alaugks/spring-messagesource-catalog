@@ -7,6 +7,7 @@ import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Convenient base class for {@link CatalogInterface} implementations.
@@ -33,27 +34,20 @@ public abstract class AbstractCatalog implements CatalogInterface {
 	}
 
 	/**
-	 * Default eager source: returns an empty (mutable) list. Subclasses override to
-	 * contribute trans units.
+	 * Default eager source: contributes nothing.
 	 *
-	 * @return an empty list
+	 * @return an empty (mutable) list
 	 */
 	public List<TransUnitInterface> getTransUnits() {
 		return new ArrayList<>();
 	}
 
 	/**
-	 * Default lazy lookup: resolves nothing. Subclasses override to resolve on demand and
-	 * return {@code null} for codes they cannot answer.
+	 * Default lazy lookup: resolves nothing.
 	 *
-	 * <p>See {@link CatalogInterface#resolveTransUnit(String, Locale)} for the {@code code}
-	 * format (with or without a domain prefix).
-	 *
-	 * @param code the message code, with or without a domain prefix ({@code "<domain>.<code>"})
-	 * @param locale the locale to resolve for
 	 * @return always {@code null}
 	 */
-	public TransUnitInterface resolveTransUnit(String code, Locale locale) {
+	public @Nullable TransUnitInterface resolveTransUnit(String code, Locale locale) {
 		return null;
 	}
 }

@@ -6,9 +6,8 @@ package io.github.alaugks.spring.messagesource.catalog;
 import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogInterface;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
-import io.github.alaugks.spring.messagesource.catalog.records.TranslationFile;
-import io.github.alaugks.spring.messagesource.catalog.resources.LocationPattern;
-import io.github.alaugks.spring.messagesource.catalog.resources.ResourcesLoader;
+import io.github.alaugks.spring.messagesource.catalog.records.TranslationFileInterface;
+import io.github.alaugks.spring.messagesource.catalog.resources.ResourceLoaderBuilder;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -49,11 +48,11 @@ class BenchmarkMessageSourceTest {
 	@BeforeAll
 	static void beforeAll() throws IOException {
 		catalogMessageSourceBuilder = CatalogMessageSourceBuilder
-				.builder(createTransUnitListFromMessagesPropertiesFiles(), defaultLocale)
+				.builder(defaultLocale, createTransUnitListFromMessagesPropertiesFiles())
 				.build();
 
 		catalogMessageSourceBuilderICU4j = CatalogMessageSourceBuilder
-				.builder(createTransUnitListFromMessagesPropertiesFiles(), defaultLocale)
+				.builder(defaultLocale, createTransUnitListFromMessagesPropertiesFiles())
 				.enableICU4j()
 				.build();
 
@@ -177,13 +176,12 @@ class BenchmarkMessageSourceTest {
 	private static CatalogInterface createTransUnitListFromMessagesPropertiesFiles() throws IOException {
 		List<TransUnitInterface> transUnits = new ArrayList<>();
 
-		ResourcesLoader resourcesLoader = new ResourcesLoader(
-				Locale.forLanguageTag("en"),
-				new LocationPattern(List.of("messages/messages*")),
-				List.of("properties")
-		);
+		ResourceLoaderBuilder resourcesLoader = ResourceLoaderBuilder
+				.builder(Locale.forLanguageTag("en"), List.of("messages/messages*"))
+				.fileExtensions(List.of("properties"))
+				.build();
 
-		for (TranslationFile translationFile : resourcesLoader.getTranslationFiles()) {
+		for (TranslationFileInterface translationFile : resourcesLoader.getTranslationFiles()) {
 			Properties properties = new Properties();
 			properties.load(new InputStreamReader(
 					new ByteArrayInputStream(translationFile.content()),

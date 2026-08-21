@@ -8,21 +8,21 @@ import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A {@link CatalogInterface} that composes an ordered list of sources.
  *
  * <p>Eager units from all sources are concatenated in source order; on a lazy lookup the
- * sources are consulted in order and the first non-{@code null} result wins. This replaces
- * the former chain-of-responsibility wiring: sources no longer reference one another, the
- * composite owns the iteration.
+ * sources are consulted in order and the first non-{@code null} result wins. Sources never
+ * reference one another — the composite owns the iteration.
  */
 final class CompositeCatalog implements CatalogInterface {
 
 	/** Sources consulted in order, copied defensively at construction. */
 	private final List<CatalogInterface> sources;
 
-	CompositeCatalog(List<CatalogInterface> sources) {
+	public CompositeCatalog(List<CatalogInterface> sources) {
 		this.sources = List.copyOf(sources);
 	}
 
@@ -36,7 +36,7 @@ final class CompositeCatalog implements CatalogInterface {
 	}
 
 	@Override
-	public TransUnitInterface resolveTransUnit(String code, Locale locale) {
+	public @Nullable TransUnitInterface resolveTransUnit(String code, Locale locale) {
 		for (CatalogInterface source : this.sources) {
 			TransUnitInterface transUnit = source.resolveTransUnit(code, locale);
 			if (transUnit != null) {

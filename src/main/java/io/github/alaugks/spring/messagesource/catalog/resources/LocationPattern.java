@@ -9,19 +9,41 @@ import java.util.Set;
 import org.springframework.util.Assert;
 
 /**
- * Holds one or more Spring resource location patterns (e.g. {@code classpath:/translations/*})
- * used by {@link ResourcesLoader} to discover translation files. Duplicates are eliminated by
- * storing the patterns in a {@link Set}.
+ * Formerly held the Spring resource location patterns (e.g. {@code classpath:translations/*})
+ * used by {@link ResourceLoaderBuilder} to discover translation files. {@link ResourceLoaderBuilder} now
+ * takes the patterns directly; this class is no longer accepted anywhere.
+ *
+ * <p>Migration:
+ *
+ * <pre>{@code
+ * // before
+ * new ResourcesLoader(
+ *     locale,
+ *     new LocationPattern("classpath:translations/*"),
+ *     List.of("ext")
+ * );
+ *
+ * // now
+ * ResourceLoader
+ *     .builder(locale, List.of("classpath:translations/*"))
+ *     .fileExtensions(List.of("ext"))
+ *     .build();
+ * }</pre>
+ *
+ * @deprecated Pass the location patterns directly as
+ * {@code List<String>} to {@link ResourceLoaderBuilder#builder(java.util.Locale, List)}.
  */
+@Deprecated()
 public class LocationPattern {
 
-	/** Configured location patterns, deduplicated. */
 	private final Set<String> locationPatterns;
 
 	/**
 	 * Convenience constructor for a single location pattern.
 	 *
 	 * @param locationPattern the location pattern; must not be {@code null}
+	 * @deprecated since 0.10.0, for removal. Pass {@code List.of(locationPattern)} directly
+	 * to {@link ResourceLoaderBuilder#builder(java.util.Locale, List)} instead.
 	 */
 	public LocationPattern(String locationPattern) {
 		this(List.of(locationPattern));
@@ -31,6 +53,9 @@ public class LocationPattern {
 	 * Creates a {@link LocationPattern} from the given list; duplicate entries are eliminated.
 	 *
 	 * @param locationPatterns the location patterns; must not be {@code null}
+	 * @deprecated since 0.10.0, for removal. Pass the list directly to
+	 * {@link ResourceLoaderBuilder#builder(java.util.Locale, List)} instead; duplicate entries are
+	 * eliminated there.
 	 */
 	public LocationPattern(List<String> locationPatterns) {
 		Assert.notNull(locationPatterns, "Argument locationPatterns must not be null");
@@ -38,11 +63,16 @@ public class LocationPattern {
 	}
 
 	/**
-	 * Returns the configured location patterns.
-	 *
-	 * @return the configured location patterns (deduplicated)
+	 * {@return the configured location patterns (deduplicated)}
 	 */
 	public Set<String> getLocationPattern() {
-		return locationPatterns;
+		return this.locationPatterns;
+	}
+
+	/**
+	 * {@return the configured location patterns as a list (deduplicated)}
+	 */
+	public List<String> getLocationPatterns() {
+		return this.locationPatterns.stream().toList();
 	}
 }

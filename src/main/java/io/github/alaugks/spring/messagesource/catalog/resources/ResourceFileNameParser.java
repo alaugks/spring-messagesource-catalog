@@ -6,6 +6,8 @@ package io.github.alaugks.spring.messagesource.catalog.resources;
 import io.github.alaugks.spring.messagesource.catalog.records.Filename;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jspecify.annotations.Nullable;
+import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 /**
@@ -15,7 +17,7 @@ import org.springframework.util.Assert;
  * or {@code .}; language and region may be separated by {@code _} or {@code -}. The file extension is
  * ignored — only the leading segments are inspected.
  *
- * <p>All separator combinations (the extension is shown for context but ignored by the parser):
+ * <p>Examples (any of the separator combinations above works the same way):
  * <ul>
  *   <li>{@code messages.ext} &rarr; domain={@code messages}</li>
  *   <li>{@code messages_de.ext} &rarr; domain={@code messages}, language={@code de}</li>
@@ -29,7 +31,7 @@ import org.springframework.util.Assert;
  *   <li>{@code messages.en-US.ext} &rarr; domain={@code messages}, language={@code en}, region={@code US}</li>
  * </ul>
  */
-public class ResourcesFileNameParser {
+public class ResourceFileNameParser implements ResourceFileNameParserInterface {
 
 	/** Matches domain, optional language and optional region in a resource file name. */
 	private static final Pattern PATTERN = Pattern.compile(
@@ -37,28 +39,12 @@ public class ResourcesFileNameParser {
 		Pattern.CASE_INSENSITIVE
 	);
 
-	/** File name this parser is bound to. */
-	private final String filename;
-
-	/**
-	 * Creates a parser bound to the given file name.
-	 *
-	 * @param filename the file name to parse; must not be {@code null}
-	 */
-	public ResourcesFileNameParser(String filename) {
+	@Override
+	public @Nullable Filename parse(Resource resource) {
+		String filename = resource.getFilename();
 		Assert.notNull(filename, "Argument filename must not be null");
 
-		this.filename = filename;
-	}
-
-	/**
-	 * Parses the bound file name into a {@link Filename}.
-	 *
-	 * @return the parsed {@link Filename}, or {@code null} if the file name does not match
-	 *         the expected pattern
-	 */
-	public Filename parse() {
-		Matcher matcher = PATTERN.matcher(this.filename);
+		Matcher matcher = PATTERN.matcher(filename);
 
 		if (matcher.find()) {
 			return new Filename(

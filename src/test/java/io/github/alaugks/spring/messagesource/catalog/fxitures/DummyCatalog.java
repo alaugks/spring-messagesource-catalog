@@ -6,7 +6,7 @@ import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface
 import java.util.Locale;
 import java.util.Objects;
 
-public class FooBarCatalog extends AbstractCatalog {
+public class DummyCatalog extends AbstractCatalog {
 
     @Override
     public TransUnitInterface resolveTransUnit(String code, Locale locale) {

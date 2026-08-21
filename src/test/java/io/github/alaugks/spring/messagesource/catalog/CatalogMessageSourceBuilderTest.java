@@ -3,7 +3,7 @@
 
 package io.github.alaugks.spring.messagesource.catalog;
 
-import io.github.alaugks.spring.messagesource.catalog.fxitures.FooBarCatalog;
+import io.github.alaugks.spring.messagesource.catalog.fxitures.DummyCatalog;
 import io.github.alaugks.spring.messagesource.catalog.fxitures.ParentMessageSource;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
@@ -34,7 +34,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-			.builder(transUnits, LOCALE_EN)
+			.builder(LOCALE_EN, transUnits)
 			.build();
 
 		assertEquals("Es gibt 10,000 Dateien", ms.getMessage("list_files", new Object[] {10000}, "", LOCALE_EN));
@@ -51,7 +51,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-			.builder(transUnits, LOCALE_EN)
+			.builder(LOCALE_EN, transUnits)
 			.build();
 
 		assertEquals(
@@ -70,7 +70,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-			.builder(transUnits, LOCALE_EN)
+			.builder(LOCALE_EN, transUnits)
 			.enableICU4j()
 			.build();
 
@@ -90,7 +90,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-			.builder(transUnits, LOCALE_EN)
+			.builder(LOCALE_EN, transUnits)
 			.useICU4j(true)
 			.build();
 
@@ -110,12 +110,12 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-			.builder(transUnits, LOCALE_EN)
+			.builder(LOCALE_EN, transUnits)
 			.enableICU4j()
 			.build();
 
 		assertEquals(
-			"Wie geht's ihr?",
+			"Wie geht es ihr?",
 			ms.getMessage("greeting", new Object[] {Map.of("recipient_gender", "feminine")}, LOCALE_DE)
 		);
 	}
@@ -129,7 +129,7 @@ class CatalogMessageSourceBuilderTest {
 		assertEquals(
 				"messages_value",
 				CatalogMessageSourceBuilder
-						.builder(transUnits, LOCALE_EN)
+						.builder(LOCALE_EN, transUnits)
 						.build().getMessage("code", null, LOCALE_EN)
 		);
 	}
@@ -143,7 +143,7 @@ class CatalogMessageSourceBuilderTest {
 		assertEquals(
 				"messages_value",
 				CatalogMessageSourceBuilder
-						.builder(new TransUnitsCatalog(transUnits), LOCALE_EN)
+						.builder(LOCALE_EN, new TransUnitsCatalog(transUnits))
 						.build()
 						.getMessage("code", null, LOCALE_EN)
 		);
@@ -159,7 +159,7 @@ class CatalogMessageSourceBuilderTest {
 		assertEquals(
 				"foo_value",
 				CatalogMessageSourceBuilder
-						.builder(new TransUnitsCatalog(transUnits), LOCALE_EN)
+						.builder(LOCALE_EN, new TransUnitsCatalog(transUnits))
 						.defaultDomain("foo")
 						.build()
 						.getMessage("code", null, LOCALE_EN)
@@ -179,7 +179,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		assertEquals("value_en_a", ms.getMessage("code_a", null, LOCALE_EN));
@@ -204,7 +204,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(first, LOCALE_EN)
+				.builder(LOCALE_EN, first)
 				.addSource(new TransUnitsCatalog(second))
 				.build();
 
@@ -222,7 +222,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(first, LOCALE_EN)
+				.builder(LOCALE_EN, first)
 				.addSource(second)
 				.build();
 
@@ -237,9 +237,9 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(first, LOCALE_EN)
+				.builder(LOCALE_EN, first)
 				.addSource(List.of(new TransUnit(LOCALE_EN, "code_b", "value_b")))
-				.addSource(new FooBarCatalog())
+				.addSource(new DummyCatalog())
 				.build();
 
 		assertEquals("value_a", ms.getMessage("code_a", null, LOCALE_EN));
@@ -254,8 +254,8 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(new TransUnitsCatalog(transUnits), LOCALE_EN)
-				.addSource(new FooBarCatalog())
+				.builder(LOCALE_EN, new TransUnitsCatalog(transUnits))
+				.addSource(new DummyCatalog())
 				.build();
 
 		assertEquals("value_en_a", ms.getMessage("code_a", null, LOCALE_EN));
@@ -270,7 +270,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		assertThrows(NoSuchMessageException.class,
@@ -286,7 +286,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		assertEquals(
@@ -306,7 +306,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		DefaultMessageSourceResolvable resolvable =
@@ -322,7 +322,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		DefaultMessageSourceResolvable resolvable =
@@ -338,7 +338,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		DefaultMessageSourceResolvable resolvable =
@@ -354,7 +354,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		DefaultMessageSourceResolvable resolvable =
@@ -370,7 +370,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		DefaultMessageSourceResolvable resolvable =
@@ -386,20 +386,10 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
-		MessageSourceResolvable resolvable = new MessageSourceResolvable() {
-			@Override
-			public String[] getCodes() {
-				return null;
-			}
-
-			@Override
-			public String getDefaultMessage() {
-				return null;
-			}
-		};
+		MessageSourceResolvable resolvable = () -> null;
 
 		assertThrows(NoSuchMessageException.class, () -> ms.getMessage(resolvable, LOCALE_EN));
 	}
@@ -411,7 +401,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		DefaultMessageSourceResolvable resolvable =
@@ -427,7 +417,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.enableICU4j()
 				.build();
 
@@ -444,7 +434,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		assertNull(ms.getMessage("not_exists", null, null, LOCALE_EN));
@@ -457,7 +447,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		DefaultMessageSourceResolvable resolvable =
@@ -473,7 +463,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("not_exists", null, null));
@@ -486,10 +476,10 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
-		assertEquals("default_message", ms.getMessage(null, null, "default_message", LOCALE_EN));
+		assertEquals("default_message", ms.getMessage("not-exists", null, "default_message", LOCALE_EN));
 	}
 
 	@Test
@@ -499,7 +489,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		assertEquals("default_message", ms.getMessage("not_exists", new Object[] {"arg"}, "default_message", LOCALE_EN));
@@ -512,7 +502,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.enableICU4j()
 				.build();
 
@@ -526,7 +516,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.enableICU4j()
 				.build();
 
@@ -540,7 +530,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("", null, LOCALE_EN));
@@ -553,7 +543,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("code_a", null, Locale.ROOT));
@@ -567,7 +557,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		assertEquals("value_en_a", ms.getMessage("code_a", null, LOCALE_EN));
@@ -581,7 +571,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		assertEquals("value_en_a", ms.getMessage("code_a", null, Locale.forLanguageTag("fr-FR")));
@@ -594,7 +584,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-				.builder(transUnits, LOCALE_EN)
+				.builder(LOCALE_EN, transUnits)
 				.build();
 
 		Locale locale = Locale.forLanguageTag("fr-FR");
@@ -609,7 +599,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-			.builder(transUnits, LOCALE_EN)
+			.builder(LOCALE_EN, transUnits)
 			.parentMessageSource(new ParentMessageSource())
 			.build();
 
@@ -625,7 +615,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-			.builder(transUnits, LOCALE_EN)
+			.builder(LOCALE_EN, transUnits)
 			.domainDivider("|")
 			.build();
 

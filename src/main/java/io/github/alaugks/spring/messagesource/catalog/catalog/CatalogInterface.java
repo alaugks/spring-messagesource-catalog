@@ -6,6 +6,7 @@ package io.github.alaugks.spring.messagesource.catalog.catalog;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 import java.util.List;
 import java.util.Locale;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A source of translation units consumed by the {@code CatalogMessageSourceBuilder}.
@@ -28,10 +29,8 @@ import java.util.Locale;
 public interface CatalogInterface {
 
 	/**
-	 * Returns the translation units this source contributes eagerly. Aggregated into the
-	 * catalog map at construction time.
-	 *
-	 * @return the trans units contributed by this source; may be empty
+	 * {@return the trans units this source contributes eagerly; may be empty}
+	 * Aggregated into the catalog map at construction time.
 	 */
 	List<TransUnitInterface> getTransUnits();
 
@@ -42,11 +41,11 @@ public interface CatalogInterface {
 	 * <p>The {@code code} parameter is passed through as-is from the caller. It may be
 	 * given without a domain prefix (e.g. {@code "headline"}, implying the default domain)
 	 * or with one (e.g. {@code "payment.headline"}). Implementations that route by domain
-	 * must split on the {@code .} separator themselves.
+	 * must split on the domain divider (default {@code .}) themselves.
 	 *
 	 * @param code the message code, with or without a domain prefix ({@code "<domain>.<code>"})
 	 * @param locale the locale to resolve for
 	 * @return the resolved trans unit, or {@code null} if this source cannot resolve it
 	 */
-	TransUnitInterface resolveTransUnit(String code, Locale locale);
+	@Nullable TransUnitInterface resolveTransUnit(String code, Locale locale);
 }

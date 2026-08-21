@@ -18,7 +18,7 @@ class TranslationFileTest {
 	@Test
 	void test_record() throws IOException {
 		byte[] content;
-		try (InputStream inputStream = getClass().getClassLoader()
+		try (InputStream inputStream = this.getClass().getClassLoader()
 				.getResourceAsStream("translations_en_US/messages_en_US.txt")) {
 			assertNotNull(inputStream);
 			content = inputStream.readAllBytes();

@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -19,7 +21,7 @@ class ResourcesFilenameParserTest {
 	@ParameterizedTest
 	@MethodSource("provider_filenames")
 	void parse(String filename, String domain, String language, String region, String locale) {
-		Filename result = new ResourcesFileNameParser(filename).parse();
+		Filename result = new ResourceFileNameParser().parse(resource(filename));
 		Locale resultLocale = result.locale();
 
 		assertEquals(domain, result.domain());
@@ -44,6 +46,16 @@ class ResourcesFilenameParserTest {
 
 	@Test
 	void test_not() {
-		assertNull(new ResourcesFileNameParser(".ext").parse());
+		assertNull(new ResourceFileNameParser().parse(resource(".ext")));
+	}
+
+	private static Resource resource(String filename) {
+		return new ByteArrayResource(new byte[0]) {
+
+			@Override
+			public String getFilename() {
+				return filename;
+			}
+		};
 	}
 }
