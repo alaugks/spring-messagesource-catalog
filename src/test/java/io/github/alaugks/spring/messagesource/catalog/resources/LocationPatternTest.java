@@ -3,25 +3,32 @@
 
 package io.github.alaugks.spring.messagesource.catalog.resources;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 class LocationPatternTest {
 
 	@Test
-	void test_string() {
+	void test_string_set() {
 		LocationPattern locationPattern = new LocationPattern("path/");
 
 		assertEquals(Set.of("path/"), locationPattern.getLocationPattern());
 	}
 
 	@Test
-	void test_string_list() {
+	void test_string_set_list() {
 		LocationPattern locationPattern = new LocationPattern(List.of("path/", "path/", "other_path/"));
 
 		assertEquals(Set.of("path/", "other_path/"), locationPattern.getLocationPattern());
+	}
+
+	@Test
+	void test_string_list() {
+		LocationPattern locationPattern = new LocationPattern("path/");
+
+		assertEquals(List.of("path/"), locationPattern.getLocationPatterns());
 	}
 }

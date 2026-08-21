@@ -30,10 +30,10 @@ import org.springframework.util.Assert;
  *     .build();
  * }</pre>
  *
- * @deprecated Pass the location patterns directly as
+ * @deprecated since 0.10.0. Pass the location patterns directly as
  * {@code List<String>} to {@link ResourceLoaderBuilder#builder(java.util.Locale, List)}.
  */
-@Deprecated()
+@Deprecated(since = "0.10.0")
 public class LocationPattern {
 
 	private final Set<String> locationPatterns;
@@ -42,9 +42,10 @@ public class LocationPattern {
 	 * Convenience constructor for a single location pattern.
 	 *
 	 * @param locationPattern the location pattern; must not be {@code null}
-	 * @deprecated since 0.10.0, for removal. Pass {@code List.of(locationPattern)} directly
+	 * @deprecated since 0.10.0. Pass {@code List.of(locationPattern)} directly
 	 * to {@link ResourceLoaderBuilder#builder(java.util.Locale, List)} instead.
 	 */
+	@Deprecated(since = "0.10.0")
 	public LocationPattern(String locationPattern) {
 		this(List.of(locationPattern));
 	}
@@ -53,10 +54,11 @@ public class LocationPattern {
 	 * Creates a {@link LocationPattern} from the given list; duplicate entries are eliminated.
 	 *
 	 * @param locationPatterns the location patterns; must not be {@code null}
-	 * @deprecated since 0.10.0, for removal. Pass the list directly to
+	 * @deprecated since 0.10.0. Pass the list directly to
 	 * {@link ResourceLoaderBuilder#builder(java.util.Locale, List)} instead; duplicate entries are
 	 * eliminated there.
 	 */
+	@Deprecated(since = "0.10.0")
 	public LocationPattern(List<String> locationPatterns) {
 		Assert.notNull(locationPatterns, "Argument locationPatterns must not be null");
 		this.locationPatterns = new HashSet<>(locationPatterns);
@@ -64,14 +66,18 @@ public class LocationPattern {
 
 	/**
 	 * {@return the configured location patterns (deduplicated)}
+	 * @deprecated since 0.10.0
 	 */
+	@Deprecated(since = "0.10.0")
 	public Set<String> getLocationPattern() {
 		return this.locationPatterns;
 	}
 
 	/**
 	 * {@return the configured location patterns as a list (deduplicated)}
+	 * @deprecated since 0.10.0
 	 */
+	@Deprecated(since = "0.10.0")
 	public List<String> getLocationPatterns() {
 		return this.locationPatterns.stream().toList();
 	}
