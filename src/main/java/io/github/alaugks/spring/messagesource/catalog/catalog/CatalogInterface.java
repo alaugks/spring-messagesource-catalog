@@ -41,7 +41,7 @@ public interface CatalogInterface {
 	 * <p>The {@code code} parameter is passed through as-is from the caller. It may be
 	 * given without a domain prefix (e.g. {@code "headline"}, implying the default domain)
 	 * or with one (e.g. {@code "payment.headline"}). Implementations that route by domain
-	 * must split on the domain divider (default {@code .}) themselves.
+	 * must split on the {@code "."} separator themselves.
 	 *
 	 * @param code the message code, with or without a domain prefix ({@code "<domain>.<code>"})
 	 * @param locale the locale to resolve for

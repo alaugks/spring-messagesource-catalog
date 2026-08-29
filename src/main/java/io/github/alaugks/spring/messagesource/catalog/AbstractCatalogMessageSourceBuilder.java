@@ -34,17 +34,17 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
     /** Locale used as fallback when a code cannot be resolved for the requested locale. */
     private final Locale defaultLocale;
 
-    /** Domain applied when a code is requested without an explicit domain. */
-    private String defaultDomain = CatalogMessageSourceBuilder.DEFAULT_DOMAIN;
-
     /** Whether messages are formatted with ICU4J. */
     private boolean useICU4j = false;
 
     /** Optional parent consulted when a code cannot be resolved locally. */
     private @Nullable MessageSource parentMessageSource = null;
 
-    /** Separator between domain and code in a qualified code. */
-    private String domainDivider = DOMAIN_DIVIDER;
+    /** Strategy for building and resolving domain-qualified codes. */
+    private @Nullable ResolverInterface resolver = null;
+
+    /** Strategy for storing a resolved trans unit into the catalog map. */
+    private @Nullable TransUnitHandlerInterface transUnitHandler = null;
 
     protected AbstractCatalogMessageSourceBuilder(Locale defaultLocale) {
         Assert.notNull(defaultLocale, "Argument defaultLocale must not be null");
@@ -93,30 +93,6 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
      */
     protected Locale getDefaultLocale() {
         return this.defaultLocale;
-    }
-
-    /**
-     * {@return the configured default domain}
-     * @see #defaultDomain(String)
-     */
-    protected String getDefaultDomain() {
-        return this.defaultDomain;
-    }
-
-    /**
-     * Sets the default domain. Codes stored under this domain are also accessible via
-     * their name without the domain prefix; codes stored under any other domain require the
-     * {@code <domain>.<code>} prefix.
-     *
-     * @param defaultDomain the default domain; must not be {@code null}
-     * @return this builder
-     */
-    public B defaultDomain(String defaultDomain) {
-        Assert.notNull(defaultDomain, "Argument defaultDomain must not be null");
-
-        this.defaultDomain = defaultDomain;
-
-        return (B) this;
     }
 
     /**
@@ -175,24 +151,42 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
     }
 
     /**
-     * Sets the domain divider to be used when building domain-based message catalogs.
-     * Default is {@code .}
+     * {@return the configured resolver}
+     * @see #resolver(ResolverInterface)
+     */
+    public @Nullable ResolverInterface getResolver() {
+        return this.resolver;
+    }
+
+    /**
+     * Sets the resolver strategy used to build and resolve domain-qualified codes.
      *
-     * @param domainDivider the domain divider string; must not be {@code null}
+     * @param resolver the resolver strategy to use
      * @return this builder
      */
-    public B domainDivider(String domainDivider) {
-        Assert.notNull(domainDivider, "Argument domainDivider must not be null");
-
-        this.domainDivider = domainDivider;
+    public B resolver(ResolverInterface resolver) {
+        this.resolver = resolver;
 
         return (B) this;
     }
 
     /**
-     * {@return the domain divider used to separate domain and code}
+     * {@return the configured trans unit handler}
+     * @see #transUnitHandler(TransUnitHandlerInterface)
      */
-    protected String getDomainDivider() {
-        return this.domainDivider;
+    public @Nullable TransUnitHandlerInterface getTransUnitHandler() {
+        return this.transUnitHandler;
+    }
+
+    /**
+     * Sets the strategy used to store a resolved trans unit into the catalog map.
+     *
+     * @param transUnitHandler the trans unit handler strategy to use
+     * @return this builder
+     */
+    public B transUnitHandler(TransUnitHandlerInterface transUnitHandler) {
+        this.transUnitHandler = transUnitHandler;
+
+        return (B) this;
     }
 }

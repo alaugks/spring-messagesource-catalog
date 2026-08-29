@@ -10,7 +10,7 @@ public class DummyCatalog extends AbstractCatalog {
 
     @Override
     public TransUnitInterface resolveTransUnit(String code, Locale locale) {
-        if (Objects.equals(code, "dummy") || Objects.equals(code, "messages.dummy")) {
+        if (Objects.equals(code, "dummy") || Objects.equals(code, "dummy")) {
             return new TransUnit(locale, code, "foobar_value");
         }
         return null;

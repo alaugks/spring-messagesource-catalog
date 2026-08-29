@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -51,16 +50,13 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	private final ResourceBundle.Control control = new CatalogControl();
 
 	/** Per-instance cache of resolved bundles, keyed by locale. */
-	private final ConcurrentMap<Locale, ResourceBundle> cachedBundles = new ConcurrentHashMap<>();
+	private final ConcurrentMap<Locale, ResourceBundle> bundles = new ConcurrentHashMap<>();
 
 	/** Resolved messages, keyed by locale and then by domain-qualified code. */
 	private final ConcurrentMap<Locale, ConcurrentMap<String, String>> catalogMap;
 
 	/** Locale used as fallback when a code cannot be resolved for the requested locale. */
 	private final Locale defaultLocale;
-
-	/** Domain applied when a code is requested without an explicit domain. */
-	private final String defaultDomain;
 
 	/** Aggregated source providing the trans units for the catalog. */
 	private final CatalogInterface catalog;
@@ -71,8 +67,11 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	/** Optional parent consulted when a code cannot be resolved locally. */
     private final @Nullable MessageSource parentMessageSource;
 
-	/** Separator between domain and code in a qualified code. */
-	private final String domainDivider;
+	/** Resolver strategy used to build and resolve domain-qualified codes. */
+	private final @Nullable ResolverInterface resolver;
+
+	/** Strategy used to store a resolved trans unit into the catalog map. */
+	private final @Nullable TransUnitHandlerInterface transUnitHandler;
 
 	/**
 	 * Aggregates trans units into the catalog map and composes the sources for
@@ -81,20 +80,20 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	private CatalogMessageSourceBuilder(
 			List<CatalogInterface> sources,
 			Locale defaultLocale,
-			String defaultDomain,
-        	boolean useICU4j,
+		boolean useICU4j,
 			@Nullable MessageSource parentMessageSource,
-			String domainDivider
+			ResolverInterface resolver,
+			TransUnitHandlerInterface transUnitHandler
 	) {
 		this.defaultLocale = defaultLocale;
-		this.defaultDomain = defaultDomain;
 		this.useICU4j = useICU4j;
         this.parentMessageSource = parentMessageSource;
-		this.domainDivider = domainDivider;
+		this.resolver = resolver;
+		this.transUnitHandler = transUnitHandler;
 		this.catalogMap = new ConcurrentHashMap<>();
 		this.catalog = new CompositeCatalog(sources);
 
-		this.catalog.getTransUnits().forEach(t -> this.put(t.locale(), t.code(), t.value(), t.domain()));
+		this.catalog.getTransUnits().forEach(this::put);
 	}
 
 	/**
@@ -244,7 +243,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 
 		TransUnitInterface tu = this.catalog.resolveTransUnit(code, locale);
 		if (tu != null) {
-			this.put(tu.locale(), tu.code(), tu.value(), tu.domain());
+			this.put(tu);
 			return tu.value();
 		}
 
@@ -256,22 +255,24 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	}
 
 	/**
-	 * Stores a translation under its key with the domain prefix, plus an alias
-	 * without the prefix when the domain matches the default.
+	 * Stores a trans unit into the catalog map via the configured {@link #transUnitHandler}.
 	 */
-	private void put(Locale locale, String code, String value, @Nullable String domain) {
+	private void put(TransUnitInterface transUnit) {
+		if (this.transUnitHandler != null) {
+			this.transUnitHandler.put(this.catalogMap, this.resolver, transUnit);
+			return;
+		}
+
+		Locale locale = transUnit.locale();
 		if (locale.getLanguage().isEmpty()) {
 			return;
 		}
 
-		ConcurrentMap<String, String> bucket = this.catalogMap.computeIfAbsent(
-				locale, l -> new ConcurrentHashMap<>()
+		ConcurrentMap<String, String> bucket = catalogMap.computeIfAbsent(
+			locale, l -> new ConcurrentHashMap<>()
 		);
 
-		if (Objects.equals(domain, this.defaultDomain)) {
-			bucket.putIfAbsent(code, value);
-		}
-		bucket.putIfAbsent(this.concatCode(domain, code), value);
+		bucket.putIfAbsent(transUnit.code(), transUnit.value());
 	}
 
 	/**
@@ -281,38 +282,30 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	private @Nullable String resolveFromBundle(String code, Locale locale) {
 		ResourceBundle bundle = this.getResourceBundle(locale);
 
-		String domainCode = this.concatCode(this.defaultDomain, code);
+		if (this.resolver != null) {
+			return this.resolver.resolve(bundle, code, locale);
+		}
+
 		if (bundle.containsKey(code)) {
 			return bundle.getString(code);
-		}
-		if (bundle.containsKey(domainCode)) {
-			return bundle.getString(domainCode);
 		}
 
 		return null;
 	}
 
 	/**
-	 * Returns the bundle for the locale from the per-instance cachedBundles cache, building it
+	 * Returns the bundle for the locale from the per-instance bundles cache, building it
 	 * once on a miss.
 	 */
 	private ResourceBundle getResourceBundle(Locale locale) {
-		ResourceBundle cached = this.cachedBundles.get(locale);
+		ResourceBundle cached = this.bundles.get(locale);
 		if (cached != null) {
 			return cached;
 		}
 
 		ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE_NAME, locale, this.control);
-		this.cachedBundles.put(locale, bundle);
+		this.bundles.put(locale, bundle);
 		return bundle;
-	}
-
-	/**
-	 * Joins domain and code with the domain divider, defaulting to DEFAULT_DOMAIN when domain
-	 * is null.
-	 */
-	private String concatCode(@Nullable String domain, String code) {
-		return Optional.ofNullable(domain).orElse(DEFAULT_DOMAIN) + this.domainDivider + code;
 	}
 
 	/**
@@ -322,7 +315,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	 * bottoms out there — preserving the builder's configurable defaultLocale fallback. The JDK's
 	 * own bundle cache is disabled (TTL_DONT_CACHE) so instances never collide in the shared,
 	 * class-loader-scoped cache and nothing leaks into it; caching is done per instance in
-	 * cachedBundles. newBundle creates the locale's catalog bucket eagerly (never returns null) and
+	 * bundles. newBundle creates the locale's catalog bucket eagerly (never returns null) and
 	 * the CatalogResourceBundle holds it by live reference, so late-binding entries added later via
 	 * put stay visible to the cached bundle chain.
 	 */
@@ -414,10 +407,10 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 			return new CatalogMessageSourceBuilder(
 					this.getSources(),
 					this.getDefaultLocale(),
-					this.getDefaultDomain(),
-					this.isICU4jEnabled(),
+				this.isICU4jEnabled(),
 					this.getParentMessageSource(),
-					this.getDomainDivider()
+					this.getResolver(),
+					this.getTransUnitHandler()
 				);
 		}
 	}
