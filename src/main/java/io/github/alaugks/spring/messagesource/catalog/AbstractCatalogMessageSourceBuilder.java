@@ -175,12 +175,15 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
     }
 
     /**
+     * @deprecated since 0.10.2
+     *
      * Sets the domain divider to be used when building domain-based message catalogs.
      * Default is {@code .}
      *
      * @param domainDivider the domain divider string; must not be {@code null}
      * @return this builder
      */
+    @Deprecated(since = "0.10.2")
     public B domainDivider(String domainDivider) {
         Assert.notNull(domainDivider, "Argument domainDivider must not be null");
 
@@ -190,8 +193,11 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
     }
 
     /**
+     * @deprecated since 0.10.2
+     *
      * {@return the domain divider used to separate domain and code}
      */
+    @Deprecated(since = "0.10.2")
     protected String getDomainDivider() {
         return this.domainDivider;
     }

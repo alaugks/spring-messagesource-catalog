@@ -3,6 +3,7 @@
 This package provides the [MessageSource interface](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/MessageSource.html).
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=alaugks_spring-messagesource-catalog&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=alaugks_spring-messagesource-catalog)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.alaugks/spring-messagesource-catalog.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.alaugks/spring-messagesource-catalog/0.10.2)
 
 > [!IMPORTANT]
 > Until version 1.0.0, breaking changes (renaming of classes or methods, changes to method signatures) can occur in any release. The functionality itself
@@ -10,6 +11,9 @@ This package provides the [MessageSource interface](https://docs.spring.io/sprin
 
 ## Table of Contents
 
+- [Dependency](#dependency)
+  - [Maven](#maven)
+  - [Gradle](#gradle)
 - [Packages that use the catalog as a base package](#packages-that-use-the-catalog-as-a-base-package)
 - [CatalogMessageSource Configuration](#catalogmessagesource-configuration)
   - [Options](#options)
@@ -28,6 +32,24 @@ This package provides the [MessageSource interface](https://docs.spring.io/sprin
 - [Interfaces](#interfaces)
 - [License](#license)
 
+## Dependency
+
+### Maven
+
+```xml
+<dependency>
+    <groupId>io.github.alaugks</groupId>
+    <artifactId>spring-messagesource-catalog</artifactId>
+    <version>0.10.2</version>
+</dependency>
+```
+
+### Gradle
+
+```
+implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog', version: '0.10.2'
+```
+
 ## Packages that use the catalog as a base package
 
 * [spring-messagesource-xliff](https://github.com/alaugks/spring-messagesource-xliff): Xliff MessageSource for Spring
@@ -45,7 +67,6 @@ This package provides the [MessageSource interface](https://docs.spring.io/sprin
 | `addSource(CatalogInterface source)`                                 | —          | Appends another source. Sources are aggregated additively at `build()`; their lazy `resolveTransUnit` lookups are consulted in the order they were added.                                                                                                    |
 | `addSource(List<TransUnitInterface> transUnits)`                     | —          | Convenience overload of `addSource` that wraps the trans units in a `TransUnitsCatalog`.                                                                                                                                                                     |
 | `defaultDomain(String defaultDomain)`                                | `messages` | The default domain. Codes stored under this domain are also accessible without the domain prefix; codes under any other domain require the `<domain>.<code>` prefix.                                                                                         |
-| `domainDivider(String domainDivider)`                                | `.`        | The divider between domain and code in message codes (`<domain><divider><code>`).                                                                                                                                                                            |
 | `enableICU4j()`                                                      | disabled   | Format messages with ICU4J's `com.ibm.icu.text.MessageFormat` instead of the default `java.text.MessageFormat`. Adds named arguments and ICU `plural`/`select` patterns. See [Message formatting](#message-formatting) for details and examples.             |
 | `parentMessageSource(MessageSource parentMessageSource)`             | —          | Sets a parent [`MessageSource`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/MessageSource.html) to delegate to. When a code cannot be resolved in the catalog, the lookup falls back to the parent source.  |
 | `build()`                                                            | —          | Builds the `CatalogMessageSourceBuilder` from the configured sources, default locale and default domain. Trans units are aggregated and the sources are composed at this point; subsequent mutations of the builder have no effect on the returned instance. |
