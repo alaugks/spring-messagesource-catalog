@@ -20,12 +20,10 @@ public interface TransUnitHandlerInterface {
 	 * locale has no language (e.g. {@link Locale#ROOT}) is ignored.
 	 *
 	 * @param catalogMap the catalog map to store into, keyed by locale and then by code
-	 * @param resolver   the resolver used to build the domain-qualified code
 	 * @param transUnit  the trans unit to store
 	 */
 	void put(
-			ConcurrentMap<Locale, ConcurrentMap<String, String>> catalogMap,
-			ResolverInterface resolver,
-			TransUnitInterface transUnit
+		ConcurrentMap<Locale, ConcurrentMap<String, String>> catalogMap,
+		TransUnitInterface transUnit
 	);
 }

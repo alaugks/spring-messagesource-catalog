@@ -80,10 +80,10 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	private CatalogMessageSourceBuilder(
 			List<CatalogInterface> sources,
 			Locale defaultLocale,
-		boolean useICU4j,
+			boolean useICU4j,
 			@Nullable MessageSource parentMessageSource,
-			ResolverInterface resolver,
-			TransUnitHandlerInterface transUnitHandler
+			@Nullable ResolverInterface resolver,
+			@Nullable TransUnitHandlerInterface transUnitHandler
 	) {
 		this.defaultLocale = defaultLocale;
 		this.useICU4j = useICU4j;
@@ -259,7 +259,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	 */
 	private void put(TransUnitInterface transUnit) {
 		if (this.transUnitHandler != null) {
-			this.transUnitHandler.put(this.catalogMap, this.resolver, transUnit);
+			this.transUnitHandler.put(this.catalogMap, transUnit);
 			return;
 		}
 
@@ -283,7 +283,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		ResourceBundle bundle = this.getResourceBundle(locale);
 
 		if (this.resolver != null) {
-			return this.resolver.resolve(bundle, code, locale);
+			return this.resolver.resolve(bundle, code);
 		}
 
 		if (bundle.containsKey(code)) {

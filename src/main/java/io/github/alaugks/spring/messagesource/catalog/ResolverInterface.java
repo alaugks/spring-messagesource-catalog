@@ -3,7 +3,6 @@
 
 package io.github.alaugks.spring.messagesource.catalog;
 
-import java.util.Locale;
 import java.util.ResourceBundle;
 import org.jspecify.annotations.Nullable;
 
@@ -20,9 +19,8 @@ public interface ResolverInterface {
 	 * Resolves {@code code} against the given bundle.
 	 *
 	 * @param bundle the bundle to resolve against
-	 * @param code the message code, without a domain prefix
-	 * @param locale the locale being resolved for
+	 * @param code   the message code, without a domain prefix
 	 * @return the resolved value, or {@code null} if the code cannot be resolved
 	 */
-	@Nullable String resolve(ResourceBundle bundle, String code, Locale locale);
+	@Nullable String resolve(ResourceBundle bundle, String code);
 }
