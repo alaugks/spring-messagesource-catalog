@@ -11,9 +11,6 @@ This package provides the [MessageSource interface](https://docs.spring.io/sprin
 
 ## Table of Contents
 
-- [Dependency](#dependency)
-  - [Maven](#maven)
-  - [Gradle](#gradle)
 - [Packages that use the catalog as a base package](#packages-that-use-the-catalog-as-a-base-package)
 - [CatalogMessageSource Configuration](#catalogmessagesource-configuration)
   - [Options](#options)
@@ -31,24 +28,6 @@ This package provides the [MessageSource interface](https://docs.spring.io/sprin
   - [Records: Filename and TranslationFile](#records-filename-and-translationfile)
 - [Interfaces](#interfaces)
 - [License](#license)
-
-## Dependency
-
-### Maven
-
-```xml
-<dependency>
-    <groupId>io.github.alaugks</groupId>
-    <artifactId>spring-messagesource-catalog</artifactId>
-    <version>0.10.1</version>
-</dependency>
-```
-
-### Gradle
-
-```
-implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog', version: '0.10.1'
-```
 
 ## Packages that use the catalog as a base package
 
