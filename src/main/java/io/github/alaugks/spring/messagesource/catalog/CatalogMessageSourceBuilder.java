@@ -98,17 +98,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	public static Builder builder(Locale defaultLocale, List<TransUnitInterface> transUnits) {
 		Assert.notNull(transUnits, "Argument transUnits must not be null");
 
-		return builder(new TransUnitsCatalog(transUnits), defaultLocale);
-	}
-
-	/**
-	 * Creates a new {@link Builder} from a list of trans units.
-	 *
-	 * @deprecated since 0.10.0, for removal. Use {@link #builder(Locale, List)} instead.
-	 */
-	@Deprecated(since = "0.10.0", forRemoval = true)
-	public static Builder builder(List<TransUnitInterface> transUnits, Locale defaultLocale) {
-		return builder(defaultLocale, transUnits);
+		return builder(defaultLocale, new TransUnitsCatalog(transUnits));
 	}
 
 	/**
@@ -123,16 +113,6 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		Assert.notNull(catalogSource, "Argument catalogSource must not be null");
 
 		return new Builder(defaultLocale, catalogSource);
-	}
-
-	/**
-	 * Creates a new {@link Builder} from a {@link CatalogInterface} source.
-	 *
-	 * @deprecated since 0.10.0, for removal. Use {@link #builder(Locale, CatalogInterface)} instead.
-	 */
-	@Deprecated(since = "0.10.0", forRemoval = true)
-	public static Builder builder(CatalogInterface catalogSource, Locale defaultLocale) {
-		return builder(defaultLocale, catalogSource);
 	}
 
 	@Override
