@@ -37,9 +37,6 @@ import org.springframework.util.ObjectUtils;
  */
 public class CatalogMessageSourceBuilder implements MessageSource {
 
-	/** Default domain used when none is configured: {@value}. */
-	public static final String DEFAULT_DOMAIN = "messages";
-
 	/** Internal base name for the ResourceBundle that serves the catalog. */
 	private static final String BUNDLE_BASE_NAME = CatalogMessageSourceBuilder.class.getPackageName();
 

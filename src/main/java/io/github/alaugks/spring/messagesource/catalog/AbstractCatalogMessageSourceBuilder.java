@@ -30,9 +30,6 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
     /** Locale used as fallback when a code cannot be resolved for the requested locale. */
     private final Locale defaultLocale;
 
-    /** Domain applied when a code is requested without an explicit domain. */
-    private String defaultDomain = CatalogMessageSourceBuilder.DEFAULT_DOMAIN;
-
     /** Whether messages are formatted with ICU4J. */
     private boolean useICU4j = false;
 
@@ -86,30 +83,6 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
      */
     protected Locale getDefaultLocale() {
         return this.defaultLocale;
-    }
-
-    /**
-     * {@return the configured default domain}
-     * @see #defaultDomain(String)
-     */
-    protected String getDefaultDomain() {
-        return this.defaultDomain;
-    }
-
-    /**
-     * Sets the default domain. Codes stored under this domain are also accessible via
-     * their name without the domain prefix; codes stored under any other domain require the
-     * {@code <domain>.<code>} prefix.
-     *
-     * @param defaultDomain the default domain; must not be {@code null}
-     * @return this builder
-     */
-    public B defaultDomain(String defaultDomain) {
-        Assert.notNull(defaultDomain, "Argument defaultDomain must not be null");
-
-        this.defaultDomain = defaultDomain;
-
-        return (B) this;
     }
 
     /**
