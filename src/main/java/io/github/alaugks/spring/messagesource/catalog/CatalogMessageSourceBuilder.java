@@ -50,7 +50,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	private final ResourceBundle.Control control = new CatalogControl();
 
 	/** Per-instance cache of resolved bundles, keyed by locale. */
-	private final ConcurrentMap<Locale, ResourceBundle> cachedBundles = new ConcurrentHashMap<>();
+	private final ConcurrentMap<Locale, ResourceBundle> bundles = new ConcurrentHashMap<>();
 
 	/** Resolved messages, keyed by locale and then by code. */
 	private final ConcurrentMap<Locale, ConcurrentMap<String, String>> catalogMap;
@@ -256,13 +256,13 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	 * once on a miss.
 	 */
 	private ResourceBundle getResourceBundle(Locale locale) {
-		ResourceBundle cached = this.cachedBundles.get(locale);
+		ResourceBundle cached = this.bundles.get(locale);
 		if (cached != null) {
 			return cached;
 		}
 
 		ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE_NAME, locale, this.control);
-		this.cachedBundles.put(locale, bundle);
+		this.bundles.put(locale, bundle);
 		return bundle;
 	}
 
