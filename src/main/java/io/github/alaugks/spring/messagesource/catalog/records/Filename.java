@@ -10,14 +10,13 @@ import java.util.Locale;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Parsed components of a translation resource file name (e.g. {@code messages_en_GB}),
- * produced by {@link ResourceFileNameParser}.
+ * Parsed components of a translation resource file name (e.g. {@code messages_en_GB}), produced by
+ * {@link ResourceFileNameParser}.
  *
- * @param domain   the domain part (always present)
  * @param language the language part, or {@code null} when the file name carries no locale
  * @param region   the region part, or {@code null} when no region is given
  */
-public record Filename(String domain, @Nullable String language, @Nullable String region) implements FilenameInterface {
+public record Filename(@Nullable String language, @Nullable String region) implements FilenameInterface {
 
 	@Override
 	public boolean hasLocale() {

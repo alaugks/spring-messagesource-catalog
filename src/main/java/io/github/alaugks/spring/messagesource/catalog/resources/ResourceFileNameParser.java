@@ -35,7 +35,7 @@ public class ResourceFileNameParser implements ResourceFileNameParserInterface {
 
 	/** Matches domain, optional language and optional region in a resource file name. */
 	private static final Pattern PATTERN = Pattern.compile(
-		"^(?<domain>[a-z0-9]+)(?:[_.-](?<language>[a-z]+)(?:[_-](?<region>[a-z]+))?)?\\.[a-z0-9]+$",
+		"(?<domain>[a-z0-9]+)(?:[_.-](?<language>[a-z]+)(?:[_-](?<region>[a-z]+))?)?\\.[a-z0-9]+$",
 		Pattern.CASE_INSENSITIVE
 	);
 
@@ -48,8 +48,7 @@ public class ResourceFileNameParser implements ResourceFileNameParserInterface {
 
 		if (matcher.find()) {
 			return new Filename(
-					matcher.group("domain"),
-					matcher.group("language"),
+				matcher.group("language"),
 					matcher.group("region")
 			);
 		}

@@ -25,11 +25,10 @@ class TranslationFileTest {
 		}
 
 		TranslationFile translationFile = new TranslationFile(
-				"my-domain",
-				Locale.forLanguageTag("en-US"),
+			Locale.forLanguageTag("en-US"),
 				content
 		);
-		assertEquals("my-domain", translationFile.domain());
+
 		assertEquals(Locale.forLanguageTag("en-US"), translationFile.locale());
 		assertEquals(content, translationFile.content());
 	}
@@ -37,13 +36,11 @@ class TranslationFileTest {
 	@Test
 	void test_equals() {
 		TranslationFile a = new TranslationFile(
-				"my-domain",
-				Locale.forLanguageTag("en-US"),
+			Locale.forLanguageTag("en-US"),
 				new byte[] {1, 2, 3}
 		);
 		TranslationFile b = new TranslationFile(
-				"my-domain",
-				Locale.forLanguageTag("en-US"),
+			Locale.forLanguageTag("en-US"),
 				new byte[] {1, 2, 3}
 		);
 
@@ -54,39 +51,29 @@ class TranslationFileTest {
 	@Test
 	void test_not_equals() {
 		TranslationFile a = new TranslationFile(
-				"my-domain",
-				Locale.forLanguageTag("en-US"),
-				new byte[] {1, 2, 3}
+			Locale.forLanguageTag("en-US"),
+			new byte[] {1, 2, 3}
 		);
 
 		assertNotEquals(null, a);
 		assertNotEquals(a, new TranslationFile(
-				"other-domain",
-				Locale.forLanguageTag("en-US"),
-				new byte[] {1, 2, 3}
+			Locale.forLanguageTag("de-DE"),
+			new byte[] {1, 2, 3}
 		));
 		assertNotEquals(a, new TranslationFile(
-				"my-domain",
-				Locale.forLanguageTag("de-DE"),
-				new byte[] {1, 2, 3}
-		));
-		assertNotEquals(a, new TranslationFile(
-				"my-domain",
-				Locale.forLanguageTag("en-US"),
-				new byte[] {4, 5, 6}
+			Locale.forLanguageTag("en-US"),
+			new byte[] {4, 5, 6}
 		));
 	}
 
 	@Test
 	void test_hash_code() {
 		TranslationFile a = new TranslationFile(
-				"my-domain",
-				Locale.forLanguageTag("en-US"),
+			Locale.forLanguageTag("en-US"),
 				new byte[] {1, 2, 3}
 		);
 		TranslationFile b = new TranslationFile(
-				"my-domain",
-				Locale.forLanguageTag("en-US"),
+			Locale.forLanguageTag("en-US"),
 				new byte[] {1, 2, 3}
 		);
 
@@ -96,22 +83,20 @@ class TranslationFileTest {
 	@Test
 	void test_to_string() {
 		TranslationFile translationFile = new TranslationFile(
-				"my-domain",
-				Locale.forLanguageTag("en-US"),
+			Locale.forLanguageTag("en-US"),
 				new byte[] {1, 2, 3}
 		);
 
-        assertEquals("TranslationFile[domain=my-domain, locale=en_US, content=3 bytes]", translationFile.toString());
+        assertEquals("TranslationFile[locale=en_US, content=3 bytes]", translationFile.toString());
 	}
 
 	@Test
 	void test_to_string_null_content() {
 		TranslationFile translationFile = new TranslationFile(
-				"my-domain",
-				Locale.forLanguageTag("en-US"),
+			Locale.forLanguageTag("en-US"),
 				null
 		);
 
-		assertEquals("TranslationFile[domain=my-domain, locale=en_US, content=null]", translationFile.toString());
+		assertEquals("TranslationFile[locale=en_US, content=null]", translationFile.toString());
 	}
 }

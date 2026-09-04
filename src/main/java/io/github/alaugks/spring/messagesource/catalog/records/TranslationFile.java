@@ -14,11 +14,10 @@ import org.jspecify.annotations.Nullable;
  * <p>{@code equals}/{@code hashCode}/{@code toString} are overridden so the {@code byte[]}
  * content is compared by value rather than by identity.
  *
- * @param domain  the domain the file belongs to
  * @param locale  the locale parsed from the file name, or the default locale when none was given
  * @param content the raw file bytes
  */
-public record TranslationFile(String domain, Locale locale, byte[] content) implements TranslationFileInterface {
+public record TranslationFile(Locale locale, byte[] content) implements TranslationFileInterface {
 
 	@Override
 	public boolean equals(@Nullable Object o) {
@@ -28,20 +27,19 @@ public record TranslationFile(String domain, Locale locale, byte[] content) impl
 		if (!(o instanceof TranslationFile other)) {
 			return false;
 		}
-		return Objects.equals(this.domain, other.domain)
-				&& Objects.equals(this.locale, other.locale)
+		return Objects.equals(this.locale, other.locale)
 				&& Arrays.equals(this.content, other.content);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.domain, this.locale, Arrays.hashCode(this.content));
+		return Objects.hash(this.locale, Arrays.hashCode(this.content));
 	}
 
 	@Override
 	public String toString() {
-		return "TranslationFile[domain=" + this.domain
-				+ ", locale=" + this.locale
+		return "TranslationFile["
+				+ "locale=" + this.locale
 				+ ", content=" + (this.content == null ? "null" : this.content.length + " bytes")
 				+ "]";
 	}

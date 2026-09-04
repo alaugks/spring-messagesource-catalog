@@ -15,21 +15,21 @@ class FilenameTest {
 
 	@Test
 	void test_has_no_locale() {
-		Filename filename = new Filename("messages", null, null);
+		Filename filename = new Filename(null, null);
 
 		assertFalse(filename.hasLocale());
 	}
 
 	@Test
 	void test_has_locale() {
-		Filename filename = new Filename("messages", "en", null);
+		Filename filename = new Filename("en", null);
 
 		assertTrue(filename.hasLocale());
 	}
 
 	@Test
 	void test_invalid_locale_exception() {
-		Filename filename = new Filename("messages", "en", "bar");
+		Filename filename = new Filename("en", "bar");
 
 		assertThrows(CatalogMessageSourceRuntimeException.class, filename::locale);
 	}

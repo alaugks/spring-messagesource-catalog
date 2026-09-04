@@ -17,11 +17,6 @@ import java.util.Locale;
 public interface TranslationFileInterface {
 
 	/**
-	 * {@return the domain the file belongs to}
-	 */
-	String domain();
-
-	/**
 	 * {@return the locale derived from the file name, or the default locale when the file
 	 * name carries no locale part}
 	 */

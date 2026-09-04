@@ -20,11 +20,10 @@ class ResourcesFilenameParserTest {
 
 	@ParameterizedTest
 	@MethodSource("provider_filenames")
-	void parse(String filename, String domain, String language, String region, String locale) {
+	void parse(String filename, String language, String region, String locale) {
 		Filename result = new ResourceFileNameParser().parse(resource(filename));
 		Locale resultLocale = result.locale();
-
-		assertEquals(domain, result.domain());
+		
 		assertEquals(language, result.language());
 		assertEquals(region, result.region());
 		assertEquals(locale, resultLocale != null ? resultLocale.toString() : null);
@@ -33,14 +32,14 @@ class ResourcesFilenameParserTest {
 	private static Stream<Arguments> provider_filenames() {
 		return Stream.of(
 				// filename, domain, language, region, locale
-				Arguments.of("message.ext", "message", null, null, null),
-				Arguments.of("message_en.ext", "message", "en", null, "en"),
-				Arguments.of("message.en.ext", "message", "en", null, "en"),
-				Arguments.of("message-en.ext", "message", "en", null, "en"),
-				Arguments.of("message_en_GB.ext", "message", "en", "GB", "en_GB"),
-				Arguments.of("message.en_GB.ext", "message", "en", "GB", "en_GB"),
-				Arguments.of("message-en-GB.ext", "message", "en", "GB", "en_GB"),
-				Arguments.of("Message-En-Gb.ext", "Message", "En", "Gb", "en_GB")
+				Arguments.of("message.ext", null, null, null),
+				Arguments.of("message_en.ext", "en", null, "en"),
+				Arguments.of("message.en.ext", "en", null, "en"),
+				Arguments.of("message-en.ext", "en", null, "en"),
+				Arguments.of("message_en_GB.ext", "en", "GB", "en_GB"),
+				Arguments.of("message.en_GB.ext", "en", "GB", "en_GB"),
+				Arguments.of("message-en-GB.ext", "en", "GB", "en_GB"),
+				Arguments.of("Message-En-Gb.ext", "En", "Gb", "en_GB")
 		);
 	}
 

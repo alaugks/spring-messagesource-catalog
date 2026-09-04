@@ -150,32 +150,15 @@ class CatalogMessageSourceBuilderTest {
 	}
 
 	@Test
-	void test_with_set_default_domain() {
-		List<TransUnitInterface> transUnits = List.of(
-				new TransUnit(LOCALE_EN, "code", "messages_value"),
-				new TransUnit(LOCALE_EN, "code", "foo_value", "foo")
-		);
-
-		assertEquals(
-				"foo_value",
-				CatalogMessageSourceBuilder
-						.builder(LOCALE_EN, new TransUnitsCatalog(transUnits))
-						.defaultDomain("foo")
-						.build()
-						.getMessage("code", null, LOCALE_EN)
-		);
-	}
-
-	@Test
 	void test_resolution_multi_domain() {
 		List<TransUnitInterface> transUnits = List.of(
 				new TransUnit(LOCALE_EN, "code_a", "value_en_a"),
 				new TransUnit(LOCALE_EN, "code_b", "value_en_b"),
 				new TransUnit(LOCALE_DE, "code_a", "value_de_1"),
 				new TransUnit(LOCALE_DE, "code_b", "value_de_2"),
-				new TransUnit(LOCALE_EN, "code_a", "value_en_a", "foobar"),
-				new TransUnit(LOCALE_EN, "code_b", "value_en_b", "foobar"),
-				new TransUnit(LOCALE_EN_US, "code_a", "value_en_us_1", "messages")
+				new TransUnit(LOCALE_EN, "code_a", "value_en_a"),
+				new TransUnit(LOCALE_EN, "code_b", "value_en_b"),
+				new TransUnit(LOCALE_EN_US, "code_a", "value_en_us_1")
 		);
 
 		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
@@ -183,15 +166,13 @@ class CatalogMessageSourceBuilderTest {
 				.build();
 
 		assertEquals("value_en_a", ms.getMessage("code_a", null, LOCALE_EN));
-		assertEquals("value_en_a", ms.getMessage("messages.code_a", null, LOCALE_EN));
-		assertEquals("value_en_b", ms.getMessage("messages.code_b", null, LOCALE_EN));
-		assertEquals("value_en_a", ms.getMessage("foobar.code_a", null, LOCALE_EN));
-		assertEquals("value_en_b", ms.getMessage("foobar.code_b", null, LOCALE_EN));
+		assertEquals("value_en_a", ms.getMessage("code_a", null, LOCALE_EN));
+		assertEquals("value_en_b", ms.getMessage("code_b", null, LOCALE_EN));
 
-		assertEquals("value_de_1", ms.getMessage("messages.code_a", null, LOCALE_DE));
-		assertEquals("value_de_2", ms.getMessage("messages.code_b", null, LOCALE_DE));
+		assertEquals("value_de_1", ms.getMessage("code_a", null, LOCALE_DE));
+		assertEquals("value_de_2", ms.getMessage("code_b", null, LOCALE_DE));
 
-		assertEquals("value_en_us_1", ms.getMessage("messages.code_a", null, LOCALE_EN_US));
+		assertEquals("value_en_us_1", ms.getMessage("code_a", null, LOCALE_EN_US));
 	}
 
 	@Test
@@ -260,7 +241,7 @@ class CatalogMessageSourceBuilderTest {
 
 		assertEquals("value_en_a", ms.getMessage("code_a", null, LOCALE_EN));
 		assertEquals("foobar_value", ms.getMessage("dummy", null, LOCALE_EN));
-		assertEquals("foobar_value", ms.getMessage("messages.dummy", null, LOCALE_EN));
+		assertEquals("foobar_value", ms.getMessage("dummy", null, LOCALE_EN));
 	}
 
 	@Test
@@ -276,7 +257,7 @@ class CatalogMessageSourceBuilderTest {
 		assertThrows(NoSuchMessageException.class,
 				() -> ms.getMessage("not_exists", null, LOCALE_EN));
 		assertThrows(NoSuchMessageException.class,
-				() -> ms.getMessage("messages.not_exists", null, LOCALE_EN));
+				() -> ms.getMessage("not_exists", null, LOCALE_EN));
 	}
 
 	@Test
@@ -295,7 +276,7 @@ class CatalogMessageSourceBuilderTest {
 		);
 		assertEquals(
 				"default_message",
-				ms.getMessage("messages.not_exists", new Object[] {}, "default_message", LOCALE_EN)
+				ms.getMessage("not_exists", new Object[] {}, "default_message", LOCALE_EN)
 		);
 	}
 
@@ -606,19 +587,5 @@ class CatalogMessageSourceBuilderTest {
 		assertEquals("value_en_a", ms.getMessage("code_a", null, LOCALE_EN));
 		assertEquals("ParentMessageSource with args: 1,234", ms.getMessage("parent-messagesource-code", new Object[]{1234}, LOCALE_EN));
 		assertThrows(NoSuchMessageException.class, () -> ms.getMessage("not_exists", null, LOCALE_EN));
-	}
-
-	@Test
-	void test_domain_divider() {
-		List<TransUnitInterface> transUnits = List.of(
-			new TransUnit(LOCALE_EN, "code_a", "value_en_a", "domain")
-		);
-
-		CatalogMessageSourceBuilder ms = CatalogMessageSourceBuilder
-			.builder(LOCALE_EN, transUnits)
-			.domainDivider("|")
-			.build();
-
-		assertEquals("value_en_a", ms.getMessage("domain|code_a", null, LOCALE_EN));
 	}
 }

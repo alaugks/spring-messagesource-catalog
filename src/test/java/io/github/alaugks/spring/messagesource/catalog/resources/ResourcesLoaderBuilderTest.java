@@ -42,18 +42,6 @@ class ResourcesLoaderBuilderTest {
 	}
 
 	@Test
-	void test_custom_file_name_parser_without_file_extension_filter() {
-		ResourceLoaderBuilder resourcesLoader = ResourceLoaderBuilder
-			.builder(LOCALE_EN, List.of("translations/messages.txt"))
-			.fileNameParser(new DummyFileNameParser())
-			.build();
-
-		TranslationFileInterface translationFile = resourcesLoader.getTranslationFiles().get(0);
-
-		assertEquals("customdomain", translationFile.domain());
-	}
-
-	@Test
 	void test_custom_file_name_parser() {
 		ResourceLoaderBuilder resourcesLoader = ResourceLoaderBuilder
 			.builder(LOCALE_EN, List.of("translations/messages.txt"))
@@ -63,7 +51,6 @@ class ResourcesLoaderBuilderTest {
 
 		TranslationFileInterface translationFile = resourcesLoader.getTranslationFiles().get(0);
 
-		assertEquals("customdomain", translationFile.domain());
 		assertEquals("de", translationFile.locale().toString());
 	}
 
@@ -71,7 +58,7 @@ class ResourcesLoaderBuilderTest {
 
 		@Override
 		public Filename parse(Resource resource) {
-			return new Filename("customdomain", "de", null);
+			return new Filename("de", null);
 		}
 	}
 
@@ -128,7 +115,6 @@ class ResourcesLoaderBuilderTest {
 
 		TranslationFileInterface translationFile = resourcesLoader.getTranslationFiles().get(0);
 
-		assertEquals("messages", translationFile.domain());
 		assertEquals("en_US", translationFile.locale().toString());
 		assertNotNull(translationFile.content());
 	}

@@ -142,8 +142,7 @@ public class ResourceLoaderBuilder implements ResourceLoaderInterface {
 			try (InputStream inputStream = resource.getInputStream()) {
 				Locale locale = filename.locale();
 				return new TranslationFile(
-						filename.domain(),
-						locale != null ? locale : this.defaultLocale,
+					locale != null ? locale : this.defaultLocale,
 						inputStream.readAllBytes()
 				);
 			}

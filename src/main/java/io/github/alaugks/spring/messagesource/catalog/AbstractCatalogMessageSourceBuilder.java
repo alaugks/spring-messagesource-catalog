@@ -25,9 +25,6 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCatalogMessageSourceBuilder<B>> {
 
-    /** Default separator between domain and code in a qualified code. */
-    protected static final String DOMAIN_DIVIDER = ".";
-
     /** Sources aggregated additively; their late-binding methods are consulted in insertion order. */
     private final List<CatalogInterface> sources = new ArrayList<>();
 
@@ -42,9 +39,6 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
 
     /** Optional parent consulted when a code cannot be resolved locally. */
     private @Nullable MessageSource parentMessageSource = null;
-
-    /** Separator between domain and code in a qualified code. */
-    private String domainDivider = DOMAIN_DIVIDER;
 
     protected AbstractCatalogMessageSourceBuilder(Locale defaultLocale) {
         Assert.notNull(defaultLocale, "Argument defaultLocale must not be null");
@@ -172,33 +166,5 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
      */
     protected @Nullable MessageSource getParentMessageSource() {
         return this.parentMessageSource;
-    }
-
-    /**
-     * @deprecated since 0.10.2
-     *
-     * Sets the domain divider to be used when building domain-based message catalogs.
-     * Default is {@code .}
-     *
-     * @param domainDivider the domain divider string; must not be {@code null}
-     * @return this builder
-     */
-    @Deprecated(since = "0.10.2")
-    public B domainDivider(String domainDivider) {
-        Assert.notNull(domainDivider, "Argument domainDivider must not be null");
-
-        this.domainDivider = domainDivider;
-
-        return (B) this;
-    }
-
-    /**
-     * @deprecated since 0.10.2
-     *
-     * {@return the domain divider used to separate domain and code}
-     */
-    @Deprecated(since = "0.10.2")
-    protected String getDomainDivider() {
-        return this.domainDivider;
     }
 }

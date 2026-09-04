@@ -28,11 +28,6 @@ public interface FilenameInterface {
 	@Nullable Locale locale();
 
 	/**
-	 * {@return the domain part}
-	 */
-	String domain();
-
-	/**
 	 * {@return the language part, or {@code null} when the file name carries no locale}
 	 */
 	@Nullable String language();

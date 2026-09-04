@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -59,9 +58,6 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	/** Locale used as fallback when a code cannot be resolved for the requested locale. */
 	private final Locale defaultLocale;
 
-	/** Domain applied when a code is requested without an explicit domain. */
-	private final String defaultDomain;
-
 	/** Aggregated source providing the trans units for the catalog. */
 	private final CatalogInterface catalog;
 
@@ -71,9 +67,6 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	/** Optional parent consulted when a code cannot be resolved locally. */
     private final @Nullable MessageSource parentMessageSource;
 
-	/** Separator between domain and code in a qualified code. */
-	private final String domainDivider;
-
 	/**
 	 * Aggregates trans units into the catalog map and composes the sources for
 	 * late-binding fallback.
@@ -81,20 +74,16 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	private CatalogMessageSourceBuilder(
 			List<CatalogInterface> sources,
 			Locale defaultLocale,
-			String defaultDomain,
-        	boolean useICU4j,
-			@Nullable MessageSource parentMessageSource,
-			String domainDivider
+		boolean useICU4j,
+			@Nullable MessageSource parentMessageSource
 	) {
 		this.defaultLocale = defaultLocale;
-		this.defaultDomain = defaultDomain;
 		this.useICU4j = useICU4j;
         this.parentMessageSource = parentMessageSource;
-		this.domainDivider = domainDivider;
 		this.catalogMap = new ConcurrentHashMap<>();
 		this.catalog = new CompositeCatalog(sources);
 
-		this.catalog.getTransUnits().forEach(t -> this.put(t.locale(), t.code(), t.value(), t.domain()));
+		this.catalog.getTransUnits().forEach(t -> this.put(t.locale(), t.code(), t.value()));
 	}
 
 	/**
@@ -244,7 +233,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 
 		TransUnitInterface tu = this.catalog.resolveTransUnit(code, locale);
 		if (tu != null) {
-			this.put(tu.locale(), tu.code(), tu.value(), tu.domain());
+			this.put(tu.locale(), tu.code(), tu.value());
 			return tu.value();
 		}
 
@@ -259,7 +248,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	 * Stores a translation under its key with the domain prefix, plus an alias
 	 * without the prefix when the domain matches the default.
 	 */
-	private void put(Locale locale, String code, String value, @Nullable String domain) {
+	private void put(Locale locale, String code, String value) {
 		if (locale.getLanguage().isEmpty()) {
 			return;
 		}
@@ -268,10 +257,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 				locale, l -> new ConcurrentHashMap<>()
 		);
 
-		if (Objects.equals(domain, this.defaultDomain)) {
-			bucket.putIfAbsent(code, value);
-		}
-		bucket.putIfAbsent(this.concatCode(domain, code), value);
+		bucket.putIfAbsent(code, value);
 	}
 
 	/**
@@ -281,14 +267,9 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	private @Nullable String resolveFromBundle(String code, Locale locale) {
 		ResourceBundle bundle = this.getResourceBundle(locale);
 
-		String domainCode = this.concatCode(this.defaultDomain, code);
 		if (bundle.containsKey(code)) {
 			return bundle.getString(code);
 		}
-		if (bundle.containsKey(domainCode)) {
-			return bundle.getString(domainCode);
-		}
-
 		return null;
 	}
 
@@ -305,14 +286,6 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_BASE_NAME, locale, this.control);
 		this.cachedBundles.put(locale, bundle);
 		return bundle;
-	}
-
-	/**
-	 * Joins domain and code with the domain divider, defaulting to DEFAULT_DOMAIN when domain
-	 * is null.
-	 */
-	private String concatCode(@Nullable String domain, String code) {
-		return Optional.ofNullable(domain).orElse(DEFAULT_DOMAIN) + this.domainDivider + code;
 	}
 
 	/**
@@ -414,11 +387,9 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 			return new CatalogMessageSourceBuilder(
 					this.getSources(),
 					this.getDefaultLocale(),
-					this.getDefaultDomain(),
 					this.isICU4jEnabled(),
-					this.getParentMessageSource(),
-					this.getDomainDivider()
-				);
+					this.getParentMessageSource()
+			);
 		}
 	}
 }

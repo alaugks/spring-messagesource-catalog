@@ -8,7 +8,6 @@ import java.util.Locale;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 class TransUnitTest {
 
@@ -19,16 +18,14 @@ class TransUnitTest {
 		assertEquals(Locale.forLanguageTag("en"), transUnit.locale());
 		assertEquals("the-code", transUnit.code());
 		assertEquals("the-value", transUnit.value());
-		assertNull(transUnit.domain());
 	}
 
 	@Test
 	void test_with_domain() {
-		TransUnit transUnit = new TransUnit(Locale.forLanguageTag("en"), "the-code", "the-value", "my-domain");
+		TransUnit transUnit = new TransUnit(Locale.forLanguageTag("en"), "the-code", "the-value");
 
 		assertEquals(Locale.forLanguageTag("en"), transUnit.locale());
 		assertEquals("the-code", transUnit.code());
 		assertEquals("the-value", transUnit.value());
-		assertEquals("my-domain", transUnit.domain());
 	}
 }
