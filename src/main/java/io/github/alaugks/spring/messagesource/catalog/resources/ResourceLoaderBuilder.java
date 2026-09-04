@@ -24,7 +24,7 @@ import org.springframework.util.Assert;
 /**
  * Discovers translation resources matching the configured location patterns (e.g.
  * {@code classpath:translations/*}), optionally filters them by file extension and loads each
- * into a {@link TranslationFile} (domain + locale + raw bytes). Duplicate patterns are
+ * into a {@link TranslationFile} (locale + raw bytes). Duplicate patterns are
  * eliminated. Without configured file extensions all discovered resources are loaded.
  *
  * <p>The patterns are resolved with Spring's
@@ -50,7 +50,7 @@ public class ResourceLoaderBuilder implements ResourceLoaderInterface {
 	/** Accepted file extensions, without leading dot; null disables the filter. */
 	private final @Nullable List<String> fileExtensions;
 
-	/** Parser that derives domain and locale from a resource file name. */
+	/** Parser that derives the locale from a resource file name. */
 	private final ResourceFileNameParserInterface fileNameParser;
 
 	private ResourceLoaderBuilder(
@@ -179,7 +179,7 @@ public class ResourceLoaderBuilder implements ResourceLoaderInterface {
 		/** Accepted file extensions, without leading dot; null disables the filter. */
 		private @Nullable List<String> fileExtensions;
 
-		/** Parser that derives domain and locale from a resource file name. */
+		/** Parser that derives the locale from a resource file name. */
 		private ResourceFileNameParserInterface fileNameParser = new ResourceFileNameParser();
 
 		/**
@@ -211,7 +211,7 @@ public class ResourceLoaderBuilder implements ResourceLoaderInterface {
 		/**
 		 * Sets a custom file name parser. Defaults to {@link ResourceFileNameParser}.
 		 *
-		 * @param fileNameParser the parser that derives domain and locale from a file name;
+		 * @param fileNameParser the parser that derives the locale from a file name;
 		 *                       must not be {@code null}
 		 * @return this builder instance
 		 */

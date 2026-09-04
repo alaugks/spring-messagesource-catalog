@@ -13,13 +13,13 @@ import org.springframework.util.Assert;
 /**
  * Parses translation resource file names into a {@link Filename} record.
  *
- * <p>Matches case-insensitively. The domain and the locale part may be separated by {@code _}, {@code -}
- * or {@code .}; language and region may be separated by {@code _} or {@code -}. The file extension is
- * ignored — only the leading segments are inspected.
+ * <p>Matches case-insensitively. A file name must carry a leading, non-empty segment before the
+ * locale part and the extension; the locale part may be separated by {@code _}, {@code -} or
+ * {@code .}, and language and region may be separated by {@code _} or {@code -}.
  *
  * <p>Examples (any of the separator combinations above works the same way):
  * <ul>
- *   <li>{@code messages.ext} &rarr; domain={@code messages}</li>
+ *   <li>{@code messages.ext} &rarr; no locale part</li>
  *   <li>{@code messages_de.ext} &rarr; language={@code de}</li>
  *   <li>{@code messages-de.ext} &rarr; language={@code de}</li>
  *   <li>{@code messages.de.ext} &rarr; language={@code de}</li>

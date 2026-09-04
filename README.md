@@ -1,13 +1,9 @@
 # Package to create a custom Spring MessageSource
 
-This package provides the [MessageSource interface](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/MessageSource.html).
+This package provides the [MessageSource interface](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/MessageSource.html). Internally, it builds a [`ResourceBundle`](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/ResourceBundle.html) and delegates locale fallback handling to it — the same mechanism Spring's own [`ResourceBundleMessageSource`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/support/ResourceBundleMessageSource.html) relies on.
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=alaugks_spring-messagesource-catalog&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=alaugks_spring-messagesource-catalog)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.alaugks/spring-messagesource-catalog.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.alaugks/spring-messagesource-catalog/2.0.0-SNAPSHOT)
-
-> [!IMPORTANT]
-> Until version 1.0.0, breaking changes (renaming of classes or methods, changes to method signatures) can occur in any release. The functionality itself
-> will always be preserved.
 
 ## Table of Contents
 
@@ -66,19 +62,14 @@ implementation group: 'io.github.alaugks', name: 'spring-messagesource-catalog',
 | `builder(Locale defaultLocale, List<TransUnitInterface> transUnits)` | —          | Entry point (alternative).<br><br>`defaultLocale` is the locale to fall back to when a code cannot be resolved for the requested locale.<br><br>`transUnits` are used as the initial source, wrapped in a `TransUnitsCatalog`.                               |
 | `addSource(CatalogInterface source)`                                 | —          | Appends another source. Sources are aggregated additively at `build()`; their lazy `resolveTransUnit` lookups are consulted in the order they were added.                                                                                                    |
 | `addSource(List<TransUnitInterface> transUnits)`                     | —          | Convenience overload of `addSource` that wraps the trans units in a `TransUnitsCatalog`.                                                                                                                                                                     |
-| `defaultDomain(String defaultDomain)`                                | `messages` | The default domain. Codes stored under this domain are also accessible without the domain prefix; codes under any other domain require the `<domain>.<code>` prefix.                                                                                         |
 | `enableICU4j()`                                                      | disabled   | Format messages with ICU4J's `com.ibm.icu.text.MessageFormat` instead of the default `java.text.MessageFormat`. Adds named arguments and ICU `plural`/`select` patterns. See [Message formatting](#message-formatting) for details and examples.             |
 | `parentMessageSource(MessageSource parentMessageSource)`             | —          | Sets a parent [`MessageSource`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/MessageSource.html) to delegate to. When a code cannot be resolved in the catalog, the lookup falls back to the parent source.  |
-| `build()`                                                            | —          | Builds the `CatalogMessageSourceBuilder` from the configured sources, default locale and default domain. Trans units are aggregated and the sources are composed at this point; subsequent mutations of the builder have no effect on the returned instance. |
+| `build()`                                                            | —          | Builds the `CatalogMessageSourceBuilder` from the configured sources and default locale. Trans units are aggregated and the sources are composed at this point; subsequent mutations of the builder have no effect on the returned instance.                 |
 
 ### TransUnit Record
 
-If the `String domain` argument is not set, the default is the **messages** domain.
-
 ```java
 TransUnit(Locale locale, String code, String value);
-
-TransUnit(Locale locale, String code, String value, String domain);
 ```
 
 
@@ -104,18 +95,13 @@ public class MessageConfig {
         // en
         add(new TransUnit(Locale.forLanguageTag("en"), "headline", "Headline"));
         add(new TransUnit(Locale.forLanguageTag("en"), "postcode", "Postcode"));
-        add(new TransUnit(Locale.forLanguageTag("en"), "headline", "Payment", "payment"));
-        add(new TransUnit(Locale.forLanguageTag("en"), "expiry_date", "Expiry date", "payment"));
 
         // en-US
         add(new TransUnit(Locale.forLanguageTag("en-US"), "postcode", "Zip code"));
-        add(new TransUnit(Locale.forLanguageTag("en-US"), "expiry_date", "Expiration date", "payment"));
 
         // de
         add(new TransUnit(Locale.forLanguageTag("de"), "headline", "Überschrift"));
         add(new TransUnit(Locale.forLanguageTag("de"), "postcode", "Postleitzahl"));
-        add(new TransUnit(Locale.forLanguageTag("de"), "headline", "Zahlung", "payment"));
-        add(new TransUnit(Locale.forLanguageTag("de"), "expiry_date", "Ablaufdatum", "payment"));
     }};
 
     @Bean
@@ -138,53 +124,37 @@ Resolving the target value based on the code behaves like the `ResourceBundleMes
     <th>en</th>
     <th>en-US</th>
     <th>de</th>
-    <th>jp***</th>
+    <th>jp**</th>
   </tr>
   </thead>
   <tbody>
   <tr>
-    <td>headline*<br>headline</td>
+    <td>headline</td>
     <td>Headline</td>
-    <td>Headline**</td>
+    <td>Headline*</td>
     <td>Überschrift</td>
     <td>Headline</td>
   </tr>
   <tr>
-    <td>postcode*<br>messages.postcode</td>
+    <td>postcode</td>
     <td>Postcode</td>
     <td>Zip code</td>
     <td>Postleitzahl</td>
     <td>Postcode</td>
   </tr>
-  <tr>
-    <td>payment.headline</td>
-    <td>Payment</td>
-    <td>Payment**</td>
-    <td>Zahlung</td>
-    <td>Payment</td>
-  </tr>
-  <tr>
-    <td>payment.expiry_date</td>
-    <td>Expiry date</td>
-    <td>Expiration date</td>
-    <td>Ablaufdatum</td>
-    <td>Expiry date</td>
-  </tr>
   </tbody>
 </table>
 
-> *Default domain is `messages`.
+> *Example of a fallback from Language_Region (`en-US`) to Language (`en`). The `id` does not exist in `en-US`, so it tries to select the translation with locale `en`.
 >
-> **Example of a fallback from Language_Region (`en-US`) to Language (`en`). The `id` does not exist in `en-US`, so it tries to select the translation with locale `en`.
->
-> ***There is no translation for Japanese (`jp`). The default locale transUnits (`en`) are selected.
+> **There is no translation for Japanese (`jp`). The default locale transUnits (`en`) are selected.
 
 ### With custom CatalogInterface
 
 A custom source typically extends `AbstractCatalog`. The base class provides no-op defaults for the two data methods. A source then chooses one of two patterns:
 
 - **Eager** — override `getTransUnits()`. The list is read once at construction time and merged into the catalog map.
-- **Lazy** — override `resolveTransUnit(code, locale)` to return a `TransUnitInterface`. Called only when the catalog map has no entry for the requested key. The returned trans unit is cached in the map (using its `domain`). Subsequent lookups for the same key hit the in-memory map.
+- **Lazy** — override `resolveTransUnit(code, locale)` to return a `TransUnitInterface`. Called only when the catalog map has no entry for the requested key. The returned trans unit is cached in the map. Subsequent lookups for the same key hit the in-memory map.
 
 #### Lazy lookups across multiple sources
 
@@ -195,7 +165,7 @@ When the catalog map cannot resolve a key, the lazy path consults the configured
 3. If it cannot answer, it returns `null` and the next source is tried.
 4. If no source claims the request, the message ends up unresolved.
 
-A common opt-out strategy is to gate on the requested domain. A source that owns `"glossary"` returns `null` for anything that does not start with `"glossary."`. The `LazyCatalog` example below shows that pattern.
+A common opt-out strategy is to gate on a recognized code prefix. A source that owns the `"glossary."` prefix returns `null` for anything that does not start with it. The `LazyCatalog` example below shows that pattern.
 
 The three examples below illustrate the patterns. They are then combined in [Combining multiple sources](#combining-multiple-sources).
 
@@ -236,8 +206,6 @@ import java.util.List;
 
 public class GlossaryDbCatalog extends AbstractCatalog {
 
-    private static final String DOMAIN = "glossary";
-
     private final GlossaryRepository glossaryRepository;
 
     public GlossaryDbCatalog(GlossaryRepository glossaryRepository) {
@@ -248,7 +216,7 @@ public class GlossaryDbCatalog extends AbstractCatalog {
     public List<TransUnitInterface> getTransUnits() {
         List<TransUnitInterface> transUnits = new ArrayList<>();
         this.glossaryRepository.findAll().forEach(row -> transUnits.add(
-            new TransUnit(row.getLocale(), row.getCode(), row.getValue(), DOMAIN)
+            new TransUnit(row.getLocale(), row.getCode(), row.getValue())
         ));
         return transUnits;
     }
@@ -261,7 +229,7 @@ The trans units are not loaded up front. `resolveTransUnit(...)` is called only 
 
 Useful when the underlying source is large enough that eager loading is impractical (e.g. a glossary table with hundreds of thousands of rows, or an external API).
 
-The `code` argument is passed through as-is from the caller. It may arrive without a domain prefix (e.g. `"headline"`) or with one (e.g. `"lazyglossary.headline"`). A source that owns a specific domain checks the prefix and strips it before looking up its backend. The returned `TransUnit` carries the code without the prefix and the source's own domain. The cache entry therefore lives at `"<domain>.<code>"`.
+The `code` argument is passed through as-is from the caller. A source that owns a specific prefix (e.g. `"lazyglossary."`) checks for it, strips it to look up its backend, but returns the `TransUnit` under the original, unstripped `code` — the cache is keyed by whatever `code` the caller used, so a later lookup with the same `code` hits the in-memory map instead of calling `resolveTransUnit` again.
 
 ```java
 import io.github.alaugks.spring.messagesource.catalog.catalog.AbstractCatalog;
@@ -271,8 +239,7 @@ import java.util.Locale;
 
 public class LazyCatalog extends AbstractCatalog {
 
-    private static final String DOMAIN = "lazyglossary";
-    private static final String PREFIX = DOMAIN + ".";
+    private static final String PREFIX = "lazyglossary.";
 
     private final LazyCatalogRepository lazyCatalogRepository;
 
@@ -282,14 +249,13 @@ public class LazyCatalog extends AbstractCatalog {
 
     @Override
     public TransUnitInterface resolveTransUnit(String code, Locale locale) {
-        // code may be "<code>" (default domain) or "<domain>.<code>".
-        // This source owns only DOMAIN; for anything it cannot answer it
-        // returns null, and the builder consults the next source.
+        // This source only answers for codes starting with PREFIX; for anything
+        // else it returns null, and the builder consults the next source.
         if (code.startsWith(PREFIX)) {
             String localCode = code.substring(PREFIX.length());
             String value = this.lazyCatalogRepository.findByCodeAndLocale(localCode, locale);
             if (value != null) {
-                return new TransUnit(locale, localCode, value, DOMAIN);
+                return new TransUnit(locale, code, value);
             }
         }
         return null;
@@ -491,8 +457,8 @@ messageSource.getMessage(
 
 The `resources` package loads translation files from the classpath or filesystem: `ResourceLoaderBuilder`
 reads the resources matching the configured location patterns, `ResourceFileNameParser` derives the
-domain and locale from each file name, and the result is a list of `TranslationFile` records
-(domain + locale + raw bytes) that a format-specific parser can turn into `TransUnit`s. The sibling
+locale from each file name, and the result is a list of `TranslationFile` records
+(locale + raw bytes) that a format-specific parser can turn into `TransUnit`s. The sibling
 packages [spring-messagesource-xliff](https://github.com/alaugks/spring-messagesource-xliff) and
 [spring-messagesource-json](https://github.com/alaugks/spring-messagesource-json) use these classes
 as their file-loading stage; a custom file-based source can reuse them as well.
@@ -514,7 +480,7 @@ are wrapped in a `CatalogMessageSourceRuntimeException`.
 | `builder(Locale defaultLocale, String locationPattern)`          | —                        | Entry point.<br><br>`defaultLocale` is used for files whose name carries no locale part.<br><br>`locationPattern` is the location pattern to scan.                                                        |
 | `builder(Locale defaultLocale, List<String> locationPatterns)`   | —                        | Entry point (alternative) for multiple location patterns. Duplicate patterns are eliminated.                                                                                                              |
 | `fileExtensions(List<String> fileExtensions)`                    | all extensions           | Restricts loading to resources with one of the given file extensions (without leading dot). Without this setting all discovered resources are loaded.                                                     |
-| `fileNameParser(ResourceFileNameParserInterface fileNameParser)` | `ResourceFileNameParser` | Sets a custom file name parser that derives the domain and locale from a file name.                                                                                                                       |
+| `fileNameParser(ResourceFileNameParserInterface fileNameParser)` | `ResourceFileNameParser` | Sets a custom file name parser that derives the locale from a file name.                                                                                                                                  |
 | `build()`                                                        | —                        | Builds the `ResourceLoaderBuilder`. The location patterns are resolved on each call to `getTranslationFiles()`.                                                                                                  |
 | `getTranslationFiles()`                                          | —                        | Resolves the location patterns, filters and reads the matching resources and returns them as `TranslationFile`s. File names that do not match the [naming convention](#file-name-convention) are skipped. |
 
@@ -535,24 +501,24 @@ List<TranslationFileInterface> files = loader.getTranslationFiles();
 ### File name convention
 
 Matching is case-insensitive and the file extension is ignored (`.ext` below stands for any extension).
-The domain and the locale part can be separated by `_`, `-` or `.`; language and region by `_` or `-`.
-Files without a locale part get the default locale passed to `ResourceLoaderBuilder`.
+Every file name must carry a leading, non-empty segment before the locale part and the extension; the
+locale part can be separated by `_`, `-` or `.`; language and region by `_` or `-`. Files without a
+locale part get the default locale passed to `ResourceLoaderBuilder`.
 
-| File name              | Domain     | Locale  |
-|------------------------|------------|---------|
-| `messages.ext`         | `messages` | default |
-| `messages_de.ext`      | `messages` | `de`    |
-| `messages.de.ext`      | `messages` | `de`    |
-| `messages_en-US.ext`   | `messages` | `en_US` |
-| `payment_de.ext`       | `payment`  | `de`    |
+| File name              | Locale  |
+|------------------------|---------|
+| `messages.ext`         | default |
+| `messages_de.ext`      | `de`    |
+| `messages.de.ext`      | `de`    |
+| `messages_en-US.ext`   | `en_US` |
 
 File names that do not match this pattern are ignored by `ResourceLoaderBuilder`.
 
 ### Records: Filename and TranslationFile
 
-- `Filename` — the parsed parts of a file name (`domain`, `language`, `region`). `hasLocale()` reports
+- `Filename` — the parsed parts of a file name (`language`, `region`). `hasLocale()` reports
   whether a language part was present. `locale()` builds the `Locale` from the parts.
-- `TranslationFile` — a loaded file: `domain`, `locale` and the raw `content` bytes. The byte content is
+- `TranslationFile` — a loaded file: `locale` and the raw `content` bytes. The byte content is
   compared by value in `equals`/`hashCode`.
 
 ## Interfaces
@@ -563,9 +529,9 @@ implementation ships with the package.
 | Interface                                                                                                                                        | Default implementation   | Description                                                                                                                                                                 |
 |--------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [`CatalogInterface`](src/main/java/io/github/alaugks/spring/messagesource/catalog/catalog/CatalogInterface.java)                                 | `TransUnitsCatalog`      | A source of translation units. Contributes eagerly via `getTransUnits()` or lazily via `resolveTransUnit(code, locale)`. Custom sources typically extend `AbstractCatalog`. |
-| [`TransUnitInterface`](src/main/java/io/github/alaugks/spring/messagesource/catalog/records/TransUnitInterface.java)                             | `TransUnit`              | A single translation entry: a `(locale, domain, code) -> value` tuple.                                                                                                      |
-| [`FilenameInterface`](src/main/java/io/github/alaugks/spring/messagesource/catalog/records/FilenameInterface.java)                               | `Filename`               | The parsed parts of a resource file name: `domain`, `language`, `region`.                                                                                                   |
-| [`TranslationFileInterface`](src/main/java/io/github/alaugks/spring/messagesource/catalog/records/TranslationFileInterface.java)                 | `TranslationFile`        | A loaded translation file: `domain`, `locale` and the raw `content` bytes.                                                                                                  |
+| [`TransUnitInterface`](src/main/java/io/github/alaugks/spring/messagesource/catalog/records/TransUnitInterface.java)                             | `TransUnit`              | A single translation entry: a `(locale, code) -> value` tuple.                                                                                                              |
+| [`FilenameInterface`](src/main/java/io/github/alaugks/spring/messagesource/catalog/records/FilenameInterface.java)                               | `Filename`               | The parsed parts of a resource file name: `language`, `region`.                                                                                                             |
+| [`TranslationFileInterface`](src/main/java/io/github/alaugks/spring/messagesource/catalog/records/TranslationFileInterface.java)                 | `TranslationFile`        | A loaded translation file: `locale` and the raw `content` bytes.                                                                                                            |
 | [`ResourceFileNameParserInterface`](src/main/java/io/github/alaugks/spring/messagesource/catalog/resources/ResourceFileNameParserInterface.java) | `ResourceFileNameParser` | Parses a `Resource` into a `Filename`. Functional interface; a custom parser can be passed to `ResourceLoaderBuilder` as a lambda.                                                 |
 | [`ResourceLoaderBuilderInterface`](src/main/java/io/github/alaugks/spring/messagesource/catalog/resources/ResourceLoaderBuilderInterface.java)                 | `ResourceLoaderBuilder`         | Loads translation resources and returns them as `TranslationFile`s.                                                                                                         |
 

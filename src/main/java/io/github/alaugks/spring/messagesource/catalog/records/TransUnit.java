@@ -9,7 +9,7 @@ import java.util.Locale;
  * Immutable {@link TransUnitInterface} implementation.
  *
  * @param locale the locale this translation belongs to
- * @param code   the message code (without domain prefix)
+ * @param code   the message code
  * @param value  the translated text
  */
 public record TransUnit(Locale locale, String code, String value) implements TransUnitInterface {

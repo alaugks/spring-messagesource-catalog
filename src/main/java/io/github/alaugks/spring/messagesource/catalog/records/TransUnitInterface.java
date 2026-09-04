@@ -6,7 +6,7 @@ package io.github.alaugks.spring.messagesource.catalog.records;
 import java.util.Locale;
 
 /**
- * A single translation entry: a {@code (locale, domain, code) -> value} tuple.
+ * A single translation entry: a {@code (locale, code) -> value} tuple.
  */
 public interface TransUnitInterface {
 
@@ -16,7 +16,7 @@ public interface TransUnitInterface {
 	Locale locale();
 
 	/**
-	 * {@return the message code (without domain prefix)}
+	 * {@return the message code}
 	 */
 	String code();
 

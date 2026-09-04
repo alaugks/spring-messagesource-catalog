@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * Loads translation resources and parses each into a {@link TranslationFile}
- * (domain + locale + raw bytes).
+ * (locale + raw bytes).
  *
  * <p>Used by sibling parser packages (XLIFF, JSON) as the file-loading stage that precedes
  * format-specific parsing.

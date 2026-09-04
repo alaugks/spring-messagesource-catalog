@@ -7,7 +7,7 @@ import io.github.alaugks.spring.messagesource.catalog.resources.ResourceLoaderIn
 import java.util.Locale;
 
 /**
- * A loaded translation file: domain, locale and the raw file content.
+ * A loaded translation file: locale and the raw file content.
  *
  * <p>Produced by a
  * {@link ResourceLoaderInterface}

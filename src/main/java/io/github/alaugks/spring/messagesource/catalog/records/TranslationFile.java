@@ -9,7 +9,7 @@ import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Raw, loaded translation resource: domain, locale and file bytes.
+ * Raw, loaded translation resource: locale and file bytes.
  *
  * <p>{@code equals}/{@code hashCode}/{@code toString} are overridden so the {@code byte[]}
  * content is compared by value rather than by identity.

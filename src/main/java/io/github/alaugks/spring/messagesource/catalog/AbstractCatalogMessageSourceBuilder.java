@@ -14,8 +14,7 @@ import org.springframework.util.Assert;
 
 /**
  * Base class for fluent builders that share the common catalog configuration: the configured
- * sources, default locale, default domain, ICU4J formatting, and an optional parent message
- * source.
+ * sources, default locale, ICU4J formatting, and an optional parent message source.
  *
  * <p>The recursive type parameter {@code B} lets each concrete builder return its own type from
  * the shared fluent methods, so chaining stays type-safe across subclasses (including sibling
@@ -149,7 +148,7 @@ public abstract class AbstractCatalogMessageSourceBuilder<B extends AbstractCata
 
     /**
      * Sets the parent message source to be used as a fallback when a message cannot be resolved
-     * from the current sources or domains.
+     * from the current sources.
      *
      * @param messageSource the parent message source; may be {@code null} for no parent
      * @return this builder

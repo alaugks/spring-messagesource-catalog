@@ -52,7 +52,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	/** Per-instance cache of resolved bundles, keyed by locale. */
 	private final ConcurrentMap<Locale, ResourceBundle> cachedBundles = new ConcurrentHashMap<>();
 
-	/** Resolved messages, keyed by locale and then by domain-qualified code. */
+	/** Resolved messages, keyed by locale and then by code. */
 	private final ConcurrentMap<Locale, ConcurrentMap<String, String>> catalogMap;
 
 	/** Locale used as fallback when a code cannot be resolved for the requested locale. */
@@ -180,7 +180,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	 * Resolves the given code for the requested locale and formats it with the given arguments.
 	 *
 	 * <p>Lookup order: the in-memory catalog (locale fallback delegated to the JDK via
-	 * {@link ResourceBundle}, default-domain prefix probed), then the late-binding sources in order,
+	 * {@link ResourceBundle}), then the late-binding sources in order,
 	 * then the parent message source. Resolved values from the sources are cached for subsequent calls.
 	 *
 	 * @param code the message code to resolve
@@ -245,8 +245,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	}
 
 	/**
-	 * Stores a translation under its key with the domain prefix, plus an alias
-	 * without the prefix when the domain matches the default.
+	 * Stores a translation under its code.
 	 */
 	private void put(Locale locale, String code, String value) {
 		if (locale.getLanguage().isEmpty()) {
@@ -261,8 +260,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	}
 
 	/**
-	 * Resolves the code against the in-memory catalog using the JDK locale fallback. The code is
-	 * probed both without and with the default-domain prefix.
+	 * Resolves the code against the in-memory catalog using the JDK locale fallback.
 	 */
 	private @Nullable String resolveFromBundle(String code, Locale locale) {
 		ResourceBundle bundle = this.getResourceBundle(locale);
@@ -360,8 +358,8 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	}
 
 	/**
-	 * Fluent builder for {@link CatalogMessageSourceBuilder}. Holds the configured sources,
-	 * the default locale, and the default domain until {@link #build()} is called.
+	 * Fluent builder for {@link CatalogMessageSourceBuilder}. Holds the configured sources
+	 * and the default locale until {@link #build()} is called.
 	 */
 	public static final class Builder extends AbstractCatalogMessageSourceBuilder<Builder> {
 
@@ -376,8 +374,8 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 		}
 
 		/**
-		 * Builds a {@link CatalogMessageSourceBuilder} from the configured sources, default
-		 * locale, and default domain. Trans units are aggregated and the sources are composed
+		 * Builds a {@link CatalogMessageSourceBuilder} from the configured sources and default
+		 * locale. Trans units are aggregated and the sources are composed
 		 * at this point; subsequent mutations of the builder have no effect on the
 		 * returned instance.
 		 *
