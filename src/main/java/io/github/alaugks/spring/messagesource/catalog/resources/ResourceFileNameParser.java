@@ -20,22 +20,22 @@ import org.springframework.util.Assert;
  * <p>Examples (any of the separator combinations above works the same way):
  * <ul>
  *   <li>{@code messages.ext} &rarr; domain={@code messages}</li>
- *   <li>{@code messages_de.ext} &rarr; domain={@code messages}, language={@code de}</li>
- *   <li>{@code messages-de.ext} &rarr; domain={@code messages}, language={@code de}</li>
- *   <li>{@code messages.de.ext} &rarr; domain={@code messages}, language={@code de}</li>
- *   <li>{@code messages_en_US.ext} &rarr; domain={@code messages}, language={@code en}, region={@code US}</li>
- *   <li>{@code messages_en-US.ext} &rarr; domain={@code messages}, language={@code en}, region={@code US}</li>
- *   <li>{@code messages-en_US.ext} &rarr; domain={@code messages}, language={@code en}, region={@code US}</li>
- *   <li>{@code messages-en-US.ext} &rarr; domain={@code messages}, language={@code en}, region={@code US}</li>
- *   <li>{@code messages.en_US.ext} &rarr; domain={@code messages}, language={@code en}, region={@code US}</li>
- *   <li>{@code messages.en-US.ext} &rarr; domain={@code messages}, language={@code en}, region={@code US}</li>
+ *   <li>{@code messages_de.ext} &rarr; language={@code de}</li>
+ *   <li>{@code messages-de.ext} &rarr; language={@code de}</li>
+ *   <li>{@code messages.de.ext} &rarr; language={@code de}</li>
+ *   <li>{@code messages_en_US.ext} &rarr; language={@code en}, region={@code US}</li>
+ *   <li>{@code messages_en-US.ext} &rarr; language={@code en}, region={@code US}</li>
+ *   <li>{@code messages-en_US.ext} &rarr; language={@code en}, region={@code US}</li>
+ *   <li>{@code messages-en-US.ext} &rarr; language={@code en}, region={@code US}</li>
+ *   <li>{@code messages.en_US.ext} &rarr; language={@code en}, region={@code US}</li>
+ *   <li>{@code messages.en-US.ext} &rarr; language={@code en}, region={@code US}</li>
  * </ul>
  */
 public class ResourceFileNameParser implements ResourceFileNameParserInterface {
 
-	/** Matches domain, optional language and optional region in a resource file name. */
+	/** Matches the optional language/region suffix and the mandatory extension at the end of a resource file name. */
 	private static final Pattern PATTERN = Pattern.compile(
-		"(?<domain>[a-z0-9]+)(?:[_.-](?<language>[a-z]+)(?:[_-](?<region>[a-z]+))?)?\\.[a-z0-9]+$",
+		"(?:[_.-](?<language>[a-z]+)(?:[_-](?<region>[a-z]+))?)?\\.[a-z0-9]+$",
 		Pattern.CASE_INSENSITIVE
 	);
 
@@ -46,10 +46,10 @@ public class ResourceFileNameParser implements ResourceFileNameParserInterface {
 
 		Matcher matcher = PATTERN.matcher(filename);
 
-		if (matcher.find()) {
+		if (matcher.find() && matcher.start() > 0) {
 			return new Filename(
 				matcher.group("language"),
-					matcher.group("region")
+				matcher.group("region")
 			);
 		}
 
