@@ -50,7 +50,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	private final ConcurrentMap<Locale, ResourceBundle> bundles = new ConcurrentHashMap<>();
 
 	/** Resolved messages, keyed by locale and then by code. */
-	private final ConcurrentMap<Locale, ConcurrentMap<String, String>> catalogMap;
+	private final ConcurrentMap<Locale, ConcurrentMap<String, String>> transUnits;
 
 	/** Locale used as fallback when a code cannot be resolved for the requested locale. */
 	private final Locale defaultLocale;
@@ -71,13 +71,13 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 	private CatalogMessageSourceBuilder(
 			List<CatalogInterface> sources,
 			Locale defaultLocale,
-		boolean useICU4j,
+			boolean useICU4j,
 			@Nullable MessageSource parentMessageSource
 	) {
 		this.defaultLocale = defaultLocale;
 		this.useICU4j = useICU4j;
         this.parentMessageSource = parentMessageSource;
-		this.catalogMap = new ConcurrentHashMap<>();
+		this.transUnits = new ConcurrentHashMap<>();
 		this.catalog = new CompositeCatalog(sources);
 
 		this.catalog.getTransUnits().forEach(t -> this.put(t.locale(), t.code(), t.value()));
@@ -229,7 +229,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 			return;
 		}
 
-		ConcurrentMap<String, String> bucket = this.catalogMap.computeIfAbsent(
+		ConcurrentMap<String, String> bucket = this.transUnits.computeIfAbsent(
 				locale, l -> new ConcurrentHashMap<>()
 		);
 
@@ -302,7 +302,7 @@ public class CatalogMessageSourceBuilder implements MessageSource {
 			Locale bucketLocale = locale.equals(Locale.ROOT)
 					? CatalogMessageSourceBuilder.this.defaultLocale
 					: locale;
-			ConcurrentMap<String, String> bucket = CatalogMessageSourceBuilder.this.catalogMap.computeIfAbsent(
+			ConcurrentMap<String, String> bucket = CatalogMessageSourceBuilder.this.transUnits.computeIfAbsent(
 					bucketLocale, l -> new ConcurrentHashMap<>()
 			);
 
