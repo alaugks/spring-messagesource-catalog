@@ -3,7 +3,6 @@
 
 package io.github.alaugks.spring.messagesource.catalog;
 
-import io.github.alaugks.spring.messagesource.catalog.catalog.CatalogInterface;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnit;
 import io.github.alaugks.spring.messagesource.catalog.records.TransUnitInterface;
 import io.github.alaugks.spring.messagesource.catalog.records.TranslationFileInterface;
@@ -142,7 +141,7 @@ class BenchmarkMessageSourceTest {
 		);
 	}
 
-	private static CatalogInterface createTransUnitListFromMessagesPropertiesFiles() throws IOException {
+	private static List<TransUnitInterface> createTransUnitListFromMessagesPropertiesFiles() throws IOException {
 		List<TransUnitInterface> transUnits = new ArrayList<>();
 
 		ResourceLoaderBuilder resourcesLoader = ResourceLoaderBuilder
@@ -168,6 +167,6 @@ class BenchmarkMessageSourceTest {
 			}
 		}
 
-		return new TransUnitsCatalog(transUnits);
+		return transUnits;
 	}
 }
