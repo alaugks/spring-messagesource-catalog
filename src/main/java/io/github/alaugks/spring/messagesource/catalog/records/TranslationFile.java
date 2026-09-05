@@ -38,9 +38,10 @@ public record TranslationFile(Locale locale, byte[] content) implements Translat
 
 	@Override
 	public String toString() {
-		return "TranslationFile["
-				+ "locale=" + this.locale
-				+ ", content=" + (this.content == null ? "null" : this.content.length + " bytes")
-				+ "]";
+		return String.format(
+			"TranslationFile[locale=%s, content=%s]",
+			this.locale,
+			(this.content == null ? "null" : this.content.length + " bytes")
+		);
 	}
 }
