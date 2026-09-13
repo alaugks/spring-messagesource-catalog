@@ -1,3 +1,6 @@
+> [!NOTE]  
+> This package is no longer being developed. In future, the functionality will be available in another package, with basic functionality.
+
 # Package to create a custom Spring MessageSource
 
 This package provides the [MessageSource interface](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/MessageSource.html).
