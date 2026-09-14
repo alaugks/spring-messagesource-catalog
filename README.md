@@ -1,5 +1,5 @@
 > [!NOTE]  
-> This package is no longer being developed. In future, the functionality will be available in another package, with basic functionality.
+> This package is no longer being developed. In future, the functionality will be available in the [spring-messagesource-base](https://github.com/alaugks/spring-messagesource-base) package, which has a reduced set of features.
 
 # Package to create a custom Spring MessageSource
 
